@@ -38,7 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    #myapps
+    # Third-party apps
+    'rest_framework',
+    'corsheaders',
+    'channels',
+    
+    # Local apps
     'core',
 ]
 
@@ -70,6 +75,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
+# Channels configuration
+ASGI_APPLICATION = 'config.asgi.application'
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"  # For development
+    }
+}
 
 
 # Database
