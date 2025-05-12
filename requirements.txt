@@ -3,3 +3,8 @@ djangorestframework
 django-cors-headers
 channels
 python-decouple
+azure-ai-formrecognizer 
+azure-storage-blob 
+azure-cognitiveservices-speech 
+openai
+azure-ai-formrecognizer
