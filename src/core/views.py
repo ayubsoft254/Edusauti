@@ -8,7 +8,7 @@ from .document_processing import process_document
 from .summarization import generate_summary
 from .speech_service import generate_audio
 from .azure_clients import get_storage_client
-import asyncio
+from asgiref.sync import sync_to_async
 
 class DocumentUploadView(APIView):
     async def post(self, request):
@@ -61,3 +61,45 @@ class AudioStreamView(APIView):
             return response
         except AudioFile.DoesNotExist:
             return Response({'error': 'Audio file not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+class OptimizedDocumentUploadView(APIView):
+    @sync_to_async
+    def save_document(self, user, title, file_obj):
+        return Document.objects.create(
+            user=user,
+            title=title,
+            file=file_obj
+        )
+    
+    async def post(self, request):
+        # Process in parallel when possible
+        document_task = self.save_document(
+            request.user,
+            request.POST.get('title'),
+            request.FILES['file']
+        )
+        
+        # Start processing immediately
+        document = await document_task
+        
+        # Process document asynchronously
+        summary_task = process_document(document)
+        
+        # Generate summary and audio in parallel
+        summary_instance = await summary_task
+        
+        summary_text_task = generate_summary(summary_instance.text)
+        
+        summary_text = await summary_text_task
+        summary_instance.text = summary_text
+        await sync_to_async(summary_instance.save)()
+        
+        # Generate audio
+        audio_file = await generate_audio(summary_instance)
+        
+        return Response({
+            'document_id': document.id,
+            'title': document.title,
+            'summary': summary_text,
+            'audio_url': f"/api/audio/{audio_file.id}/"
+        }, status=status.HTTP_201_CREATED)
