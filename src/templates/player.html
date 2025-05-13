@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}Listening to {{ document.title }} - EduSauti{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">{{ document.title }}</h1>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Audio Player</h2>
+            <audio id="audio-player" controls class="w-full">
+                <source src="/api/audio/{{ audio_file.id }}/" type="audio/wav">
+                Your browser does not support the audio element.
+            </audio>
+            <div class="flex justify-between mt-2 text-sm text-gray-600">
+                <span id="current-time">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+        </div>
+        
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Summary</h2>
+            <div class="prose max-w-none">
+                {{ summary.text|linebreaks }}
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold mb-4">Ask Questions</h2>
+        <p class="mb-4 text-gray-700">Feel free to ask questions about the document content while listening!</p>
+        
+        <div id="qa-container" class="mb-4 h-64 overflow-y-auto border rounded-md p-4 bg-gray-50">
+            <div class="text-gray-500 italic">Start asking questions about the document...</div>
+        </div>
+        
+        <form id="question-form" class="flex gap-2">
+            <input type="text" id="question-input" class="flex-grow px-4 py-2 border rounded-md" placeholder="Type your question here...">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Ask</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const audioPlayer = document.getElementById('audio-player');
+    const currentTimeDisplay = document.getElementById('current-time');
+    const durationDisplay = document.getElementById('duration');
+    const questionForm = document.getElementById('question-form');
+    const questionInput = document.getElementById('question-input');
+    const qaContainer = document.getElementById('qa-container');
+    
+    let documentId = '{{ document.id }}';
+    let websocket;
+    
+    // Update audio player time displays
+    audioPlayer.addEventListener('timeupdate', function() {
+        currentTimeDisplay.textContent = formatTime(audioPlayer.currentTime);
+    });
+    
+    audioPlayer.addEventListener('loadedmetadata', function() {
+        durationDisplay.textContent = formatTime(audioPlayer.duration);
+    });
+    
+    // Format time in mm:ss
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    // Set up WebSocket connection
+    function connectWebSocket() {
+        websocket = new WebSocket(`ws://${window.location.host}/ws/qa/${documentId}/`);
+        
+        websocket.onopen = function(e) {
+            console.log('WebSocket connection established');
+        };
+        
+        websocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            displayQA(data.question, data.answer);
+        };
+        
+        websocket.onclose = function(e) {
+            console.log('WebSocket connection closed');
+            // Try to reconnect after a delay
+            setTimeout(connectWebSocket, 2000);
+        };
+        
+        websocket.onerror = function(e) {
+            console.error('WebSocket error:', e);
+        };
+    }
+    
+    // Display question and answer in the Q&A container
+    function displayQA(question, answer) {
+        // Clear placeholder text if it exists
+        if (qaContainer.querySelector('.text-gray-500.italic')) {
+            qaContainer.innerHTML = '';
+        }
+        
+        const qaElement = document.createElement('div');
+        qaElement.className = 'mb-4';
+        qaElement.innerHTML = `
+            <div class="mb-2">
+                <span class="font-semibold text-blue-600">Q:</span> ${question}
+            </div>
+            <div>
+                <span class="font-semibold text-green-600">A:</span> ${answer}
+            </div>
+        `;
+        qaContainer.appendChild(qaElement);
+        
+        // Scroll to the latest message
+        qaContainer.scrollTop = qaContainer.scrollHeight;
+    }
+    
+    // Handle question submission
+    questionForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const question = questionInput.value.trim();
+        if (question && websocket.readyState === WebSocket.OPEN) {
+            // Send question through WebSocket
+            websocket.send(JSON.stringify({
+                'question': question
+            }));
+            
+            // Clear input
+            questionInput.value = '';
+            
+            // Display the question immediately
+            displayQA(question, 'Thinking...');
+        }
+    });
+    
+    // Initialize WebSocket connection
+    connectWebSocket();
+    });
+</script>
+{% endblock %}
