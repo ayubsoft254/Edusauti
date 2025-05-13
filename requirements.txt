@@ -10,3 +10,4 @@ openai
 azure-ai-formrecognizer
 daphne
 redis
+django-redis
