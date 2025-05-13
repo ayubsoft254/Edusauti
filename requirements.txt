@@ -8,3 +8,5 @@ azure-storage-blob
 azure-cognitiveservices-speech 
 openai
 azure-ai-formrecognizer
+daphne
+redis
