@@ -11,3 +11,4 @@ azure-ai-formrecognizer
 daphne
 redis
 django-redis
+django-widget-tweaks
