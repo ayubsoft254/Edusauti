@@ -9,6 +9,8 @@ from .summarization import generate_summary
 from .speech_service import generate_audio
 from .azure_clients import get_storage_client
 from asgiref.sync import sync_to_async
+from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
 
 class DocumentUploadView(APIView):
     async def post(self, request):
@@ -103,3 +105,39 @@ class OptimizedDocumentUploadView(APIView):
             'summary': summary_text,
             'audio_url': f"/api/audio/{audio_file.id}/"
         }, status=status.HTTP_201_CREATED)
+    
+class SecureDocumentUploadView(DocumentUploadView):
+    ALLOWED_EXTENSIONS = ['pdf', 'docx', 'txt']
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+    
+    def validate_file(self, file_obj):
+        # Check file extension
+        validator = FileExtensionValidator(allowed_extensions=self.ALLOWED_EXTENSIONS)
+        try:
+            validator(file_obj)
+        except ValidationError:
+            raise ValidationError("Invalid file type. Only PDF, DOCX, and TXT files are allowed.")
+        
+        # Check file size
+        if file_obj.size > self.MAX_FILE_SIZE:
+            raise ValidationError("File size exceeds 10MB limit.")
+        
+        # Check file content (basic validation)
+        file_obj.seek(0)
+        first_bytes = file_obj.read(1024)
+        file_obj.seek(0)
+        
+        # Basic magic number checking
+        if file_obj.name.endswith('.pdf') and not first_bytes.startswith(b'%PDF'):
+            raise ValidationError("Invalid PDF file.")
+        
+        return True
+    
+    async def post(self, request):
+        try:
+            file_obj = request.FILES['file']
+            self.validate_file(file_obj)
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return await super().post(request)
