@@ -11,6 +11,11 @@ from .azure_clients import get_storage_client
 from asgiref.sync import sync_to_async
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
+from django.views.generic import TemplateView
+from django.shortcuts import render
+from django.contrib import messages
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 class DocumentUploadView(APIView):
     async def post(self, request):
@@ -140,4 +145,34 @@ class SecureDocumentUploadView(DocumentUploadView):
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
-        return await super().post(request)
+        return await super().post(request)   
+class HomeView(TemplateView):
+    """Landing page view"""
+    template_name = 'marketing/home.html'
+    
+class FeaturesView(TemplateView):
+    """Features page view"""
+    template_name = 'marketing/features.html'
+    
+class AboutView(TemplateView):
+    """About page view"""
+    template_name = 'marketing/about.html'
+    
+class ContactView(TemplateView):
+    """Contact page view with form handling"""
+    template_name = 'marketing/contact.html'
+    
+    def post(self, request, *args, **kwargs):
+        # Process contact form submission
+        name = request.POST.get('name', '')
+        email = request.POST.get('email', '')
+        message = request.POST.get('message', '')
+        
+        # Here you would typically save to database or send an email
+        # For example using Django's send_mail function
+        
+        # Add a success message
+        messages.success(request, 'Your message has been sent successfully. We will get back to you soon!')
+        
+        # Redirect back to contact page
+        return HttpResponseRedirect(reverse('contact'))

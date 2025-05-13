@@ -20,18 +20,24 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from core.auth_views import SignUpView, DashboardView, PlayerView
+from core.views import HomeView, FeaturesView, AboutView, ContactView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('core.urls')),
     
+    # Marketing Pages
+    path('', HomeView.as_view(), name='home'),
+    path('features/', FeaturesView.as_view(), name='features'),
+    path('about/', AboutView.as_view(), name='about'),
+    path('contact/', ContactView.as_view(), name='contact'),
+    
     # Authentication URLs
     path('login/', auth_views.LoginView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
     path('signup/', SignUpView.as_view(), name='signup'),
     
     # Application URLs
-    path('', auth_views.LoginView.as_view(), name='home'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('player/<int:document_id>/', PlayerView.as_view(), name='player'),
 ]
