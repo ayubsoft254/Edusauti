@@ -166,10 +166,22 @@ class ContactView(TemplateView):
         # Process contact form submission
         name = request.POST.get('name', '')
         email = request.POST.get('email', '')
+        reason = request.POST.get('reason', 'general')
         message = request.POST.get('message', '')
         
         # Here you would typically save to database or send an email
-        # For example using Django's send_mail function
+        # For example using Django's send_mail function:
+        """
+        from django.core.mail import send_mail
+        
+        send_mail(
+            subject=f'EduSauti Contact: {reason}',
+            message=f'From: {name} ({email})\n\n{message}',
+            from_email='noreply@edusauti.com',
+            recipient_list=['support@edusauti.com'],
+            fail_silently=False,
+        )
+        """
         
         # Add a success message
         messages.success(request, 'Your message has been sent successfully. We will get back to you soon!')
