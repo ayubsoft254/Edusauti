@@ -25,22 +25,22 @@ class DocumentUploadView(APIView):
     
     async def post(self, request):
         try:
-            # Check if file exists in request
-            if 'file' not in request.FILES:
-                return Response(
-                    {'error': 'No file uploaded'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-                
+            # Save uploaded file synchronously first
             file_obj = request.FILES['file']
             title = request.POST.get('title', file_obj.name)
             
-            document = Document(
-                user=request.user,
-                title=title,
-                file=file_obj
-            )
-            document.save()
+            # Use sync_to_async for database operations
+            @sync_to_async
+            def save_document():
+                doc = Document(
+                    user=request.user,
+                    title=title,
+                    file=file_obj
+                )
+                doc.save()
+                return doc
+            
+            document = await save_document()
             
             # Process document (async)
             summary_instance = await process_document(document)
