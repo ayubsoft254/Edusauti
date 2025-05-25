@@ -16,10 +16,11 @@
                     </svg>
                     Upload Document
                 </h2>
-                <form id="upload-form" class="space-y-4">
+                <form id="upload-form" class="space-y-4" method="post" enctype="multipart/form-data" action="{% url 'document-upload' %}">
+                    {% csrf_token %}
                     <div>
                         <label for="document-title" class="block text-gray-700 text-sm font-medium mb-1">Document Title</label>
-                        <input type="text" id="document-title" name="title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" required>
+                        <input type="text" id="document-title" name="title" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Document title (optional)">
                     </div>
                     <div>
                         <label for="document-file" class="block text-gray-700 text-sm font-medium mb-1">Document File</label>
