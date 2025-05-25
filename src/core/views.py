@@ -24,35 +24,52 @@ class DocumentUploadView(APIView):
     permission_classes = [IsAuthenticated]
     
     async def post(self, request):
-        # Save uploaded file
-        file_obj = request.FILES['file']
-        title = request.POST.get('title', file_obj.name)
-        
-        document = Document(
-            user=request.user,
-            title=title,
-            file=file_obj
-        )
-        document.save()
-        
-        # Process document (async)
-        summary_instance = await process_document(document)
-        
-        # Generate summary
-        summary_text = await generate_summary(summary_instance.text)
-        summary_instance.text = summary_text
-        summary_instance.save()
-        
-        # Generate audio
-        voice_type = request.POST.get('voice_type', 'en-US-JennyNeural')
-        audio_file = await generate_audio(summary_instance, voice_type)
-        
-        return Response({
-            'document_id': document.id,
-            'title': document.title,
-            'summary': summary_text,
-            'audio_url': f"/api/audio/{audio_file.id}/"
-        }, status=status.HTTP_201_CREATED)
+        try:
+            # Check if file exists in request
+            if 'file' not in request.FILES:
+                return Response(
+                    {'error': 'No file uploaded'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+            file_obj = request.FILES['file']
+            title = request.POST.get('title', file_obj.name)
+            
+            document = Document(
+                user=request.user,
+                title=title,
+                file=file_obj
+            )
+            document.save()
+            
+            # Process document (async)
+            summary_instance = await process_document(document)
+            
+            # Generate summary
+            summary_text = await generate_summary(summary_instance.text)
+            summary_instance.text = summary_text
+            summary_instance.save()
+            
+            # Generate audio
+            voice_type = request.POST.get('voice_type', 'en-US-JennyNeural')
+            audio_file = await generate_audio(summary_instance, voice_type)
+            
+            return Response({
+                'document_id': document.id,
+                'title': document.title,
+                'summary': summary_text,
+                'audio_url': f"/api/audio/{audio_file.id}/"
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            # Log the error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Document upload error: {str(e)}")
+            
+            return Response(
+                {'error': f"Upload failed: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class AudioStreamView(APIView):
     def get(self, request, audio_id):
@@ -145,6 +162,13 @@ class SecureDocumentUploadView(DocumentUploadView):
     
     async def post(self, request):
         try:
+            # Check if file exists in request
+            if 'file' not in request.FILES:
+                return Response(
+                    {'error': 'No file uploaded'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
             file_obj = request.FILES['file']
             self.validate_file(file_obj)
         except ValidationError as e:
