@@ -26,3 +26,13 @@ class CachedDocument(Document):  # Specify the base model
                 logger.error(f"Error retrieving summary for document {self.id}: {e}")
         
         return summary
+
+    def invalidate_cache(self):
+        """Invalidate cached data when document is updated"""
+        cache_key = f'summary_{self.id}'
+        cache.delete(cache_key)
+        
+    def save(self, *args, **kwargs):
+        """Override save to invalidate cache"""
+        super().save(*args, **kwargs)
+        self.invalidate_cache()
