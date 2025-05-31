@@ -18,6 +18,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
+from .db_optimization import CachedDocument
 
 class DocumentUploadView(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication]
@@ -32,7 +33,7 @@ class DocumentUploadView(APIView):
             # Use sync_to_async for database operations
             @sync_to_async
             def save_document():
-                doc = Document(
+                doc = CachedDocument(
                     user=request.user,
                     title=title,
                     file=file_obj
