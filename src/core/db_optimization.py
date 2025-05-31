@@ -69,3 +69,17 @@ class CachedDocument(Document):  # Specify the base model
                 audio_url = ""
                 
         return audio_url
+
+# Create: core/management/commands/test_cache.py
+from django.core.management.base import BaseCommand
+from core.db_optimization import CachedDocument
+
+class Command(BaseCommand):
+    def handle(self, *args, **options):
+        # Test caching functionality
+        doc = CachedDocument.objects.first()
+        if doc:
+            print(f"First call: {doc.cached_summary}")
+            print(f"Second call (should be cached): {doc.cached_summary}")
+            doc.invalidate_cache()
+            print(f"After cache invalidation: {doc.cached_summary}")
