@@ -36,3 +36,33 @@ class CachedDocument(Document):  # Specify the base model
         """Override save to invalidate cache"""
         super().save(*args, **kwargs)
         self.invalidate_cache()
+        
+    @classmethod
+    def get_user_documents_cached(cls, user_id):
+        """Get user documents with caching"""
+        cache_key = f'user_docs_{user_id}'
+        documents = cache.get(cache_key)
+        
+        if documents is None:
+            documents = list(cls.objects.filter(user_id=user_id).select_related('user'))
+            cache.set(cache_key, documents, 1800)  # Cache for 30 minutes
+            
+        return documents
+    
+    @property
+    def cached_audio_url(self):
+        """Cache audio file URL"""
+        cache_key = f'audio_url_{self.id}'
+        audio_url = cache.get(cache_key)
+        
+        if audio_url is None:
+            try:
+                if hasattr(self, 'audiofile') and self.audiofile:
+                    audio_url = f"/api/audio/{self.audiofile.id}/"
+                else:
+                    audio_url = ""
+                cache.set(cache_key, audio_url, 3600)
+            except Exception:
+                audio_url = ""
+                
+        return audio_url
