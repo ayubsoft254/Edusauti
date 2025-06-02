@@ -232,3 +232,96 @@ class SubscriptionHistory(models.Model):
     
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.tier} ({self.start_date.date()})"
+    
+    def get_next_billing_date(self):
+        """Calculate next billing date"""
+        if not self.is_active or not self.end_date:
+            return None
+        
+        # If subscription hasn't ended yet, return end_date
+        if self.end_date > timezone.now().date():
+            return self.end_date
+        
+        return None
+
+
+class BillingProfile(models.Model):
+    """Extended billing information for users"""
+    
+    CURRENCY_CHOICES = [
+        ('USD', 'US Dollar'),
+        ('EUR', 'Euro'),
+        ('GBP', 'British Pound'),
+        ('CAD', 'Canadian Dollar'),
+        ('AUD', 'Australian Dollar'),
+    ]
+    
+    COUNTRY_CHOICES = [
+        ('US', 'United States'),
+        ('CA', 'Canada'),
+        ('GB', 'United Kingdom'),
+        ('AU', 'Australia'),
+        ('DE', 'Germany'),
+        ('FR', 'France'),
+        ('IT', 'Italy'),
+        ('ES', 'Spain'),
+        ('NL', 'Netherlands'),
+        ('SE', 'Sweden'),
+        ('NO', 'Norway'),
+        ('DK', 'Denmark'),
+        ('FI', 'Finland'),
+        ('CH', 'Switzerland'),
+        ('AT', 'Austria'),
+        ('BE', 'Belgium'),
+        ('IE', 'Ireland'),
+        ('PT', 'Portugal'),
+        ('LU', 'Luxembourg'),
+        ('IS', 'Iceland'),
+        # Add more countries as needed
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='billing_profile')
+    
+    # Company information
+    company_name = models.CharField(max_length=200, blank=True)
+    tax_id = models.CharField(max_length=50, blank=True, help_text="VAT ID, Tax ID, etc.")
+    
+    # Billing address
+    billing_address_line1 = models.CharField(max_length=200)
+    billing_address_line2 = models.CharField(max_length=200, blank=True)
+    billing_city = models.CharField(max_length=100)
+    billing_state = models.CharField(max_length=100, blank=True)
+    billing_country = models.CharField(max_length=2, choices=COUNTRY_CHOICES)
+    billing_postal_code = models.CharField(max_length=20)
+    
+    # Preferences
+    preferred_currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='USD')
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Billing Profile'
+        verbose_name_plural = 'Billing Profiles'
+    
+    def __str__(self):
+        return f"Billing for {self.user.email}"
+    
+    def get_full_address(self):
+        """Get formatted billing address"""
+        address_parts = [self.billing_address_line1]
+        
+        if self.billing_address_line2:
+            address_parts.append(self.billing_address_line2)
+        
+        address_parts.append(f"{self.billing_city}, {self.billing_state}")
+        address_parts.append(self.billing_postal_code)
+        address_parts.append(self.get_billing_country_display())
+        
+        return '\n'.join(address_parts)
+    
+    def get_payment_methods(self):
+        """Get associated payment methods (placeholder for payment processor integration)"""
+        # This would integrate with your payment processor (Stripe, PayPal, etc.)
+        return []
