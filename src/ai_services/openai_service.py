@@ -1,4 +1,3 @@
-import json
 import tiktoken
 from typing import Dict, Any
 from openai import AzureOpenAI

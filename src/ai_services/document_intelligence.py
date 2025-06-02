@@ -1,7 +1,6 @@
 import os
 import json
-import tempfile
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from azure.ai.documentintelligence import DocumentIntelligenceClient
 from azure.core.credentials import AzureKeyCredential
 from azure.core.exceptions import HttpResponseError
