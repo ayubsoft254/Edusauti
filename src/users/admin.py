@@ -1,12 +1,15 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
-from .models import User, UserProfile, Subscription
+from django.urls import reverse
+from django.utils.safestring import mark_safe
+from .models import User, UserProfile, SubscriptionHistory
 
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    """Custom User Admin"""
+    """Admin interface for User model"""
+    
     list_display = [
         'email', 'full_name', 'subscription_tier', 'is_subscription_active',
         'documents_uploaded_this_month', 'questions_asked_this_month',
@@ -14,40 +17,46 @@ class UserAdmin(BaseUserAdmin):
     ]
     list_filter = [
         'subscription_tier', 'is_subscription_active', 'is_active',
-        'is_verified', 'date_joined', 'preferred_language'
+        'date_joined', 'last_login'
     ]
     search_fields = ['email', 'first_name', 'last_name', 'organization']
     ordering = ['-date_joined']
     
     fieldsets = (
         (None, {
-            'fields': ('username', 'email', 'password')
+            'fields': ('email', 'password')
         }),
-        ('Personal Info', {
-            'fields': ('first_name', 'last_name', 'phone_number', 'organization')
-        }),
-        ('Preferences', {
-            'fields': ('preferred_language', 'preferred_voice', 'email_notifications')
+        ('Personal info', {
+            'fields': (
+                'first_name', 'last_name', 'avatar', 'bio',
+                'organization', 'role'
+            )
         }),
         ('Subscription', {
             'fields': (
-                'subscription_tier', 'subscription_start_date', 'subscription_end_date',
-                'is_subscription_active'
+                'subscription_tier', 'subscription_start_date',
+                'subscription_end_date', 'is_subscription_active'
             )
         }),
-        ('Usage Tracking', {
+        ('Usage', {
             'fields': (
                 'documents_uploaded_this_month', 'questions_asked_this_month',
                 'last_usage_reset'
             )
         }),
+        ('Preferences', {
+            'fields': (
+                'preferred_voice', 'preferred_language',
+                'auto_play_summaries', 'email_notifications'
+            )
+        }),
         ('Permissions', {
             'fields': (
-                'is_active', 'is_staff', 'is_superuser', 'is_verified',
+                'is_active', 'is_staff', 'is_superuser',
                 'groups', 'user_permissions'
             )
         }),
-        ('Important Dates', {
+        ('Important dates', {
             'fields': ('last_login', 'date_joined')
         }),
     )
@@ -55,85 +64,155 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'username', 'first_name', 'last_name', 'password1', 'password2'),
+            'fields': (
+                'email', 'first_name', 'last_name',
+                'password1', 'password2'
+            ),
         }),
     )
     
-    readonly_fields = ['date_joined', 'last_login', 'created_at', 'updated_at']
+    readonly_fields = ['date_joined', 'last_login', 'last_usage_reset']
     
     def full_name(self, obj):
-        return obj.full_name
-    full_name.short_description = 'Full Name'
+        return obj.get_full_name() or obj.email
+    full_name.short_description = 'Name'
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('profile')
+    
+    actions = ['reset_monthly_usage', 'upgrade_to_pro', 'downgrade_to_free']
+    
+    def reset_monthly_usage(self, request, queryset):
+        """Reset monthly usage for selected users"""
+        count = 0
+        for user in queryset:
+            user.documents_uploaded_this_month = 0
+            user.questions_asked_this_month = 0
+            user.save(update_fields=['documents_uploaded_this_month', 'questions_asked_this_month'])
+            count += 1
+        
+        self.message_user(request, f'Reset monthly usage for {count} users.')
+    reset_monthly_usage.short_description = 'Reset monthly usage'
+    
+    def upgrade_to_pro(self, request, queryset):
+        """Upgrade selected users to Pro tier"""
+        count = queryset.filter(subscription_tier='free').update(
+            subscription_tier='pro',
+            is_subscription_active=True
+        )
+        self.message_user(request, f'Upgraded {count} users to Pro tier.')
+    upgrade_to_pro.short_description = 'Upgrade to Pro tier'
+    
+    def downgrade_to_free(self, request, queryset):
+        """Downgrade selected users to Free tier"""
+        count = queryset.exclude(subscription_tier='free').update(
+            subscription_tier='free',
+            is_subscription_active=False
+        )
+        self.message_user(request, f'Downgraded {count} users to Free tier.')
+    downgrade_to_free.short_description = 'Downgrade to Free tier'
 
 
-class UserProfileInline(admin.StackedInline):
-    """Inline admin for UserProfile"""
-    model = UserProfile
-    can_delete = False
-    verbose_name_plural = 'Profile'
-    fields = [
-        'avatar', 'bio', 'institution', 'department', 'role',
-        'timezone', 'allow_analytics', 'allow_marketing_emails'
-    ]
+class SubscriptionHistoryInline(admin.TabularInline):
+    """Inline admin for subscription history"""
+    model = SubscriptionHistory
+    extra = 0
+    readonly_fields = ['created_at']
+    fields = ['tier', 'start_date', 'end_date', 'amount_paid', 'payment_method', 'is_active', 'created_at']
 
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    """UserProfile Admin"""
-    list_display = ['user', 'institution', 'department', 'role', 'created_at']
-    list_filter = ['role', 'institution', 'allow_analytics', 'created_at']
-    search_fields = ['user__email', 'user__first_name', 'user__last_name', 'institution']
-    readonly_fields = ['created_at', 'updated_at']
-
-
-@admin.register(Subscription)
-class SubscriptionAdmin(admin.ModelAdmin):
-    """Subscription Admin"""
+    """Admin interface for UserProfile model"""
+    
     list_display = [
-        'user', 'tier', 'amount', 'billing_cycle', 'start_date',
-        'end_date', 'is_active', 'is_expired_status'
+        'user', 'phone_number', 'country', 'timezone',
+        'total_documents_processed', 'total_questions_asked',
+        'created_at'
     ]
     list_filter = [
-        'tier', 'is_active', 'billing_cycle', 'currency',
-        'start_date', 'end_date', 'auto_renew'
+        'country', 'timezone', 'default_summary_length',
+        'preferred_explanation_style', 'created_at'
     ]
-    search_fields = [
-        'user__email', 'user__first_name', 'user__last_name',
-        'transaction_id'
+    search_fields = ['user__email', 'user__first_name', 'user__last_name', 'phone_number']
+    readonly_fields = [
+        'total_documents_processed', 'total_questions_asked',
+        'total_audio_time_listened', 'created_at', 'updated_at'
     ]
-    readonly_fields = ['created_at', 'updated_at', 'is_expired']
-    date_hierarchy = 'start_date'
     
     fieldsets = (
-        ('User & Tier', {
-            'fields': ('user', 'tier')
+        ('User', {
+            'fields': ('user',)
         }),
-        ('Billing', {
-            'fields': ('amount', 'currency', 'billing_cycle', 'payment_method', 'transaction_id')
+        ('Contact Information', {
+            'fields': ('phone_number', 'date_of_birth', 'country', 'timezone')
         }),
-        ('Subscription Period', {
-            'fields': ('start_date', 'end_date', 'is_active', 'auto_renew')
+        ('Learning Preferences', {
+            'fields': ('default_summary_length', 'preferred_explanation_style')
         }),
-        ('Cancellation', {
-            'fields': ('cancelled_at',)
+        ('Analytics', {
+            'fields': (
+                'total_documents_processed', 'total_questions_asked',
+                'total_audio_time_listened'
+            )
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at')
         }),
     )
     
-    def is_expired_status(self, obj):
-        if obj.is_expired:
-            return format_html('<span style="color: red;">Expired</span>')
-        return format_html('<span style="color: green;">Active</span>')
-    is_expired_status.short_description = 'Status'
+    inlines = [SubscriptionHistoryInline]
     
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('user')
 
 
-# Add UserProfile inline to UserAdmin
-UserAdmin.inlines = [UserProfileInline]
+@admin.register(SubscriptionHistory)
+class SubscriptionHistoryAdmin(admin.ModelAdmin):
+    """Admin interface for SubscriptionHistory model"""
+    
+    list_display = [
+        'user', 'tier', 'start_date', 'end_date',
+        'amount_paid', 'payment_method', 'is_active', 'created_at'
+    ]
+    list_filter = [
+        'tier', 'payment_method', 'is_active', 'created_at', 'start_date'
+    ]
+    search_fields = ['user__email', 'user__first_name', 'user__last_name']
+    readonly_fields = ['created_at']
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        ('Subscription Info', {
+            'fields': ('user', 'tier', 'start_date', 'end_date', 'is_active')
+        }),
+        ('Payment Info', {
+            'fields': ('amount_paid', 'payment_method')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('user')
+    
+    actions = ['mark_as_active', 'mark_as_inactive']
+    
+    def mark_as_active(self, request, queryset):
+        """Mark selected subscriptions as active"""
+        count = queryset.update(is_active=True)
+        self.message_user(request, f'Marked {count} subscriptions as active.')
+    mark_as_active.short_description = 'Mark as active'
+    
+    def mark_as_inactive(self, request, queryset):
+        """Mark selected subscriptions as inactive"""
+        count = queryset.update(is_active=False)
+        self.message_user(request, f'Marked {count} subscriptions as inactive.')
+    mark_as_inactive.short_description = 'Mark as inactive'
+
+
+# Custom admin site title
+admin.site.site_header = 'EduSauti Admin'
+admin.site.site_title = 'EduSauti Admin Portal'
+admin.site.index_title = 'Welcome to EduSauti Administration'

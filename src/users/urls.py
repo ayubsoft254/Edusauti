@@ -3,36 +3,40 @@ from . import views
 
 app_name = 'users'
 
-# API URLs
-api_urlpatterns = [
-    # Authentication
-    path('register/', views.UserRegistrationView.as_view(), name='api_register'),
-    path('login/', views.UserLoginView.as_view(), name='api_login'),
-    path('logout/', views.UserLogoutView.as_view(), name='api_logout'),
-    
-    # User Profile
-    path('profile/', views.UserProfileView.as_view(), name='api_profile'),
-    path('profile/details/', views.UserProfileDetailView.as_view(), name='api_profile_details'),
-    path('password/change/', views.PasswordChangeView.as_view(), name='api_password_change'),
-    
-    # Dashboard
-    path('dashboard/', views.UserDashboardView.as_view(), name='api_dashboard'),
-    path('usage/', views.usage_stats, name='api_usage_stats'),
-    
-    # Subscriptions
-    path('subscriptions/', views.SubscriptionListView.as_view(), name='api_subscriptions'),
-    path('subscriptions/<int:pk>/', views.SubscriptionDetailView.as_view(), name='api_subscription_detail'),
-    path('subscriptions/<int:subscription_id>/cancel/', views.cancel_subscription, name='api_cancel_subscription'),
+# Web URLs
+web_urlpatterns = [
+    path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('profile/', views.ProfileView.as_view(), name='profile'),
+    path('profile/edit/', views.ProfileUpdateView.as_view(), name='profile_edit'),
+    path('settings/', views.settings_view, name='settings'),
+    path('subscription/', views.subscription_view, name='subscription'),
+    path('subscription/upgrade/', views.upgrade_subscription, name='upgrade_subscription'),
+    path('usage/', views.usage_stats_view, name='usage_stats'),
 ]
 
-# Template URLs
-template_urlpatterns = [
-    path('dashboard/', views.dashboard_view, name='dashboard'),
-    path('profile/', views.profile_view, name='profile'),
-    path('pricing/', views.pricing_view, name='pricing'),
+# API URLs
+api_urlpatterns = [
+    path('auth/register/', views.UserRegistrationAPIView.as_view(), name='api_register'),
+    path('auth/login/', views.UserLoginAPIView.as_view(), name='api_login'),
+    path('auth/logout/', views.UserLogoutAPIView.as_view(), name='api_logout'),
+    path('profile/', views.UserProfileAPIView.as_view(), name='api_profile'),
+    path('profile/extended/', views.ExtendedProfileAPIView.as_view(), name='api_extended_profile'),
+    path('subscription/history/', views.SubscriptionHistoryAPIView.as_view(), name='api_subscription_history'),
+    path('subscription/upgrade/', views.SubscriptionUpgradeAPIView.as_view(), name='api_subscription_upgrade'),
+    path('usage/stats/', views.UsageStatsAPIView.as_view(), name='api_usage_stats'),
+    path('auth/password/change/', views.PasswordChangeAPIView.as_view(), name='api_password_change'),
+    path('account/deactivate/', views.AccountDeactivationAPIView.as_view(), name='api_account_deactivate'),
+    path('limits/check/', views.check_limits_api, name='api_check_limits'),
+    path('usage/increment/', views.increment_usage_api, name='api_increment_usage'),
 ]
 
 urlpatterns = [
+    # Include web URLs
+    path('', include(web_urlpatterns)),
+    
+    # Include API URLs under /api/
     path('api/', include(api_urlpatterns)),
-    path('', include(template_urlpatterns)),
+    
+    # Include allauth URLs
+    path('accounts/', include('allauth.urls')),
 ]
