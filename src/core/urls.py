@@ -18,22 +18,24 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import TemplateView
+from . import views
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # Home page
-    path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    # Home and landing pages
+    path('', views.home, name='home'),
+    path('landing/', views.landing_page, name='landing'),
+    path('dashboard/', views.dashboard_redirect, name='dashboard-redirect'),
     
     # Authentication (allauth)
     path('accounts/', include('allauth.urls')),
     
-    # Users app
+    # Users app (web interface)
     path('profile/', include('users.urls')),
     
-    # Documents app
+    # Documents app (web interface)
     path('documents/', include('documents.urls')),
     
     # API endpoints
@@ -46,3 +48,12 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    
+    # Add debug toolbar if available
+    try:
+        import debug_toolbar
+        urlpatterns = [
+            path('__debug__/', include(debug_toolbar.urls)),
+        ] + urlpatterns
+    except ImportError:
+        pass
