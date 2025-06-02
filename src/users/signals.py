@@ -1,7 +1,6 @@
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.contrib.auth.signals import user_logged_in
-from django.utils import timezone
 from .models import User, UserProfile
 
 

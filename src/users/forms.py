@@ -1,7 +1,4 @@
 from django import forms
-from django.contrib.auth import authenticate
-from django.contrib.auth.forms import UserCreationForm
-from django.core.exceptions import ValidationError
 from allauth.account.forms import SignupForm, LoginForm
 from .models import User, UserProfile
 

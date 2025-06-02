@@ -1,20 +1,14 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
-from django.views.generic import DetailView, UpdateView, TemplateView
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.views.generic import DetailView, UpdateView
 from django.utils import timezone
-from django.db.models import Count, Sum
-from django.core.paginator import Paginator
 
 # DRF imports
-from rest_framework import generics, status, permissions, viewsets
-from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework import generics, status, permissions
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.throttling import UserRateThrottle
