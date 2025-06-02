@@ -14,6 +14,8 @@ class User(AbstractUser):
         ('enterprise', 'Institution Learn'),
     ]
     
+    # Keep both username and email
+    username = models.CharField(max_length=150, unique=True)  # Add this back
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
@@ -50,8 +52,8 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
     
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']  # These will be prompted during createsuperuser
     
     class Meta:
         db_table = 'auth_user'
