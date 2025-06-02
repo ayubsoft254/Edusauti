@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - EduSauti{% endblock %}
+
+{% block meta_description %}Create your EduSauti account and start learning with AI-powered voice summaries{% endblock %}
+
+{% block body_class %}bg-gradient-bg min-h-screen{% endblock %}
+
+{% block extra_css %}
+.auth-container {
+    background: linear-gradient(135deg, rgba(153, 135, 111, 0.1) 0%, rgba(245, 243, 240, 0.8) 100%);
+}
+
+.form-floating {
+    position: relative;
+}
+
+.form-floating label {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    color: #7d6b57;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.form-floating input {
+    padding: 1rem 1rem 0.5rem 1rem;
+}
+
+.form-floating input:focus + label,
+.form-floating input:not(:placeholder-shown) + label {
+    top: 0.75rem;
+    font-size: 0.75rem;
+    color: #99876f;
+    transform: translateY(0);
+}
+
+.auth-card {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(153, 135, 111, 0.2);
+    box-shadow: 0 25px 50px rgba(153, 135, 111, 0.15);
+}
+
+.password-strength {
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.password-strength-fill {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-weak { background-color: #ef4444; }
+.strength-medium { background-color: #f59e0b; }
+.strength-strong { background-color: #10b981; }
+{% endblock %}
+
+{% block content %}
+<div class="auth-container min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <!-- Header -->
+        <div class="text-center scroll-reveal">
+            <div class="flex items-center justify-center mb-6">
+                <div class="text-5xl animate-bounce-gentle">🎓</div>
+            </div>
+            <h2 class="text-3xl font-bold text-edu-deep mb-2">
+                Create your account
+            </h2>
+            <p class="text-edu-dark">
+                Join thousands of learners using AI-powered education
+            </p>
+        </div>
+
+        <!-- Main Signup Card -->
+        <div class="auth-card rounded-2xl p-8 scroll-reveal">
+            <!-- Signup Form -->
+            <form method="post" class="space-y-6" id="signup-form">
+                {% csrf_token %}
+                
+                <!-- Name Fields -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-floating">
+                        <input
+                            id="{{ form.first_name.id_for_label }}"
+                            name="{{ form.first_name.name }}"
+                            type="text"
+                            class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
+                            placeholder=" "
+                            required
+                            {% if form.first_name.value %}value="{{ form.first_name.value }}"{% endif %}
+                        >
+                        <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                            First name
+                        </label>
+                    </div>
+                    
+                    <div class="form-floating">
+                        <input
+                            id="{{ form.last_name.id_for_label }}"
+                            name="{{ form.last_name.name }}"
+                            type="text"
+                            class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
+                            placeholder=" "
+                            required
+                            {% if form.last_name.value %}value="{{ form.last_name.value }}"{% endif %}
+                        >
+                        <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                            Last name
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Email Field -->
+                <div class="form-floating">
+                    <input
+                        id="{{ form.email.id_for_label }}"
+                        name="{{ form.email.name }}"
+                        type="email"
+                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
+                        placeholder=" "
+                        required
+                        {% if form.email.value %}value="{{ form.email.value }}"{% endif %}
+                    >
+                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                        Email address
+                    </label>
+                    {% if form.email.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {% for error in form.email.errors %}
+                                <p class="flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Password Fields -->
+                <div class="form-floating">
+                    <input
+                        id="{{ form.password1.id_for_label }}"
+                        name="{{ form.password1.name }}"
+                        type="password"
+                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
+                        placeholder=" "
+                        required
+                    >
+                    <label for="{{ form.password1.id_for_label }}" class="form-label">
+                        Password
+                    </label>
+                    <div class="password-strength">
+                        <div class="password-strength-fill" id="password-strength-fill"></div>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500" id="password-help">
+                        Password strength: <span id="strength-text">Enter a password</span>
+                    </p>
+                </div>
+
+                <div class="form-floating">
+                    <input
+                        id="{{ form.password2.id_for_label }}"
+                        name="{{ form.password2.name }}"
+                        type="password"
+                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
+                        placeholder=" "
+                        required
+                    >
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">
+                        Confirm password
+                    </label>
+                    <div class="mt-1 text-xs" id="password-match">
+                        <span class="text-gray-500">Passwords must match</span>
+                    </div>
+                </div>
+
+                <!-- Optional Fields -->
+                <div class="space-y-4">
+                    <div class="form-floating">
+                        <input
+                            id="{{ form.organization.id_for_label }}"
+                            name="{{ form.organization.name }}"
+                            type="text"
+                            class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
+                            placeholder=" "
+                            {% if form.organization.value %}value="{{ form.organization.value }}"{% endif %}
+                        >
+                        <label for="{{ form.organization.id_for_label }}" class="form-label">
+                            Organization (Optional)
+                        </label>
+                    </div>
+                    
+                    <div class="form-floating">
+                        <input
+                            id="{{ form.role.id_for_label }}"
+                            name="{{ form.role.name }}"
+                            type="text"
+                            class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
+                            placeholder=" "
+                            {% if form.role.value %}value="{{ form.role.value }}"{% endif %}
+                        >
+                        <label for="{{ form.role.id_for_label }}" class="form-label">
+                            Role/Title (Optional)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Terms Agreement -->
+                <div class="flex items-start">
+                    <input
+                        id="terms"
+                        name="terms"
+                        type="checkbox"
+                        class="h-4 w-4 text-edu-beige focus:ring-edu-beige border-gray-300 rounded mt-1"
+                        required
+                    >
+                    <label for="terms" class="ml-3 text-sm text-gray-600">
+                        I agree to the 
+                        <a href="#" class="text-edu-beige hover:text-edu-dark font-medium">Terms of Service</a>
+                        and 
+                        <a href="#" class="text-edu-beige hover:text-edu-dark font-medium">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                    type="submit"
+                    class="w-full bg-edu-beige text-white py-4 px-6 rounded-xl font-semibold hover:bg-edu-dark transition-all hover-lift focus:outline-none focus:ring-4 focus:ring-edu-beige focus:ring-opacity-30"
+                    id="signup-btn"
+                >
+                    <span class="flex items-center justify-center">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Create your account
+                    </span>
+                </button>
+
+                <!-- Form Errors -->
+                {% if form.non_field_errors %}
+                    <div class="rounded-lg bg-red-50 p-4 border border-red-200">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">
+                                    Please fix the following errors:
+                                </h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        {% for error in form.non_field_errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Login Link -->
+        <div class="text-center scroll-reveal">
+            <p class="text-gray-600">
+                Already have an account?
+                <a href="{% url 'account_login' %}" class="text-edu-beige hover:text-edu-dark font-semibold transition-colors ml-1">
+                    Sign in here
+                    <i class="fas fa-arrow-right ml-1 text-sm"></i>
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+// Password strength checker
+function checkPasswordStrength(password) {
+    let strength = 0;
+    let feedback = [];
+    
+    if (password.length >= 8) strength += 1;
+    else feedback.push('at least 8 characters');
+    
+    if (/[a-z]/.test(password)) strength += 1;
+    else feedback.push('lowercase letter');
+    
+    if (/[A-Z]/.test(password)) strength += 1;
+    else feedback.push('uppercase letter');
+    
+    if (/[0-9]/.test(password)) strength += 1;
+    else feedback.push('number');
+    
+    if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
+    else feedback.push('special character');
+    
+    return { strength, feedback };
+}
+
+// Update password strength indicator
+function updatePasswordStrength() {
+    const password = document.getElementById('{{ form.password1.id_for_label }}').value;
+    const strengthFill = document.getElementById('password-strength-fill');
+    const strengthText = document.getElementById('strength-text');
+    
+    if (!password) {
+        strengthFill.style.width = '0%';
+        strengthFill.className = 'password-strength-fill';
+        strengthText.textContent = 'Enter a password';
+        return;
+    }
+    
+    const result = checkPasswordStrength(password);
+    const percentage = (result.strength / 5) * 100;
+    
+    strengthFill.style.width = percentage + '%';
+    
+    if (result.strength <= 2) {
+        strengthFill.className = 'password-strength-fill strength-weak';
+        strengthText.textContent = 'Weak';
+    } else if (result.strength <= 3) {
+        strengthFill.className = 'password-strength-fill strength-medium';
+        strengthText.textContent = 'Medium';
+    } else {
+        strengthFill.className = 'password-strength-fill strength-strong';
+        strengthText.textContent = 'Strong';
+    }
+}
+
+// Check password match
+function checkPasswordMatch() {
+    const password1 = document.getElementById('{{ form.password1.id_for_label }}').value;
+    const password2 = document.getElementById('{{ form.password2.id_for_label }}').value;
+    const matchIndicator = document.getElementById('password-match');
+    
+    if (!password2) {
+        matchIndicator.innerHTML = '<span class="text-gray-500">Passwords must match</span>';
+        return false;
+    }
+    
+    if (password1 === password2) {
+        matchIndicator.innerHTML = '<span class="text-green-600"><i class="fas fa-check mr-1"></i>Passwords match</span>';
+        return true;
+    } else {
+        matchIndicator.innerHTML = '<span class="text-red-600"><i class="fas fa-times mr-1"></i>Passwords do not match</span>';
+        return false;
+    }
+}
+
+// Form validation
+function validateForm() {
+    const firstName = document.getElementById('{{ form.first_name.id_for_label }}').value;
+    const lastName = document.getElementById('{{ form.last_name.id_for_label }}').value;
+    const email = document.getElementById('{{ form.email.id_for_label }}').value;
+    const password1 = document.getElementById('{{ form.password1.id_for_label }}').value;
+    const password2 = document.getElementById('{{ form.password2.id_for_label }}').value;
+    const terms = document.getElementById('terms').checked;
+    const submitBtn = document.getElementById('signup-btn');
+    
+    const passwordStrength = checkPasswordStrength(password1);
+    const passwordsMatch = checkPasswordMatch();
+    
+    const isValid = EduSauti.validateRequired(firstName) &&
+                   EduSauti.validateRequired(lastName) &&
+                   EduSauti.validateEmail(email) &&
+                   passwordStrength.strength >= 3 &&
+                   passwordsMatch &&
+                   terms;
+    
+    if (isValid) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    
+    return isValid;
+}
+
+// Event listeners
+document.getElementById('{{ form.password1.id_for_label }}').addEventListener('input', function() {
+    updatePasswordStrength();
+    validateForm();
+});
+
+document.getElementById('{{ form.password2.id_for_label }}').addEventListener('input', function() {
+    checkPasswordMatch();
+    validateForm();
+});
+
+// Add validation to all form fields
+['{{ form.first_name.id_for_label }}', '{{ form.last_name.id_for_label }}', '{{ form.email.id_for_label }}'].forEach(id => {
+    document.getElementById(id).addEventListener('input', validateForm);
+});
+
+document.getElementById('terms').addEventListener('change', validateForm);
+
+// Form submission
+document.getElementById('signup-form').addEventListener('submit', function(e) {
+    if (!validateForm()) {
+        e.preventDefault();
+        EduSauti.showToast('Please fill in all required fields correctly', 'error');
+        return;
+    }
+    
+    const submitBtn = document.getElementById('signup-btn');
+    EduSauti.setLoadingState(submitBtn, true);
+});
+
+// Initial validation
+validateForm();
+
+// Auto-focus first field
+document.getElementById('{{ form.first_name.id_for_label }}').focus();
+{% endblock %}

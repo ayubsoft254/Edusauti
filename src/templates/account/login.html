@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - EduSauti{% endblock %}
+
+{% block meta_description %}Login to your EduSauti account to access AI-powered learning tools{% endblock %}
+
+{% block body_class %}bg-gradient-bg min-h-screen{% endblock %}
+
+{% block extra_css %}
+.auth-container {
+    background: linear-gradient(135deg, rgba(153, 135, 111, 0.1) 0%, rgba(245, 243, 240, 0.8) 100%);
+}
+
+.form-floating {
+    position: relative;
+}
+
+.form-floating label {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    color: #7d6b57;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.form-floating input {
+    padding: 1rem 1rem 0.5rem 1rem;
+}
+
+.form-floating input:focus + label,
+.form-floating input:not(:placeholder-shown) + label {
+    top: 0.75rem;
+    font-size: 0.75rem;
+    color: #99876f;
+    transform: translateY(0);
+}
+
+.social-btn {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.social-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s;
+}
+
+.social-btn:hover::before {
+    left: 100%;
+}
+
+.auth-card {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(153, 135, 111, 0.2);
+    box-shadow: 0 25px 50px rgba(153, 135, 111, 0.15);
+}
+
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #d1d5db, transparent);
+}
+
+.divider span {
+    background: white;
+    padding: 0 1rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+{% endblock %}
+
+{% block content %}
+<div class="auth-container min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <!-- Header -->
+        <div class="text-center scroll-reveal">
+            <div class="flex items-center justify-center mb-6">
+                <div class="text-5xl animate-bounce-gentle">🎓</div>
+            </div>
+            <h2 class="text-3xl font-bold text-edu-deep mb-2">
+                Welcome back
+            </h2>
+            <p class="text-edu-dark">
+                Continue your learning journey with EduSauti
+            </p>
+        </div>
+
+        <!-- Main Login Card -->
+        <div class="auth-card rounded-2xl p-8 scroll-reveal">
+            <!-- Social Login Options -->
+            <div class="space-y-3 mb-6">
+                <button class="social-btn w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all">
+                    <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                
+                <button class="social-btn w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all">
+                    <svg class="w-5 h-5 mr-3" fill="#1877F2" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    Continue with Facebook
+                </button>
+            </div>
+
+            <!-- Divider -->
+            <div class="divider">
+                <span>or continue with email</span>
+            </div>
+
+            <!-- Login Form -->
+            <form method="post" class="space-y-6" id="login-form">
+                {% csrf_token %}
+                
+                <!-- Email Field -->
+                <div class="form-floating">
+                    <input
+                        id="{{ form.login.id_for_label }}"
+                        name="{{ form.login.name }}"
+                        type="email"
+                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
+                        placeholder=" "
+                        required
+                        {% if form.login.value %}value="{{ form.login.value }}"{% endif %}
+                    >
+                    <label for="{{ form.login.id_for_label }}" class="form-label">
+                        Email address
+                    </label>
+                    {% if form.login.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {% for error in form.login.errors %}
+                                <p class="flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-floating">
+                    <input
+                        id="{{ form.password.id_for_label }}"
+                        name="{{ form.password.name }}"
+                        type="password"
+                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
+                        placeholder=" "
+                        required
+                    >
+                    <label for="{{ form.password.id_for_label }}" class="form-label">
+                        Password
+                    </label>
+                    <button
+                        type="button"
+                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-edu-beige transition-colors"
+                        onclick="togglePassword()"
+                        id="password-toggle"
+                    >
+                        <i class="fas fa-eye" id="password-icon"></i>
+                    </button>
+                    {% if form.password.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {% for error in form.password.errors %}
+                                <p class="flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input
+                            id="{{ form.remember.id_for_label }}"
+                            name="{{ form.remember.name }}"
+                            type="checkbox"
+                            class="h-4 w-4 text-edu-beige focus:ring-edu-beige border-gray-300 rounded transition-colors"
+                            {% if form.remember.value %}checked{% endif %}
+                        >
+                        <label for="{{ form.remember.id_for_label }}" class="ml-2 block text-sm text-gray-700">
+                            Remember me
+                        </label>
+                    </div>
+                    <div class="text-sm">
+                        <a href="{% url 'account_reset_password' %}" class="text-edu-beige hover:text-edu-dark transition-colors font-medium">
+                            Forgot your password?
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                    type="submit"
+                    class="w-full bg-edu-beige text-white py-4 px-6 rounded-xl font-semibold hover:bg-edu-dark transition-all hover-lift focus:outline-none focus:ring-4 focus:ring-edu-beige focus:ring-opacity-30"
+                    id="login-btn"
+                >
+                    <span class="flex items-center justify-center">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Sign in to your account
+                    </span>
+                </button>
+
+                <!-- Form Errors -->
+                {% if form.non_field_errors %}
+                    <div class="rounded-lg bg-red-50 p-4 border border-red-200">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">
+                                    There were errors with your submission:
+                                </h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        {% for error in form.non_field_errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Sign Up Link -->
+        <div class="text-center scroll-reveal">
+            <p class="text-gray-600">
+                Don't have an account?
+                <a href="{% url 'account_signup' %}" class="text-edu-beige hover:text-edu-dark font-semibold transition-colors ml-1">
+                    Get started for free
+                    <i class="fas fa-arrow-right ml-1 text-sm"></i>
+                </a>
+            </p>
+        </div>
+
+        <!-- Features Preview -->
+        <div class="bg-white rounded-2xl p-6 scroll-reveal">
+            <h3 class="text-lg font-semibold text-edu-deep mb-4 text-center">
+                What you'll get with EduSauti
+            </h3>
+            <div class="grid grid-cols-1 gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-edu-cream rounded-full flex items-center justify-center">
+                            <i class="fas fa-microphone text-edu-beige text-sm"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">AI Voice Summaries</p>
+                        <p class="text-sm text-gray-500">Transform documents into audio</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-edu-cream rounded-full flex items-center justify-center">
+                            <i class="fas fa-comments text-edu-beige text-sm"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Real-time Q&A</p>
+                        <p class="text-sm text-gray-500">Ask questions during playback</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-edu-cream rounded-full flex items-center justify-center">
+                            <i class="fas fa-brain text-edu-beige text-sm"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Smart Learning</p>
+                        <p class="text-sm text-gray-500">Personalized AI teacher</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+// Password toggle functionality
+function togglePassword() {
+    const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
+    const passwordIcon = document.getElementById('password-icon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        passwordIcon.classList.remove('fa-eye');
+        passwordIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        passwordIcon.classList.remove('fa-eye-slash');
+        passwordIcon.classList.add('fa-eye');
+    }
+}
+
+// Form submission with loading state
+document.getElementById('login-form').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('login-btn');
+    EduSauti.setLoadingState(submitBtn, true);
+    
+    // Re-enable button after 5 seconds in case of network issues
+    setTimeout(() => {
+        EduSauti.setLoadingState(submitBtn, false);
+    }, 5000);
+});
+
+// Auto-focus first empty field
+document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.getElementById('{{ form.login.id_for_label }}');
+    const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
+    
+    if (!emailInput.value) {
+        emailInput.focus();
+    } else if (!passwordInput.value) {
+        passwordInput.focus();
+    }
+});
+
+// Enhanced form validation
+function validateForm() {
+    const email = document.getElementById('{{ form.login.id_for_label }}').value;
+    const password = document.getElementById('{{ form.password.id_for_label }}').value;
+    const submitBtn = document.getElementById('login-btn');
+    
+    const isValid = EduSauti.validateEmail(email) && EduSauti.validateRequired(password);
+    
+    if (isValid) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    
+    return isValid;
+}
+
+// Real-time validation
+document.getElementById('{{ form.login.id_for_label }}').addEventListener('input', validateForm);
+document.getElementById('{{ form.password.id_for_label }}').addEventListener('input', validateForm);
+
+// Initial validation
+validateForm();
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Enter key submits form
+    if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
+        e.preventDefault();
+        if (validateForm()) {
+            document.getElementById('login-form').submit();
+        }
+    }
+});
+
+// Social login placeholders (replace with actual implementations)
+document.querySelectorAll('.social-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const provider = this.textContent.includes('Google') ? 'Google' : 'Facebook';
+        EduSauti.showToast(`${provider} login coming soon!`, 'info');
+    });
+});
+
+// Show success message if redirected with success parameter
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('registered') === 'true') {
+    EduSauti.showToast('Account created successfully! Please sign in.', 'success');
+}
+{% endblock %}
