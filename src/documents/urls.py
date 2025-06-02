@@ -3,14 +3,15 @@ from . import views
 
 app_name = 'documents'
 
-# Web URLs
+# Web URLs (for /documents/)
 web_urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('upload/', views.upload_document, name='upload'),
     path('<int:document_id>/', views.document_detail, name='detail'),
+    path('shared/<str:share_token>/', views.shared_document_view, name='shared-document-view'),
 ]
 
-# API URLs
+# API URLs (for /api/documents/)
 api_urlpatterns = [
     # Document CRUD
     path('', views.DocumentListCreateView.as_view(), name='document-list-create'),
@@ -25,7 +26,7 @@ api_urlpatterns = [
     
     # Document sharing
     path('<int:document_id>/share/', views.DocumentShareView.as_view(), name='document-share'),
-    path('shared/<str:share_token>/', views.shared_document_view, name='shared-document'),
+    path('shared/<str:share_token>/', views.shared_document_view, name='shared-document-api'),
     
     # User statistics
     path('stats/', views.user_stats, name='user-stats'),
