@@ -1,8 +1,6 @@
 from django.urls import path, include
 from . import views
 
-app_name = 'users'
-
 # Web URLs (for /profile/)
 web_urlpatterns = [
     path('', views.ProfileView.as_view(), name='profile'),
