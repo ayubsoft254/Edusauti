@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import User, UserProfile, SubscriptionHistory
+from .models import User, UserProfile, SubscriptionHistory, BillingProfile
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -260,3 +260,62 @@ class AccountDeactivationSerializer(serializers.Serializer):
         if not user.check_password(value):
             raise serializers.ValidationError("Invalid password")
         return value
+
+
+class BillingProfileSerializer(serializers.ModelSerializer):
+    """Serializer for billing profile"""
+    
+    class Meta:
+        model = BillingProfile
+        fields = [
+            'company_name', 'billing_address_line1', 'billing_address_line2',
+            'billing_city', 'billing_state', 'billing_country', 'billing_postal_code',
+            'tax_id', 'preferred_currency', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class PaymentMethodSerializer(serializers.Serializer):
+    """Serializer for payment method information"""
+    
+    card_last_four = serializers.CharField(max_length=4, read_only=True)
+    card_type = serializers.CharField(max_length=20, read_only=True)
+    expiry_month = serializers.IntegerField(min_value=1, max_value=12, read_only=True)
+    expiry_year = serializers.IntegerField(read_only=True)
+    is_default = serializers.BooleanField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    """Serializer for invoice/subscription history"""
+    
+    tier_display = serializers.CharField(source='get_tier_display', read_only=True)
+    payment_method_display = serializers.CharField(source='get_payment_method_display', read_only=True)
+    invoice_number = serializers.SerializerMethodField()
+    next_billing_date = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = SubscriptionHistory
+        fields = [
+            'id', 'tier', 'tier_display', 'start_date', 'end_date',
+            'amount_paid', 'payment_method', 'payment_method_display',
+            'is_active', 'created_at', 'invoice_number', 'next_billing_date'
+        ]
+    
+    def get_invoice_number(self, obj):
+        return f'INV-{obj.id:06d}'
+    
+    def get_next_billing_date(self, obj):
+        return obj.get_next_billing_date()
+
+
+class BillingSummarySerializer(serializers.Serializer):
+    """Serializer for billing summary"""
+    
+    current_subscription = InvoiceSerializer(read_only=True, allow_null=True)
+    subscription_cost = serializers.DecimalField(max_digits=10, decimal_places=2)
+    ai_usage_cost = serializers.DecimalField(max_digits=10, decimal_places=2)
+    total_this_month = serializers.DecimalField(max_digits=10, decimal_places=2)
+    total_spent_ever = serializers.DecimalField(max_digits=10, decimal_places=2)
+    subscription_tier = serializers.CharField()
+    next_billing_date = serializers.DateField(allow_null=True)
