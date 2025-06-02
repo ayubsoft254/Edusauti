@@ -1,14 +1,13 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse, Http404
-from django.views.decorators.http import require_http_methods
+from django.http import Http404
 from django.contrib import messages
 from django.core.paginator import Paginator
 from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Document, AudioSummary, Question, DocumentShare
+from .models import Document, Question, DocumentShare
 from .serializers import (
     DocumentSerializer, DocumentListSerializer, AudioSummarySerializer,
     QuestionSerializer, QuestionCreateSerializer, DocumentShareSerializer
