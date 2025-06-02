@@ -104,7 +104,6 @@ SITE_ID = 1
 AUTH_USER_MODEL = 'users.User'
 
 # Allauth settings (Updated for new version)
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_LOGIN_METHODS = ['email', 'username']
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = config('ACCOUNT_EMAIL_VERIFICATION', default='mandatory')
