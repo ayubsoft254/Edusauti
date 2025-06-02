@@ -3,9 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EduSauti - Transform your learning with AI-powered voice summaries and real-time Q&A. Upload documents and get instant, interactive educational content.">
+    <meta name="keywords" content="AI education, voice summaries, document learning, interactive Q&A, educational technology">
+    <meta name="author" content="EduSauti">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://edusauti.com/">
+    <meta property="og:title" content="EduSauti - AI-Powered Learning Revolution">
+    <meta property="og:description" content="Transform your learning with AI-powered voice summaries and real-time Q&A">
+    <meta property="og:image" content="https://edusauti.com/static/images/og-image.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://edusauti.com/">
+    <meta property="twitter:title" content="EduSauti - AI-Powered Learning Revolution">
+    <meta property="twitter:description" content="Transform your learning with AI-powered voice summaries and real-time Q&A">
+    <meta property="twitter:image" content="https://edusauti.com/static/images/twitter-image.jpg">
+    
     <title>EduSauti - AI-Powered Learning Revolution</title>
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    
     <script>
         tailwind.config = {
             theme: {
@@ -27,6 +56,9 @@
                         'slideInLeft': 'slideInLeft 0.8s ease-out',
                         'slideInRight': 'slideInRight 0.8s ease-out',
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
+                        'gradient-x': 'gradient-x 3s ease infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
                     },
                     keyframes: {
                         float: {
@@ -44,19 +76,38 @@
                         slideInRight: {
                             '0%': { opacity: '0', transform: 'translateX(30px)' },
                             '100%': { opacity: '1', transform: 'translateX(0)' }
+                        },
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' }
+                        },
+                        'gradient-x': {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            }
+                        },
+                        glow: {
+                            '0%': { 'box-shadow': '0 0 5px rgba(153, 135, 111, 0.5)' },
+                            '100%': { 'box-shadow': '0 0 20px rgba(153, 135, 111, 0.8)' }
                         }
                     }
                 }
             }
         }
     </script>
+    
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #f5f3f0 0%, #e8e0d7 50%, #d4c7b8 100%);
         }
         .glass-effect {
             backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
         .hover-lift {
@@ -75,9 +126,206 @@
             opacity: 1;
             transform: translateY(0);
         }
+        .typing-animation {
+            border-right: 2px solid #99876f;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { border-color: transparent; }
+            51%, 100% { border-color: #99876f; }
+        }
+        
+        /* Loading states */
+        .loading {
+            position: relative;
+            overflow: hidden;
+        }
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        /* Advanced Contact Form Styles */
+        .contact-container {
+            background: linear-gradient(135deg, #99876f 0%, #b5a28a 50%, #d4a574 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .contact-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .contact-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        
+        .form-input {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: rgba(245, 243, 240, 0.8);
+        }
+        
+        .form-input:focus {
+            border-color: #99876f;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(153, 135, 111, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .form-label {
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus + .form-label,
+        .form-input:not(:placeholder-shown) + .form-label {
+            transform: translateY(-1.5rem) scale(0.9);
+            color: #99876f;
+        }
+        
+        .contact-method {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .contact-method:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .floating-shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .floating-shape:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+        
+        .floating-shape:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Success animation */
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 3;
+            stroke: #4CAF50;
+            stroke-miterlimit: 10;
+            margin: 10% auto;
+            box-shadow: inset 0px 0px 0px #4CAF50;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+        
+        .success-checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 3;
+            stroke-miterlimit: 10;
+            stroke: #4CAF50;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        
+        .success-checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+        
+        @keyframes scale {
+            0%, 100% {
+                transform: none;
+            }
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+        
+        @keyframes fill {
+            100% {
+                box-shadow: inset 0px 0px 0px 30px #4CAF50;
+            }
+        }
     </style>
 </head>
 <body class="font-display antialiased">
+    <!-- Page Loading Overlay -->
+    <div id="page-loader" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="text-4xl mb-4">🎓</div>
+            <div class="text-xl font-bold text-edu-deep mb-4">EduSauti</div>
+            <div class="loading w-32 h-1 bg-edu-cream rounded-full"></div>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-6 right-6 bg-edu-beige text-white p-3 rounded-full shadow-lg hover:bg-edu-dark transition-all transform translate-y-16 opacity-0 z-40">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
     <!-- Navigation -->
     <nav class="fixed top-0 w-full z-50 glass-effect">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,14 +340,15 @@
                     <a href="#features" class="text-edu-deep hover:text-edu-beige transition-colors">Features</a>
                     <a href="#pricing" class="text-edu-deep hover:text-edu-beige transition-colors">Pricing</a>
                     <a href="#about" class="text-edu-deep hover:text-edu-beige transition-colors">About</a>
-                    <a href="#login" class="text-edu-deep hover:text-edu-beige transition-colors">Login</a>
-                    <button class="bg-edu-beige text-white px-6 py-2 rounded-full hover:bg-edu-dark transition-all hover-lift">
+                    <a href="#contact" class="text-edu-deep hover:text-edu-beige transition-colors">Contact</a>
+                    <a href="{% url 'account_login' %}" class="text-edu-deep hover:text-edu-beige transition-colors">Login</a>
+                    <a href="{% url 'account_signup' %}" class="bg-edu-beige text-white px-6 py-2 rounded-full hover:bg-edu-dark transition-all hover-lift">
                         Get Started
-                    </button>
+                    </a>
                 </div>
                 
                 <!-- Mobile Menu Button -->
-                <button class="md:hidden" id="mobile-menu-btn">
+                <button class="md:hidden" id="mobile-menu-btn" aria-label="Toggle mobile menu">
                     <i class="fas fa-bars text-edu-deep text-xl"></i>
                 </button>
             </div>
@@ -108,13 +357,14 @@
         <!-- Mobile Menu -->
         <div class="md:hidden hidden bg-white shadow-lg" id="mobile-menu">
             <div class="px-4 pt-2 pb-4 space-y-2">
-                <a href="#features" class="block py-2 text-edu-deep hover:text-edu-beige">Features</a>
-                <a href="#pricing" class="block py-2 text-edu-deep hover:text-edu-beige">Pricing</a>
-                <a href="#about" class="block py-2 text-edu-deep hover:text-edu-beige">About</a>
-                <a href="#login" class="block py-2 text-edu-deep hover:text-edu-beige">Login</a>
-                <button class="w-full mt-2 bg-edu-beige text-white px-6 py-2 rounded-full hover:bg-edu-dark transition-colors">
+                <a href="#features" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Features</a>
+                <a href="#pricing" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Pricing</a>
+                <a href="#about" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">About</a>
+                <a href="#contact" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Contact</a>
+                <a href="{% url 'account_login' %}" class="block py-2 text-edu-deep hover:text-edu-beige">Login</a>
+                <a href="{% url 'account_signup' %}" class="block w-full mt-2 bg-edu-beige text-white px-6 py-2 rounded-full hover:bg-edu-dark transition-colors text-center">
                     Get Started
-                </button>
+                </a>
             </div>
         </div>
     </nav>
@@ -128,7 +378,7 @@
                     <div class="animate-fadeInUp">
                         <h1 class="text-5xl md:text-6xl font-bold text-edu-deep leading-tight">
                             Transform Your
-                            <span class="text-edu-beige block">Learning Experience</span>
+                            <span class="text-edu-beige block typing-animation" id="typing-text">Learning Experience</span>
                         </h1>
                         <p class="text-xl text-edu-dark mt-6 leading-relaxed">
                             Upload documents, get AI-powered voice summaries, and ask questions in real-time. 
@@ -137,10 +387,10 @@
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-4 animate-slideInLeft">
-                        <button class="bg-edu-beige text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-edu-dark transition-all hover-lift shadow-lg">
+                        <a href="{% url 'account_signup' %}" class="bg-edu-beige text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-edu-dark transition-all hover-lift shadow-lg text-center">
                             <i class="fas fa-rocket mr-2"></i>Start Learning Now
-                        </button>
-                        <button class="border-2 border-edu-beige text-edu-beige px-8 py-4 rounded-full text-lg font-semibold hover:bg-edu-beige hover:text-white transition-all hover-lift">
+                        </a>
+                        <button id="demo-btn" class="border-2 border-edu-beige text-edu-beige px-8 py-4 rounded-full text-lg font-semibold hover:bg-edu-beige hover:text-white transition-all hover-lift">
                             <i class="fas fa-play mr-2"></i>Watch Demo
                         </button>
                     </div>
@@ -148,15 +398,15 @@
                     <!-- Stats -->
                     <div class="grid grid-cols-3 gap-6 pt-8 animate-fadeInUp">
                         <div class="text-center">
-                            <div class="text-3xl font-bold text-edu-beige">10K+</div>
+                            <div class="text-3xl font-bold text-edu-beige counter" data-target="10000">0</div>
                             <div class="text-edu-dark">Documents Processed</div>
                         </div>
                         <div class="text-center">
-                            <div class="text-3xl font-bold text-edu-beige">50K+</div>
+                            <div class="text-3xl font-bold text-edu-beige counter" data-target="50000">0</div>
                             <div class="text-edu-dark">Questions Answered</div>
                         </div>
                         <div class="text-center">
-                            <div class="text-3xl font-bold text-edu-beige">99%</div>
+                            <div class="text-3xl font-bold text-edu-beige counter" data-target="99">0</div>
                             <div class="text-edu-dark">Satisfaction Rate</div>
                         </div>
                     </div>
@@ -191,15 +441,15 @@
                                     <!-- Audio Player -->
                                     <div class="bg-white rounded-lg p-4">
                                         <div class="flex items-center space-x-4">
-                                            <button class="bg-edu-beige text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-edu-dark transition-colors">
+                                            <button id="demo-play-btn" class="bg-edu-beige text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-edu-dark transition-colors">
                                                 <i class="fas fa-play"></i>
                                             </button>
                                             <div class="flex-1">
                                                 <div class="bg-edu-cream h-2 rounded-full overflow-hidden">
-                                                    <div class="bg-edu-beige h-full w-1/3 rounded-full animate-pulse-slow"></div>
+                                                    <div id="demo-progress" class="bg-edu-beige h-full w-1/3 rounded-full animate-pulse-slow"></div>
                                                 </div>
                                                 <div class="flex justify-between text-sm text-edu-dark mt-1">
-                                                    <span>2:34</span>
+                                                    <span id="current-time">2:34</span>
                                                     <span>7:12</span>
                                                 </div>
                                             </div>
@@ -246,7 +496,7 @@
             
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Feature 1 -->
-                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal">
+                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal feature-card">
                     <div class="bg-edu-beige text-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
                         <i class="fas fa-upload text-2xl"></i>
                     </div>
@@ -257,7 +507,7 @@
                 </div>
                 
                 <!-- Feature 2 -->
-                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal">
+                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal feature-card">
                     <div class="bg-edu-beige text-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
                         <i class="fas fa-volume-up text-2xl"></i>
                     </div>
@@ -268,7 +518,7 @@
                 </div>
                 
                 <!-- Feature 3 -->
-                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal">
+                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal feature-card">
                     <div class="bg-edu-beige text-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
                         <i class="fas fa-comments text-2xl"></i>
                     </div>
@@ -279,7 +529,7 @@
                 </div>
                 
                 <!-- Feature 4 -->
-                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal">
+                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal feature-card">
                     <div class="bg-edu-beige text-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
                         <i class="fas fa-users text-2xl"></i>
                     </div>
@@ -290,7 +540,7 @@
                 </div>
                 
                 <!-- Feature 5 -->
-                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal">
+                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal feature-card">
                     <div class="bg-edu-beige text-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
                         <i class="fas fa-mobile-alt text-2xl"></i>
                     </div>
@@ -301,7 +551,7 @@
                 </div>
                 
                 <!-- Feature 6 -->
-                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal">
+                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal feature-card">
                     <div class="bg-edu-beige text-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
                         <i class="fas fa-chart-line text-2xl"></i>
                     </div>
@@ -326,7 +576,7 @@
             
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Free Tier -->
-                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift scroll-reveal">
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift scroll-reveal pricing-card">
                     <div class="text-center">
                         <h3 class="text-2xl font-bold text-edu-deep mb-2">Starter Learn</h3>
                         <div class="text-4xl font-bold text-edu-beige mb-4">Free</div>
@@ -344,7 +594,7 @@
                         </li>
                         <li class="flex items-center text-edu-dark">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            5 questions per document
+                            25 questions per month
                         </li>
                         <li class="flex items-center text-edu-dark">
                             <i class="fas fa-check text-green-500 mr-3"></i>
@@ -352,13 +602,13 @@
                         </li>
                     </ul>
                     
-                    <button class="w-full bg-edu-cream text-edu-beige py-3 rounded-full font-semibold hover:bg-edu-beige hover:text-white transition-all">
+                    <a href="{% url 'account_signup' %}" class="block w-full bg-edu-cream text-edu-beige py-3 rounded-full font-semibold hover:bg-edu-beige hover:text-white transition-all text-center">
                         Get Started Free
-                    </button>
+                    </a>
                 </div>
                 
                 <!-- Pro Tier -->
-                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift scroll-reveal relative">
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift scroll-reveal pricing-card relative">
                     <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
                         <span class="bg-edu-beige text-white px-4 py-1 rounded-full text-sm font-semibold">Most Popular</span>
                     </div>
@@ -375,15 +625,15 @@
                         </li>
                         <li class="flex items-center text-edu-dark">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            5 premium voices
+                            Premium AI voices
                         </li>
                         <li class="flex items-center text-edu-dark">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            Unlimited Q&A
+                            250 questions/month
                         </li>
                         <li class="flex items-center text-edu-dark">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            Real-time chat
+                            Real-time Q&A chat
                         </li>
                         <li class="flex items-center text-edu-dark">
                             <i class="fas fa-check text-green-500 mr-3"></i>
@@ -397,7 +647,7 @@
                 </div>
                 
                 <!-- Edu Pack -->
-                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift scroll-reveal">
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift scroll-reveal pricing-card">
                     <div class="text-center">
                         <h3 class="text-2xl font-bold text-edu-deep mb-2">Classroom Learn</h3>
                         <div class="text-4xl font-bold text-edu-beige mb-4">$49<span class="text-lg">/mo</span></div>
@@ -433,7 +683,7 @@
                 </div>
                 
                 <!-- Enterprise -->
-                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift scroll-reveal">
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift scroll-reveal pricing-card">
                     <div class="text-center">
                         <h3 class="text-2xl font-bold text-edu-deep mb-2">Institution Learn</h3>
                         <div class="text-4xl font-bold text-edu-beige mb-4">Custom</div>
@@ -447,7 +697,7 @@
                         </li>
                         <li class="flex items-center text-edu-dark">
                             <i class="fas fa-check text-green-500 mr-3"></i>
-                            Custom voices
+                            Custom AI voices
                         </li>
                         <li class="flex items-center text-edu-dark">
                             <i class="fas fa-check text-green-500 mr-3"></i>
@@ -471,6 +721,48 @@
         </div>
     </section>
 
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="scroll-reveal">
+                    <h2 class="text-4xl font-bold text-edu-deep mb-6">Revolutionizing Education with AI</h2>
+                    <p class="text-lg text-edu-dark mb-6">
+                        EduSauti combines cutting-edge artificial intelligence with proven educational methodologies 
+                        to create an immersive learning experience that adapts to your needs.
+                    </p>
+                    <p class="text-lg text-edu-dark mb-8">
+                        Our platform transforms static documents into dynamic, interactive learning sessions that 
+                        engage multiple senses and learning styles, making education more accessible and effective.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                            <span class="text-edu-dark">Advanced natural language processing</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                            <span class="text-edu-dark">Multi-modal learning support</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                            <span class="text-edu-dark">Personalized learning paths</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="scroll-reveal">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
+                             alt="Students learning together" 
+                             class="rounded-2xl shadow-2xl w-full h-96 object-cover"
+                             loading="lazy">
+                        <div class="absolute inset-0 bg-edu-beige bg-opacity-20 rounded-2xl"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="py-20 bg-edu-beige">
         <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8 scroll-reveal">
@@ -479,12 +771,229 @@
                 Join thousands of students and educators who are already experiencing the future of education with EduSauti.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button class="bg-white text-edu-beige px-8 py-4 rounded-full text-lg font-semibold hover:bg-edu-cream transition-all hover-lift shadow-lg">
+                <a href="{% url 'account_signup' %}" class="bg-white text-edu-beige px-8 py-4 rounded-full text-lg font-semibold hover:bg-edu-cream transition-all hover-lift shadow-lg">
                     <i class="fas fa-rocket mr-2"></i>Start Your Free Trial
-                </button>
-                <button class="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-edu-beige transition-all hover-lift">
+                </a>
+                <button id="schedule-demo-btn" class="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-edu-beige transition-all hover-lift">
                     <i class="fas fa-calendar mr-2"></i>Schedule Demo
                 </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advanced Contact Section -->
+    <section id="contact" class="contact-container py-32 relative">
+        <div class="floating-shapes">
+            <div class="floating-shape"></div>
+            <div class="floating-shape"></div>
+            <div class="floating-shape"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-20 scroll-reveal">
+                <h2 class="text-5xl font-bold text-white mb-6">Let's Connect & Create Together</h2>
+                <p class="text-xl text-white opacity-90 max-w-3xl mx-auto">
+                    Ready to revolutionize your learning experience? Get in touch with our team of education technology experts.
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-5 gap-12 items-start">
+                <!-- Contact Methods - 2 columns -->
+                <div class="lg:col-span-2 space-y-8 scroll-reveal">
+                    <h3 class="text-2xl font-bold text-white mb-8">Get in Touch</h3>
+                    
+                    <!-- Contact Method Cards -->
+                    <div class="space-y-6">
+                        <div class="contact-method bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-white bg-opacity-20 p-4 rounded-xl">
+                                    <i class="fas fa-envelope text-white text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-white mb-2">Email Us</h4>
+                                    <p class="text-white opacity-80 mb-2">Quick response within 24 hours</p>
+                                    <a href="mailto:support@edusauti.com" class="text-white font-medium hover:underline">
+                                        support@edusauti.com
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-white bg-opacity-20 p-4 rounded-xl">
+                                    <i class="fas fa-phone text-white text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-white mb-2">Call Us</h4>
+                                    <p class="text-white opacity-80 mb-2">Mon-Fri, 9AM-6PM EAT</p>
+                                    <a href="tel:+254700123456" class="text-white font-medium hover:underline">
+                                        +254 700 123 456
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-white bg-opacity-20 p-4 rounded-xl">
+                                    <i class="fas fa-map-marker-alt text-white text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-white mb-2">Visit Us</h4>
+                                    <p class="text-white opacity-80 mb-2">Innovation Hub</p>
+                                    <p class="text-white font-medium">Nairobi, Kenya</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl p-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-white bg-opacity-20 p-4 rounded-xl">
+                                    <i class="fas fa-comments text-white text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-white mb-2">Live Chat</h4>
+                                    <p class="text-white opacity-80 mb-2">Available 24/7</p>
+                                    <button id="start-chat" class="text-white font-medium hover:underline">
+                                        Start conversation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Social Media -->
+                    <div class="pt-8">
+                        <h4 class="text-lg font-semibold text-white mb-4">Follow Us</h4>
+                        <div class="flex space-x-4">
+                            <a href="#" class="bg-white bg-opacity-20 p-3 rounded-xl hover:bg-opacity-30 transition-all">
+                                <i class="fab fa-twitter text-white text-xl"></i>
+                            </a>
+                            <a href="#" class="bg-white bg-opacity-20 p-3 rounded-xl hover:bg-opacity-30 transition-all">
+                                <i class="fab fa-linkedin text-white text-xl"></i>
+                            </a>
+                            <a href="#" class="bg-white bg-opacity-20 p-3 rounded-xl hover:bg-opacity-30 transition-all">
+                                <i class="fab fa-youtube text-white text-xl"></i>
+                            </a>
+                            <a href="#" class="bg-white bg-opacity-20 p-3 rounded-xl hover:bg-opacity-30 transition-all">
+                                <i class="fab fa-instagram text-white text-xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Form - 3 columns -->
+                <div class="lg:col-span-3 scroll-reveal">
+                    <div class="contact-card rounded-3xl p-8 lg:p-12">
+                        <div class="mb-8">
+                            <h3 class="text-2xl font-bold text-edu-deep mb-2">Send us a message</h3>
+                            <p class="text-edu-dark">We'd love to hear about your learning goals and how we can help.</p>
+                        </div>
+                        
+                        <form id="contact-form" class="space-y-8">
+                            <!-- Name and Email Row -->
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div class="relative">
+                                    <input type="text" id="name" name="name" required 
+                                           class="form-input w-full px-6 py-4 rounded-xl text-edu-deep placeholder-transparent"
+                                           placeholder="Your name">
+                                    <label for="name" class="form-label absolute left-6 top-4 text-edu-dark transition-all pointer-events-none">
+                                        Your Name *
+                                    </label>
+                                </div>
+                                
+                                <div class="relative">
+                                    <input type="email" id="email" name="email" required 
+                                           class="form-input w-full px-6 py-4 rounded-xl text-edu-deep placeholder-transparent"
+                                           placeholder="your@email.com">
+                                    <label for="email" class="form-label absolute left-6 top-4 text-edu-dark transition-all pointer-events-none">
+                                        Email Address *
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Company and Phone Row -->
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div class="relative">
+                                    <input type="text" id="company" name="company" 
+                                           class="form-input w-full px-6 py-4 rounded-xl text-edu-deep placeholder-transparent"
+                                           placeholder="Your company">
+                                    <label for="company" class="form-label absolute left-6 top-4 text-edu-dark transition-all pointer-events-none">
+                                        Company/Institution
+                                    </label>
+                                </div>
+                                
+                                <div class="relative">
+                                    <input type="tel" id="phone" name="phone" 
+                                           class="form-input w-full px-6 py-4 rounded-xl text-edu-deep placeholder-transparent"
+                                           placeholder="+254 700 123 456">
+                                    <label for="phone" class="form-label absolute left-6 top-4 text-edu-dark transition-all pointer-events-none">
+                                        Phone Number
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Subject -->
+                            <div class="relative">
+                                <select id="subject" name="subject" required 
+                                        class="form-input w-full px-6 py-4 rounded-xl text-edu-deep">
+                                    <option value="">Select a topic</option>
+                                    <option value="general">General Inquiry</option>
+                                    <option value="demo">Schedule a Demo</option>
+                                    <option value="pricing">Pricing Questions</option>
+                                    <option value="technical">Technical Support</option>
+                                    <option value="partnership">Partnership Opportunity</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <label for="subject" class="form-label absolute left-6 -top-2 text-edu-dark text-sm bg-white px-2">
+                                    What can we help you with? *
+                                </label>
+                            </div>
+                            
+                            <!-- Message -->
+                            <div class="relative">
+                                <textarea id="message" name="message" rows="6" required 
+                                          class="form-input w-full px-6 py-4 rounded-xl text-edu-deep placeholder-transparent resize-none"
+                                          placeholder="Tell us about your project..."></textarea>
+                                <label for="message" class="form-label absolute left-6 top-4 text-edu-dark transition-all pointer-events-none">
+                                    Your Message *
+                                </label>
+                            </div>
+                            
+                            <!-- Checkbox -->
+                            <div class="flex items-start space-x-3">
+                                <input type="checkbox" id="newsletter" name="newsletter" 
+                                       class="mt-1.5 w-5 h-5 text-edu-beige border-2 border-edu-light rounded focus:ring-edu-beige">
+                                <label for="newsletter" class="text-edu-dark text-sm leading-relaxed">
+                                    I'd like to receive updates about EduSauti's latest features and educational content. 
+                                    You can unsubscribe at any time.
+                                </label>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <button type="submit" id="submit-btn" 
+                                    class="w-full bg-gradient-to-r from-edu-beige to-edu-accent text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-edu-dark hover:to-edu-beige transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                                <span id="submit-text">
+                                    <i class="fas fa-paper-plane mr-2"></i>Send Message
+                                </span>
+                                <span id="loading-text" class="hidden">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i>Sending...
+                                </span>
+                            </button>
+                        </form>
+                        
+                        <!-- Success Message -->
+                        <div id="success-message" class="hidden text-center py-8">
+                            <svg class="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                                <circle class="success-checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                                <path class="success-checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                            </svg>
+                            <h3 class="text-2xl font-bold text-green-600 mb-2">Message Sent Successfully!</h3>
+                            <p class="text-edu-dark">Thank you for contacting us. We'll get back to you within 24 hours.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -498,20 +1007,20 @@
                         <div class="text-2xl">🎓</div>
                         <span class="text-xl font-bold">EduSauti</span>
                     </div>
-                    <p class="text-edu-light max-w-md">
+                    <p class="text-edu-light max-w-md mb-6">
                         Empowering education through AI-powered voice summaries and interactive learning experiences.
                     </p>
-                    <div class="flex space-x-4 mt-6">
-                        <a href="#" class="text-edu-light hover:text-white transition-colors">
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-edu-light hover:text-white transition-colors" aria-label="Twitter">
                             <i class="fab fa-twitter text-xl"></i>
                         </a>
-                        <a href="#" class="text-edu-light hover:text-white transition-colors">
+                        <a href="#" class="text-edu-light hover:text-white transition-colors" aria-label="LinkedIn">
                             <i class="fab fa-linkedin text-xl"></i>
                         </a>
-                        <a href="#" class="text-edu-light hover:text-white transition-colors">
+                        <a href="#" class="text-edu-light hover:text-white transition-colors" aria-label="YouTube">
                             <i class="fab fa-youtube text-xl"></i>
                         </a>
-                        <a href="#" class="text-edu-light hover:text-white transition-colors">
+                        <a href="#" class="text-edu-light hover:text-white transition-colors" aria-label="Instagram">
                             <i class="fab fa-instagram text-xl"></i>
                         </a>
                     </div>
@@ -520,8 +1029,8 @@
                 <div>
                     <h4 class="font-semibold mb-4">Product</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-edu-light hover:text-white transition-colors">Features</a></li>
-                        <li><a href="#" class="text-edu-light hover:text-white transition-colors">Pricing</a></li>
+                        <li><a href="#features" class="text-edu-light hover:text-white transition-colors">Features</a></li>
+                        <li><a href="#pricing" class="text-edu-light hover:text-white transition-colors">Pricing</a></li>
                         <li><a href="#" class="text-edu-light hover:text-white transition-colors">API</a></li>
                         <li><a href="#" class="text-edu-light hover:text-white transition-colors">Integrations</a></li>
                     </ul>
@@ -531,7 +1040,7 @@
                     <h4 class="font-semibold mb-4">Support</h4>
                     <ul class="space-y-2">
                         <li><a href="#" class="text-edu-light hover:text-white transition-colors">Help Center</a></li>
-                        <li><a href="#" class="text-edu-light hover:text-white transition-colors">Contact Us</a></li>
+                        <li><a href="#contact" class="text-edu-light hover:text-white transition-colors">Contact Us</a></li>
                         <li><a href="#" class="text-edu-light hover:text-white transition-colors">Privacy Policy</a></li>
                         <li><a href="#" class="text-edu-light hover:text-white transition-colors">Terms of Service</a></li>
                     </ul>
@@ -540,34 +1049,363 @@
             
             <div class="border-t border-edu-light mt-12 pt-8 text-center">
                 <p class="text-edu-light">
-                    &copy;
-                    <script>document.write(new Date().getFullYear())</script> EduSauti. All rights reserved.
-                </p>
-                <p class="text-sm text-edu-light mt-2">
-                    Built with ❤️ by the EduSauti Team
+                    &copy; <span id="current-year"></span> EduSauti. All rights reserved.
                 </p>
             </div>
         </div>
     </footer>
+
+    <!-- Demo Modal -->
+    <div id="demo-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-96 overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-edu-deep">EduSauti Demo</h3>
+                    <button id="close-modal" class="text-edu-dark hover:text-edu-deep">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="aspect-video bg-edu-cream rounded-lg flex items-center justify-center">
+                    <div class="text-center">
+                        <i class="fas fa-play-circle text-6xl text-edu-beige mb-4"></i>
+                        <p class="text-edu-dark">Demo video would play here</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
     <script>
-        // Mobile menu toggle
-        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
+        // Page loader
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('page-loader').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('page-loader').style.display = 'none';
+                }, 300);
+            }, 500);
         });
 
-        // Scroll reveal effect
-        const scrollRevealElements = document.querySelectorAll('.scroll-reveal');
-        const revealOnScroll = () => {
-            scrollRevealElements.forEach(el => {
-                const rect = el.getBoundingClientRect();
-                if (rect.top < window.innerHeight && rect.bottom > 0) {
-                    el.classList.add('revealed');
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when clicking on links
+        document.querySelectorAll('.mobile-menu-link').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.add('hidden');
+            });
+        });
+
+        // Scroll reveal animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
                 }
             });
-        };
-        window.addEventListener('scroll', revealOnScroll);
-        revealOnScroll(); // Initial check
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Counter animation
+        function animateCounter(element) {
+            const target = parseInt(element.getAttribute('data-target'));
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                
+                if (target === 99) {
+                    element.textContent = Math.floor(current) + '%';
+                } else if (target >= 1000) {
+                    element.textContent = (Math.floor(current / 1000)) + 'K+';
+                } else {
+                    element.textContent = Math.floor(current);
+                }
+            }, 16);
+        }
+
+        // Start counter animation when in view
+        const counterObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        });
+
+        document.querySelectorAll('.counter').forEach(counter => {
+            counterObserver.observe(counter);
+        });
+
+        // Typing animation
+        function typeWriter(element, text, speed = 100) {
+            let i = 0;
+            element.textContent = '';
+            
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        // Start typing animation after page load
+        setTimeout(() => {
+            const typingElement = document.getElementById('typing-text');
+            if (typingElement) {
+                typeWriter(typingElement, 'Learning Experience', 150);
+            }
+        }, 1000);
+
+        // Demo modal
+        document.getElementById('demo-btn').addEventListener('click', function() {
+            document.getElementById('demo-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
+
+        document.getElementById('schedule-demo-btn').addEventListener('click', function() {
+            document.getElementById('demo-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
+
+        document.getElementById('close-modal').addEventListener('click', function() {
+            document.getElementById('demo-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('demo-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Demo audio player
+        let isPlaying = false;
+        let currentTime = 154; // 2:34 in seconds
+        const totalTime = 432; // 7:12 in seconds
+
+        document.getElementById('demo-play-btn').addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            const progressBar = document.getElementById('demo-progress');
+            const timeDisplay = document.getElementById('current-time');
+
+            if (!isPlaying) {
+                isPlaying = true;
+                icon.classList.remove('fa-play');
+                icon.classList.add('fa-pause');
+                
+                // Simulate audio progress
+                const interval = setInterval(() => {
+                    if (isPlaying && currentTime < totalTime) {
+                        currentTime += 1;
+                        const progress = (currentTime / totalTime) * 100;
+                        progressBar.style.width = progress + '%';
+                        
+                        const minutes = Math.floor(currentTime / 60);
+                        const seconds = currentTime % 60;
+                        timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    } else {
+                        clearInterval(interval);
+                        isPlaying = false;
+                        icon.classList.remove('fa-pause');
+                        icon.classList.add('fa-play');
+                    }
+                }, 1000);
+            } else {
+                isPlaying = false;
+                icon.classList.remove('fa-pause');
+                icon.classList.add('fa-play');
+            }
+        });
+
+        // Back to top button
+        const backToTopBtn = document.getElementById('back-to-top');
+
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.remove('translate-y-16', 'opacity-0');
+                backToTopBtn.classList.add('translate-y-0', 'opacity-100');
+            } else {
+                backToTopBtn.classList.add('translate-y-16', 'opacity-0');
+                backToTopBtn.classList.remove('translate-y-0', 'opacity-100');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Contact form
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+            submitBtn.disabled = true;
+            
+            // Simulate form submission
+            setTimeout(() => {
+                alert('Thank you for your message! We\'ll get back to you soon.');
+                this.reset();
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Feature cards hover effect
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Pricing cards hover effect
+        document.querySelectorAll('.pricing-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+                this.style.boxShadow = '0 25px 50px rgba(153, 135, 111, 0.3)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.1)';
+            });
+        });
+
+        // Set current year in footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Keyboard accessibility
+        document.addEventListener('keydown', function(e) {
+            // Close modal with Escape key
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('demo-modal');
+                if (!modal.classList.contains('hidden')) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+                
+                // Close mobile menu with Escape key
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            }
+        });
+
+        // Performance optimization: Lazy load images
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src || img.src;
+                        img.classList.remove('loading');
+                        observer.unobserve(img);
+                    }
+                });
+            });
+
+            document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+                imageObserver.observe(img);
+            });
+        }
+
+        // Error handling for images
+        document.querySelectorAll('img').forEach(img => {
+            img.addEventListener('error', function() {
+                this.style.display = 'none';
+            });
+        });
+
+        // Analytics tracking (placeholder)
+        function trackEvent(category, action, label) {
+            // Integration with analytics service would go here
+            console.log('Event tracked:', { category, action, label });
+        }
+
+        // Track button clicks
+        document.querySelectorAll('button, a[href^="#"]').forEach(element => {
+            element.addEventListener('click', function() {
+                const text = this.textContent.trim();
+                trackEvent('User Interaction', 'Click', text);
+            });
+        });
+    </script>
+
+    <!-- Schema.org structured data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "EduSauti",
+        "description": "AI-powered learning platform that transforms documents into interactive voice summaries with real-time Q&A",
+        "url": "https://edusauti.com",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free tier available"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "1250"
+        }
+    }
     </script>
 </body>
 </html>
