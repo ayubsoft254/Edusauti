@@ -21,7 +21,7 @@ class User(AbstractUser):
     # Subscription and billing
     subscription_tier = models.CharField(
         max_length=20, 
-        choices=SUBSCRIPTION_TIERS, 
+        choices=SUBSCRIPTION_TIERS,  
         default='free'
     )
     subscription_start_date = models.DateTimeField(null=True, blank=True)

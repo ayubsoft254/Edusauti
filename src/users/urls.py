@@ -1,8 +1,6 @@
 from django.urls import path, include
 from . import views
 
-app_name = 'ECusers'
-
 # Web URLs
 web_urlpatterns = [
     path('dashboard/', views.dashboard_view, name='dashboard'),
