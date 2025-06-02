@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduSauti - AI-Powered Learning Revolution</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'edu-beige': '#99876f',
+                        'edu-light': '#b5a28a',
+                        'edu-dark': '#7d6b57',
+                        'edu-cream': '#f5f3f0',
+                        'edu-accent': '#d4a574',
+                        'edu-deep': '#5c5246',
+                    },
+                    fontFamily: {
+                        'display': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'fadeInUp': 'fadeInUp 0.8s ease-out',
+                        'slideInLeft': 'slideInLeft 0.8s ease-out',
+                        'slideInRight': 'slideInRight 0.8s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideInLeft: {
+                            '0%': { opacity: '0', transform: 'translateX(-30px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' }
+                        },
+                        slideInRight: {
+                            '0%': { opacity: '0', transform: 'translateX(30px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #f5f3f0 0%, #e8e0d7 50%, #d4c7b8 100%);
+        }
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(153, 135, 111, 0.2);
+        }
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="font-display antialiased">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-effect">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="text-2xl">🎓</div>
+                    <span class="text-xl font-bold text-edu-deep">EduSauti</span>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-edu-deep hover:text-edu-beige transition-colors">Features</a>
+                    <a href="#pricing" class="text-edu-deep hover:text-edu-beige transition-colors">Pricing</a>
+                    <a href="#about" class="text-edu-deep hover:text-edu-beige transition-colors">About</a>
+                    <a href="#login" class="text-edu-deep hover:text-edu-beige transition-colors">Login</a>
+                    <button class="bg-edu-beige text-white px-6 py-2 rounded-full hover:bg-edu-dark transition-all hover-lift">
+                        Get Started
+                    </button>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden" id="mobile-menu-btn">
+                    <i class="fas fa-bars text-edu-deep text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="md:hidden hidden bg-white shadow-lg" id="mobile-menu">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="#features" class="block py-2 text-edu-deep hover:text-edu-beige">Features</a>
+                <a href="#pricing" class="block py-2 text-edu-deep hover:text-edu-beige">Pricing</a>
+                <a href="#about" class="block py-2 text-edu-deep hover:text-edu-beige">About</a>
+                <a href="#login" class="block py-2 text-edu-deep hover:text-edu-beige">Login</a>
+                <button class="w-full mt-2 bg-edu-beige text-white px-6 py-2 rounded-full hover:bg-edu-dark transition-colors">
+                    Get Started
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg min-h-screen flex items-center pt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Left Content -->
+                <div class="space-y-8">
+                    <div class="animate-fadeInUp">
+                        <h1 class="text-5xl md:text-6xl font-bold text-edu-deep leading-tight">
+                            Transform Your
+                            <span class="text-edu-beige block">Learning Experience</span>
+                        </h1>
+                        <p class="text-xl text-edu-dark mt-6 leading-relaxed">
+                            Upload documents, get AI-powered voice summaries, and ask questions in real-time. 
+                            Experience education like never before with EduSauti.
+                        </p>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 animate-slideInLeft">
+                        <button class="bg-edu-beige text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-edu-dark transition-all hover-lift shadow-lg">
+                            <i class="fas fa-rocket mr-2"></i>Start Learning Now
+                        </button>
+                        <button class="border-2 border-edu-beige text-edu-beige px-8 py-4 rounded-full text-lg font-semibold hover:bg-edu-beige hover:text-white transition-all hover-lift">
+                            <i class="fas fa-play mr-2"></i>Watch Demo
+                        </button>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="grid grid-cols-3 gap-6 pt-8 animate-fadeInUp">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-edu-beige">10K+</div>
+                            <div class="text-edu-dark">Documents Processed</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-edu-beige">50K+</div>
+                            <div class="text-edu-dark">Questions Answered</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-edu-beige">99%</div>
+                            <div class="text-edu-dark">Satisfaction Rate</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Content - Interactive Demo -->
+                <div class="animate-slideInRight">
+                    <div class="relative">
+                        <!-- Main Device -->
+                        <div class="bg-white rounded-3xl shadow-2xl p-8 hover-lift">
+                            <div class="space-y-6">
+                                <!-- Header -->
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-xl font-semibold text-edu-deep">AI Voice Summary</h3>
+                                    <div class="flex space-x-2">
+                                        <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                                        <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                        <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Document Preview -->
+                                <div class="bg-edu-cream rounded-xl p-4">
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <i class="fas fa-file-pdf text-edu-beige text-2xl"></i>
+                                        <div>
+                                            <div class="font-semibold text-edu-deep">Research Paper.pdf</div>
+                                            <div class="text-sm text-edu-dark">Processing complete</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Audio Player -->
+                                    <div class="bg-white rounded-lg p-4">
+                                        <div class="flex items-center space-x-4">
+                                            <button class="bg-edu-beige text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-edu-dark transition-colors">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                            <div class="flex-1">
+                                                <div class="bg-edu-cream h-2 rounded-full overflow-hidden">
+                                                    <div class="bg-edu-beige h-full w-1/3 rounded-full animate-pulse-slow"></div>
+                                                </div>
+                                                <div class="flex justify-between text-sm text-edu-dark mt-1">
+                                                    <span>2:34</span>
+                                                    <span>7:12</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Q&A Section -->
+                                <div class="space-y-3">
+                                    <div class="bg-blue-50 rounded-lg p-3">
+                                        <div class="text-sm text-blue-600 font-medium">Question asked at 2:15</div>
+                                        <div class="text-edu-deep">"Can you explain the methodology?"</div>
+                                    </div>
+                                    <div class="bg-green-50 rounded-lg p-3">
+                                        <div class="text-sm text-green-600 font-medium">AI Answer</div>
+                                        <div class="text-edu-deep">"The study used a mixed-methods approach combining..."</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Floating Elements -->
+                        <div class="absolute -top-4 -right-4 bg-edu-beige text-white p-3 rounded-full animate-float">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <div class="absolute -bottom-4 -left-4 bg-edu-accent text-white p-3 rounded-full animate-float" style="animation-delay: 1s;">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-4xl font-bold text-edu-deep mb-4">Powerful Features for Modern Learning</h2>
+                <p class="text-xl text-edu-dark max-w-3xl mx-auto">
+                    Discover how EduSauti transforms the way you consume and interact with educational content
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal">
+                    <div class="bg-edu-beige text-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-upload text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-edu-deep mb-4">Smart Document Upload</h3>
+                    <p class="text-edu-dark">
+                        Upload PDFs, DOCX, and text files. Our AI instantly extracts and processes content with high accuracy.
+                    </p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal">
+                    <div class="bg-edu-beige text-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-volume-up text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-edu-deep mb-4">AI Voice Summaries</h3>
+                    <p class="text-edu-dark">
+                        Get teacher-quality voice summaries that make complex topics easy to understand and engaging.
+                    </p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal">
+                    <div class="bg-edu-beige text-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-comments text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-edu-deep mb-4">Real-Time Q&A</h3>
+                    <p class="text-edu-dark">
+                        Ask questions during audio playback and get instant, contextual answers from our AI teacher.
+                    </p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal">
+                    <div class="bg-edu-beige text-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-users text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-edu-deep mb-4">Collaborative Learning</h3>
+                    <p class="text-edu-dark">
+                        Share documents with classmates and teachers. Perfect for group studies and classroom discussions.
+                    </p>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal">
+                    <div class="bg-edu-beige text-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-mobile-alt text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-edu-deep mb-4">Multi-Platform Access</h3>
+                    <p class="text-edu-dark">
+                        Access your learning materials anywhere, anytime. Seamless experience across all devices.
+                    </p>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="bg-edu-cream rounded-2xl p-8 hover-lift scroll-reveal">
+                    <div class="bg-edu-beige text-white w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-edu-deep mb-4">Progress Tracking</h3>
+                    <p class="text-edu-dark">
+                        Monitor your learning progress with detailed analytics and personalized recommendations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 gradient-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 scroll-reveal">
+                <h2 class="text-4xl font-bold text-edu-deep mb-4">Choose Your Learning Journey</h2>
+                <p class="text-xl text-edu-dark max-w-3xl mx-auto">
+                    Flexible pricing plans designed to meet every learner's needs
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Free Tier -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift scroll-reveal">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-edu-deep mb-2">Starter Learn</h3>
+                        <div class="text-4xl font-bold text-edu-beige mb-4">Free</div>
+                        <p class="text-edu-dark mb-6">Perfect for trying out EduSauti</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            5 documents/month
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Basic voice summaries
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            5 questions per document
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Text summary view
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-edu-cream text-edu-beige py-3 rounded-full font-semibold hover:bg-edu-beige hover:text-white transition-all">
+                        Get Started Free
+                    </button>
+                </div>
+                
+                <!-- Pro Tier -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift scroll-reveal relative">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-edu-beige text-white px-4 py-1 rounded-full text-sm font-semibold">Most Popular</span>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-edu-deep mb-2">Smart Learn</h3>
+                        <div class="text-4xl font-bold text-edu-beige mb-4">$12<span class="text-lg">/mo</span></div>
+                        <p class="text-edu-dark mb-6">For serious learners</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            50 documents/month
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            5 premium voices
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Unlimited Q&A
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Real-time chat
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Q&A history saved
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-edu-beige text-white py-3 rounded-full font-semibold hover:bg-edu-dark transition-all">
+                        Start Pro Trial
+                    </button>
+                </div>
+                
+                <!-- Edu Pack -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift scroll-reveal">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-edu-deep mb-2">Classroom Learn</h3>
+                        <div class="text-4xl font-bold text-edu-beige mb-4">$49<span class="text-lg">/mo</span></div>
+                        <p class="text-edu-dark mb-6">For teachers & classrooms</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            200 documents/month
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Up to 30 users
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Teacher dashboard
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Export to PDF/audio
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Priority support
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-edu-cream text-edu-beige py-3 rounded-full font-semibold hover:bg-edu-beige hover:text-white transition-all">
+                        Contact Sales
+                    </button>
+                </div>
+                
+                <!-- Enterprise -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift scroll-reveal">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-edu-deep mb-2">Institution Learn</h3>
+                        <div class="text-4xl font-bold text-edu-beige mb-4">Custom</div>
+                        <p class="text-edu-dark mb-6">For large organizations</p>
+                    </div>
+                    
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Unlimited everything
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Custom voices
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            API access
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            White-label options
+                        </li>
+                        <li class="flex items-center text-edu-dark">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            SLA support
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-edu-cream text-edu-beige py-3 rounded-full font-semibold hover:bg-edu-beige hover:text-white transition-all">
+                        Get Quote
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-edu-beige">
+        <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8 scroll-reveal">
+            <h2 class="text-4xl font-bold text-white mb-6">Ready to Transform Your Learning?</h2>
+            <p class="text-xl text-edu-cream mb-8 max-w-2xl mx-auto">
+                Join thousands of students and educators who are already experiencing the future of education with EduSauti.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button class="bg-white text-edu-beige px-8 py-4 rounded-full text-lg font-semibold hover:bg-edu-cream transition-all hover-lift shadow-lg">
+                    <i class="fas fa-rocket mr-2"></i>Start Your Free Trial
+                </button>
+                <button class="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-edu-beige transition-all hover-lift">
+                    <i class="fas fa-calendar mr-2"></i>Schedule Demo
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-edu-deep text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="text-2xl">🎓</div>
+                        <span class="text-xl font-bold">EduSauti</span>
+                    </div>
+                    <p class="text-edu-light max-w-md">
+                        Empowering education through AI-powered voice summaries and interactive learning experiences.
+                    </p>
+                    <div class="flex space-x-4 mt-6">
+                        <a href="#" class="text-edu-light hover:text-white transition-colors">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-edu-light hover:text-white transition-colors">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-edu-light hover:text-white transition-colors">
+                            <i class="fab fa-youtube text-xl"></i>
+                        </a>
+                        <a href="#" class="text-edu-light hover:text-white transition-colors">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-edu-light hover:text-white transition-colors">Features</a></li>
+                        <li><a href="#" class="text-edu-light hover:text-white transition-colors">Pricing</a></li>
+                        <li><a href="#" class="text-edu-light hover:text-white transition-colors">API</a></li>
+                        <li><a href="#" class="text-edu-light hover:text-white transition-colors">Integrations</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Support</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-edu-light hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="#" class="text-edu-light hover:text-white transition-colors">Contact Us</a></li>
+                        <li><a href="#" class="text-edu-light hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="text-edu-light hover:text-white transition-colors">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-edu-light mt-12 pt-8 text-center">
+                <p class="text-edu-light">
+                    &copy;
+                    <script>document.write(new Date().getFullYear())</script> EduSauti. All rights reserved.
+                </p>
+                <p class="text-sm text-edu-light mt-2">
+                    Built with ❤️ by the EduSauti Team
+                </p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
+        // Scroll reveal effect
+        const scrollRevealElements = document.querySelectorAll('.scroll-reveal');
+        const revealOnScroll = () => {
+            scrollRevealElements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom > 0) {
+                    el.classList.add('revealed');
+                }
+            });
+        };
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll(); // Initial check
+    </script>
+</body>
+</html>
