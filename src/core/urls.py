@@ -18,16 +18,27 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # Users and authentication
-    path('', include('users.urls')),
+    # Home page
+    path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    
+    # Authentication (allauth)
+    path('accounts/', include('allauth.urls')),
+    
+    # Users app
+    path('profile/', include('users.urls')),
+    
+    # Documents app
+    path('documents/', include('documents.urls')),
     
     # API endpoints
-    path('api/users/', include('users.urls')),
+    path('api/auth/', include('users.urls')),  # User API endpoints
+    path('api/documents/', include('documents.urls')),  # Document API endpoints
     
 ]
 
