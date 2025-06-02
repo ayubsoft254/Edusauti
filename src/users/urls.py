@@ -3,9 +3,9 @@ from . import views
 
 # Web URLs (for /profile/)
 web_urlpatterns = [
-    path('', views.profile_view, name='profile'),
-    path('dashboard/', views.dashboard, name='dashboard'),
-    path('settings/', views.profile_settings, name='settings'),
+    path('', views.ProfileView, name='profile'),
+    path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('settings/', views.settings_view, name='settings'),
     path('subscription/', views.subscription_view, name='subscription'),
     path('billing/', views.billing_view, name='billing'),
 ]

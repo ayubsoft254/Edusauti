@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count, Sum, Avg
 from django.utils.html import format_html
 from .models import AIServiceLog, AIServiceUsage, ServiceConfiguration
 
@@ -164,15 +165,32 @@ class ServiceConfigurationAdmin(admin.ModelAdmin):
     )
 
 
-# Custom admin views for analytics
+# Custom admin view for analytics - create a simple proxy model
+class AIServiceAnalytics(AIServiceLog):
+    """Proxy model for analytics view"""
+    class Meta:
+        proxy = True
+        verbose_name = "AI Service Analytics"
+        verbose_name_plural = "AI Service Analytics"
+
+
+@admin.register(AIServiceAnalytics)
 class AIServiceAnalyticsAdmin(admin.ModelAdmin):
     """Custom admin for viewing AI service analytics"""
     
     change_list_template = 'admin/ai_services/analytics_changelist.html'
     
+    def has_add_permission(self, request):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
+    
     def changelist_view(self, request, extra_context=None):
         # Get usage statistics
-        from django.db.models import Count, Sum, Avg
         from datetime import datetime, timedelta
         
         # Calculate date ranges
@@ -224,6 +242,3 @@ class AIServiceAnalyticsAdmin(admin.ModelAdmin):
         })
         
         return super().changelist_view(request, extra_context=extra_context)
-
-# Register the analytics admin (you can access it via URL)
-admin.site.register(AIServiceLog.__class__, AIServiceAnalyticsAdmin)
