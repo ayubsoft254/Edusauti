@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, UpdateView
 from django.utils import timezone
+from django.db import models
 
 # DRF imports
 from rest_framework import generics, status, permissions
@@ -15,13 +16,14 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.parsers import MultiPartParser, FormParser
 
 # Local imports
-from .models import User, UserProfile, SubscriptionHistory
-from .forms import UserProfileForm, ExtendedProfileForm, SubscriptionUpgradeForm
+from .models import User, UserProfile, SubscriptionHistory, BillingProfile
+from .forms import UserProfileForm, ExtendedProfileForm, SubscriptionUpgradeForm, BillingProfileForm
 from .serializers import (
     UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer,
     UserProfileUpdateSerializer, ExtendedUserProfileSerializer,
     SubscriptionHistorySerializer, SubscriptionUpgradeSerializer,
-    UsageStatsSerializer, PasswordChangeSerializer, AccountDeactivationSerializer
+    UsageStatsSerializer, PasswordChangeSerializer, AccountDeactivationSerializer,
+    BillingProfileSerializer
 )
 
 
@@ -37,7 +39,7 @@ def dashboard_view(request):
     
     # Calculate usage statistics
     context = {
-        'user': user,
+        'user': request.user,
         'recent_documents': recent_documents,
         'documents_used': user.documents_uploaded_this_month,
         'documents_limit': user.monthly_document_limit,
@@ -110,7 +112,7 @@ def subscription_view(request):
     subscription_history = SubscriptionHistory.objects.filter(user=user).order_by('-created_at')
     
     context = {
-        'user': user,
+        'user': request.user,
         'subscription_history': subscription_history,
         'upgrade_form': SubscriptionUpgradeForm(user=user),
     }
@@ -355,7 +357,7 @@ def download_invoice(request, invoice_id):
         invoice_data = [
             ['Invoice Number:', f'INV-{subscription.id:06d}'],
             ['Date:', subscription.created_at.strftime('%B %d, %Y')],
-            ['Customer:', f'{user.get_full_name() or user.email}'],
+            ['Customer:', f'{request.user.get_full_name() or request.user.email}'],
             ['Subscription:', subscription.get_tier_display()],
             ['Amount:', f'${subscription.amount_paid:.2f}'],
             ['Status:', 'Paid' if subscription.is_active else 'Inactive'],
