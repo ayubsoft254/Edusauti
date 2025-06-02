@@ -1,11 +1,9 @@
 import os
 import logging
-import tempfile
 from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
 from celery import shared_task
-from celery.exceptions import Retry
 from .models import Document, AudioSummary, Question, ProcessingLog
 from ai_services.document_intelligence import DocumentIntelligenceService
 from ai_services.openai_service import OpenAIService

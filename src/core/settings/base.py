@@ -197,3 +197,28 @@ USE_TZ = True
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Celery Configuration
+CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
+
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TIMEZONE = 'Africa/Nairobi'
+
+# Celery beat schedule for periodic tasks
+CELERY_BEAT_SCHEDULE = {
+    'cleanup-failed-documents': {
+        'task': 'documents.tasks.cleanup_failed_documents',
+        'schedule': 3600.0,  # Run every hour
+    },
+    'cleanup-old-files': {
+        'task': 'documents.tasks.cleanup_old_files',
+        'schedule': 86400.0,  # Run daily
+    },
+    'generate-usage-analytics': {
+        'task': 'documents.tasks.generate_usage_analytics',
+        'schedule': 43200.0,  # Run twice daily
+    },
+}
