@@ -160,7 +160,7 @@ def usage_stats_view(request):
     profile = getattr(user, 'profile', None)
     
     context = {
-        'user': user,
+        'user': request.user,
         'profile': profile,
         'usage_percentage_docs': (user.documents_uploaded_this_month / user.monthly_document_limit * 100) if user.monthly_document_limit > 0 else 0,
         'usage_percentage_questions': (user.questions_asked_this_month / user.monthly_question_limit * 100) if user.monthly_question_limit > 0 else 0,
