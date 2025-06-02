@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-from django.db import models
 from ai_services.document_intelligence import DocumentIntelligenceService
 from ai_services.openai_service import OpenAIService
 from ai_services.speech_service import SpeechService
