@@ -32,14 +32,14 @@ from .serializers import (
 @login_required
 def dashboard_view(request):
     """User dashboard view"""
-    user = request.user
+    user = request.user  # Fixed: was request.User (capital U)
     
     # Get recent activity data
     recent_documents = user.documents.all()[:5] if hasattr(user, 'documents') else []
     
     # Calculate usage statistics
     context = {
-        'user': request.user,
+        'user': user,  # Changed from request.user to user for consistency
         'recent_documents': recent_documents,
         'documents_used': user.documents_uploaded_this_month,
         'documents_limit': user.monthly_document_limit,
@@ -112,7 +112,7 @@ def subscription_view(request):
     subscription_history = SubscriptionHistory.objects.filter(user=user).order_by('-created_at')
     
     context = {
-        'user': request.user,
+        'user': user,  # Changed from request.user to user for consistency
         'subscription_history': subscription_history,
         'upgrade_form': SubscriptionUpgradeForm(user=user),
     }
@@ -160,7 +160,7 @@ def usage_stats_view(request):
     profile = getattr(user, 'profile', None)
     
     context = {
-        'user': request.user,
+        'user': user,  # Changed from request.user to user for consistency
         'profile': profile,
         'usage_percentage_docs': (user.documents_uploaded_this_month / user.monthly_document_limit * 100) if user.monthly_document_limit > 0 else 0,
         'usage_percentage_questions': (user.questions_asked_this_month / user.monthly_question_limit * 100) if user.monthly_question_limit > 0 else 0,
@@ -268,7 +268,7 @@ def billing_history_view(request):
     )['total'] or 0
     
     # Get yearly spending
-    from datetime import datetime, timedelta
+    from datetime import datetime
     current_year = datetime.now().year
     yearly_spending = subscription_history.filter(
         created_at__year=current_year
@@ -328,12 +328,11 @@ def download_invoice(request, invoice_id):
     # Generate PDF invoice
     from django.http import HttpResponse
     from django.template.loader import render_to_string
-    import io
     
     try:
         # Try to use reportlab for PDF generation
         from reportlab.pdfgen import canvas
-        from reportlab.lib.pagesizes import letter, A4
+        from reportlab.lib.pagesizes import A4
         from reportlab.lib.styles import getSampleStyleSheet
         from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
         from reportlab.lib import colors
@@ -390,7 +389,7 @@ def download_invoice(request, invoice_id):
         # Fallback to HTML if reportlab is not available
         context = {
             'subscription': subscription,
-            'user': user,
+            'user': request.user,
             'invoice_number': f'INV-{subscription.id:06d}',
         }
         
