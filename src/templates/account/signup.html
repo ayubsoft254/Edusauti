@@ -61,6 +61,15 @@
 .strength-weak { background-color: #ef4444; }
 .strength-medium { background-color: #f59e0b; }
 .strength-strong { background-color: #10b981; }
+
+.field-error {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+}
+
+.field-success {
+    border-color: #10b981 !important;
+}
 {% endblock %}
 
 {% block content %}
@@ -81,50 +90,51 @@
 
         <!-- Main Signup Card -->
         <div class="auth-card rounded-2xl p-8 scroll-reveal">
+            <!-- Debug Info (remove in production) -->
+            {% if settings.DEBUG %}
+                <div class="mb-4 p-2 bg-yellow-100 rounded text-xs">
+                    <strong>Debug Info:</strong><br>
+                    Available form fields: 
+                    {% for field in form %}
+                        {{ field.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Form Errors at Top -->
+            {% if form.non_field_errors %}
+                <div class="mb-6 rounded-lg bg-red-50 p-4 border border-red-200">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-red-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">
+                                Please fix the following errors:
+                            </h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <ul class="list-disc pl-5 space-y-1">
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
             <!-- Signup Form -->
             <form method="post" class="space-y-6" id="signup-form">
                 {% csrf_token %}
                 
-                <!-- Name Fields -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="form-floating">
-                        <input
-                            id="{{ form.first_name.id_for_label }}"
-                            name="{{ form.first_name.name }}"
-                            type="text"
-                            class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
-                            placeholder=" "
-                            required
-                            {% if form.first_name.value %}value="{{ form.first_name.value }}"{% endif %}
-                        >
-                        <label for="{{ form.first_name.id_for_label }}" class="form-label">
-                            First name
-                        </label>
-                    </div>
-                    
-                    <div class="form-floating">
-                        <input
-                            id="{{ form.last_name.id_for_label }}"
-                            name="{{ form.last_name.name }}"
-                            type="text"
-                            class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
-                            placeholder=" "
-                            required
-                            {% if form.last_name.value %}value="{{ form.last_name.value }}"{% endif %}
-                        >
-                        <label for="{{ form.last_name.id_for_label }}" class="form-label">
-                            Last name
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Email Field -->
+                <!-- Email Field (always present in allauth) -->
                 <div class="form-floating">
                     <input
                         id="{{ form.email.id_for_label }}"
                         name="{{ form.email.name }}"
                         type="email"
-                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
+                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white {% if form.email.errors %}field-error{% endif %}"
                         placeholder=" "
                         required
                         {% if form.email.value %}value="{{ form.email.value }}"{% endif %}
@@ -144,13 +154,69 @@
                     {% endif %}
                 </div>
 
+                <!-- First Name (if available) -->
+                {% if form.first_name %}
+                <div class="form-floating">
+                    <input
+                        id="{{ form.first_name.id_for_label }}"
+                        name="{{ form.first_name.name }}"
+                        type="text"
+                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white {% if form.first_name.errors %}field-error{% endif %}"
+                        placeholder=" "
+                        {% if form.first_name.field.required %}required{% endif %}
+                        {% if form.first_name.value %}value="{{ form.first_name.value }}"{% endif %}
+                    >
+                    <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                        First name{% if form.first_name.field.required %} *{% endif %}
+                    </label>
+                    {% if form.first_name.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {% for error in form.first_name.errors %}
+                                <p class="flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Last Name (if available) -->
+                {% if form.last_name %}
+                <div class="form-floating">
+                    <input
+                        id="{{ form.last_name.id_for_label }}"
+                        name="{{ form.last_name.name }}"
+                        type="text"
+                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white {% if form.last_name.errors %}field-error{% endif %}"
+                        placeholder=" "
+                        {% if form.last_name.field.required %}required{% endif %}
+                        {% if form.last_name.value %}value="{{ form.last_name.value }}"{% endif %}
+                    >
+                    <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                        Last name{% if form.last_name.field.required %} *{% endif %}
+                    </label>
+                    {% if form.last_name.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {% for error in form.last_name.errors %}
+                                <p class="flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
                 <!-- Password Fields -->
                 <div class="form-floating">
                     <input
                         id="{{ form.password1.id_for_label }}"
                         name="{{ form.password1.name }}"
                         type="password"
-                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
+                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white {% if form.password1.errors %}field-error{% endif %}"
                         placeholder=" "
                         required
                     >
@@ -163,6 +229,16 @@
                     <p class="mt-1 text-xs text-gray-500" id="password-help">
                         Password strength: <span id="strength-text">Enter a password</span>
                     </p>
+                    {% if form.password1.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {% for error in form.password1.errors %}
+                                <p class="flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="form-floating">
@@ -170,7 +246,7 @@
                         id="{{ form.password2.id_for_label }}"
                         name="{{ form.password2.name }}"
                         type="password"
-                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
+                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white {% if form.password2.errors %}field-error{% endif %}"
                         placeholder=" "
                         required
                     >
@@ -180,55 +256,50 @@
                     <div class="mt-1 text-xs" id="password-match">
                         <span class="text-gray-500">Passwords must match</span>
                     </div>
+                    {% if form.password2.errors %}
+                        <div class="mt-1 text-sm text-red-600">
+                            {% for error in form.password2.errors %}
+                                <p class="flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
-                <!-- Optional Fields -->
-                <div class="space-y-4">
-                    <div class="form-floating">
-                        <input
-                            id="{{ form.organization.id_for_label }}"
-                            name="{{ form.organization.name }}"
-                            type="text"
-                            class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
-                            placeholder=" "
-                            {% if form.organization.value %}value="{{ form.organization.value }}"{% endif %}
-                        >
-                        <label for="{{ form.organization.id_for_label }}" class="form-label">
-                            Organization (Optional)
-                        </label>
-                    </div>
-                    
-                    <div class="form-floating">
-                        <input
-                            id="{{ form.role.id_for_label }}"
-                            name="{{ form.role.name }}"
-                            type="text"
-                            class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
-                            placeholder=" "
-                            {% if form.role.value %}value="{{ form.role.value }}"{% endif %}
-                        >
-                        <label for="{{ form.role.id_for_label }}" class="form-label">
-                            Role/Title (Optional)
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Terms Agreement -->
-                <div class="flex items-start">
-                    <input
-                        id="terms"
-                        name="terms"
-                        type="checkbox"
-                        class="h-4 w-4 text-edu-beige focus:ring-edu-beige border-gray-300 rounded mt-1"
-                        required
-                    >
-                    <label for="terms" class="ml-3 text-sm text-gray-600">
-                        I agree to the 
-                        <a href="#" class="text-edu-beige hover:text-edu-dark font-medium">Terms of Service</a>
-                        and 
-                        <a href="#" class="text-edu-beige hover:text-edu-dark font-medium">Privacy Policy</a>
-                    </label>
-                </div>
+                <!-- Any additional fields -->
+                {% for field in form %}
+                    {% if field.name not in 'email,first_name,last_name,password1,password2' %}
+                        <div class="form-floating">
+                            <input
+                                id="{{ field.id_for_label }}"
+                                name="{{ field.name }}"
+                                type="{% if field.field.widget.input_type %}{{ field.field.widget.input_type }}{% else %}text{% endif %}"
+                                class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white {% if field.errors %}field-error{% endif %}"
+                                placeholder=" "
+                                {% if field.field.required %}required{% endif %}
+                                {% if field.value %}value="{{ field.value }}"{% endif %}
+                            >
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}{% if field.field.required %} *{% endif %}
+                            </label>
+                            {% if field.errors %}
+                                <div class="mt-1 text-sm text-red-600">
+                                    {% for error in field.errors %}
+                                        <p class="flex items-center">
+                                            <i class="fas fa-exclamation-circle mr-1"></i>
+                                            {{ error }}
+                                        </p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if field.help_text %}
+                                <p class="mt-1 text-xs text-gray-500">{{ field.help_text }}</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
 
                 <!-- Submit Button -->
                 <button
@@ -241,29 +312,6 @@
                         Create your account
                     </span>
                 </button>
-
-                <!-- Form Errors -->
-                {% if form.non_field_errors %}
-                    <div class="rounded-lg bg-red-50 p-4 border border-red-200">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-exclamation-circle text-red-400"></i>
-                            </div>
-                            <div class="ml-3">
-                                <h3 class="text-sm font-medium text-red-800">
-                                    Please fix the following errors:
-                                </h3>
-                                <div class="mt-2 text-sm text-red-700">
-                                    <ul class="list-disc pl-5 space-y-1">
-                                        {% for error in form.non_field_errors %}
-                                            <li>{{ error }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
             </form>
         </div>
 
@@ -282,6 +330,12 @@
 {% endblock %}
 
 {% block extra_js %}
+// Safely get form field IDs
+function getFieldId(fieldName) {
+    const element = document.querySelector(`[name="${fieldName}"]`);
+    return element ? element.id : null;
+}
+
 // Password strength checker
 function checkPasswordStrength(password) {
     let strength = 0;
@@ -307,9 +361,14 @@ function checkPasswordStrength(password) {
 
 // Update password strength indicator
 function updatePasswordStrength() {
-    const password = document.getElementById('{{ form.password1.id_for_label }}').value;
+    const passwordId = getFieldId('password1');
+    if (!passwordId) return;
+    
+    const password = document.getElementById(passwordId).value;
     const strengthFill = document.getElementById('password-strength-fill');
     const strengthText = document.getElementById('strength-text');
+    
+    if (!strengthFill || !strengthText) return;
     
     if (!password) {
         strengthFill.style.width = '0%';
@@ -337,9 +396,16 @@ function updatePasswordStrength() {
 
 // Check password match
 function checkPasswordMatch() {
-    const password1 = document.getElementById('{{ form.password1.id_for_label }}').value;
-    const password2 = document.getElementById('{{ form.password2.id_for_label }}').value;
+    const password1Id = getFieldId('password1');
+    const password2Id = getFieldId('password2');
+    
+    if (!password1Id || !password2Id) return false;
+    
+    const password1 = document.getElementById(password1Id).value;
+    const password2 = document.getElementById(password2Id).value;
     const matchIndicator = document.getElementById('password-match');
+    
+    if (!matchIndicator) return false;
     
     if (!password2) {
         matchIndicator.innerHTML = '<span class="text-gray-500">Passwords must match</span>';
@@ -357,24 +423,50 @@ function checkPasswordMatch() {
 
 // Form validation
 function validateForm() {
-    const firstName = document.getElementById('{{ form.first_name.id_for_label }}').value;
-    const lastName = document.getElementById('{{ form.last_name.id_for_label }}').value;
-    const email = document.getElementById('{{ form.email.id_for_label }}').value;
-    const password1 = document.getElementById('{{ form.password1.id_for_label }}').value;
-    const password2 = document.getElementById('{{ form.password2.id_for_label }}').value;
-    const terms = document.getElementById('terms').checked;
     const submitBtn = document.getElementById('signup-btn');
+    if (!submitBtn) return false;
     
-    const passwordStrength = checkPasswordStrength(password1);
-    const passwordsMatch = checkPasswordMatch();
+    let isValid = true;
+    const requiredFields = ['email', 'password1', 'password2'];
     
-    const isValid = EduSauti.validateRequired(firstName) &&
-                   EduSauti.validateRequired(lastName) &&
-                   EduSauti.validateEmail(email) &&
-                   passwordStrength.strength >= 3 &&
-                   passwordsMatch &&
-                   terms;
+    // Check each required field
+    requiredFields.forEach(fieldName => {
+        const fieldId = getFieldId(fieldName);
+        if (fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field && field.required && !field.value.trim()) {
+                isValid = false;
+            }
+        }
+    });
     
+    // Check email format
+    const emailId = getFieldId('email');
+    if (emailId) {
+        const email = document.getElementById(emailId).value;
+        if (email && !EduSauti.validateEmail(email)) {
+            isValid = false;
+        }
+    }
+    
+    // Check password strength
+    const password1Id = getFieldId('password1');
+    if (password1Id) {
+        const password = document.getElementById(password1Id).value;
+        if (password) {
+            const strength = checkPasswordStrength(password);
+            if (strength.strength < 3) {
+                isValid = false;
+            }
+        }
+    }
+    
+    // Check password match
+    if (!checkPasswordMatch()) {
+        isValid = false;
+    }
+    
+    // Update submit button state
     if (isValid) {
         submitBtn.disabled = false;
         submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -386,39 +478,66 @@ function validateForm() {
     return isValid;
 }
 
-// Event listeners
-document.getElementById('{{ form.password1.id_for_label }}').addEventListener('input', function() {
-    updatePasswordStrength();
-    validateForm();
-});
-
-document.getElementById('{{ form.password2.id_for_label }}').addEventListener('input', function() {
-    checkPasswordMatch();
-    validateForm();
-});
-
-// Add validation to all form fields
-['{{ form.first_name.id_for_label }}', '{{ form.last_name.id_for_label }}', '{{ form.email.id_for_label }}'].forEach(id => {
-    document.getElementById(id).addEventListener('input', validateForm);
-});
-
-document.getElementById('terms').addEventListener('change', validateForm);
-
-// Form submission
-document.getElementById('signup-form').addEventListener('submit', function(e) {
-    if (!validateForm()) {
-        e.preventDefault();
-        EduSauti.showToast('Please fill in all required fields correctly', 'error');
-        return;
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up event listeners for password fields
+    const password1Id = getFieldId('password1');
+    const password2Id = getFieldId('password2');
+    
+    if (password1Id) {
+        document.getElementById(password1Id).addEventListener('input', function() {
+            updatePasswordStrength();
+            validateForm();
+        });
     }
     
-    const submitBtn = document.getElementById('signup-btn');
-    EduSauti.setLoadingState(submitBtn, true);
+    if (password2Id) {
+        document.getElementById(password2Id).addEventListener('input', function() {
+            checkPasswordMatch();
+            validateForm();
+        });
+    }
+    
+    // Set up validation for all form fields
+    const formFields = document.querySelectorAll('#signup-form input');
+    formFields.forEach(field => {
+        field.addEventListener('input', validateForm);
+        field.addEventListener('change', validateForm);
+    });
+    
+    // Form submission handler
+    const form = document.getElementById('signup-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                EduSauti.showToast('Please fill in all required fields correctly', 'error');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('signup-btn');
+            if (submitBtn) {
+                EduSauti.setLoadingState(submitBtn, true);
+            }
+        });
+    }
+    
+    // Initial validation
+    validateForm();
+    
+    // Auto-focus first field
+    const firstField = document.querySelector('#signup-form input:not([type="hidden"])');
+    if (firstField) {
+        firstField.focus();
+    }
 });
 
-// Initial validation
-validateForm();
-
-// Auto-focus first field
-document.getElementById('{{ form.first_name.id_for_label }}').focus();
+// Debug function (remove in production)
+{% if settings.DEBUG %}
+console.log('Available form fields:', [
+    {% for field in form %}
+        '{{ field.name }}'{% if not forloop.last %},{% endif %}
+    {% endfor %}
+]);
+{% endif %}
 {% endblock %}
