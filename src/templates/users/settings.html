@@ -1,0 +1,395 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - EduSauti{% endblock %}
+
+{% block meta_description %}Manage your EduSauti account settings and preferences{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <span class="mx-2 text-gray-400">/</span>
+        <span class="text-gray-600">Settings</span>
+    </li>
+{% endblock %}
+
+{% block extra_css %}
+.settings-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(153, 135, 111, 0.1);
+}
+
+.form-floating {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.form-floating input,
+.form-floating select,
+.form-floating textarea {
+    width: 100%;
+    padding: 1.25rem 1rem 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background-color: #f9fafb;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.form-floating input:focus,
+.form-floating select:focus,
+.form-floating textarea:focus {
+    outline: none;
+    border-color: #99876f;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(153, 135, 111, 0.1);
+}
+
+.form-floating label {
+    position: absolute;
+    top: 1.25rem;
+    left: 1rem;
+    color: #6b7280;
+    pointer-events: none;
+    transition: all 0.2s ease-in-out;
+    transform-origin: 0 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    z-index: 1;
+}
+
+.form-floating input:focus + label,
+.form-floating input:not(:placeholder-shown) + label,
+.form-floating input[value]:not([value=""]) + label,
+.form-floating select:focus + label,
+.form-floating textarea:focus + label,
+.form-floating textarea:not(:placeholder-shown) + label {
+    top: 0.25rem;
+    left: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #99876f;
+    transform: scale(1);
+}
+
+.avatar-upload {
+    position: relative;
+    display: inline-block;
+}
+
+.avatar-upload input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.avatar-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #99876f;
+}
+
+.upload-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.avatar-upload:hover .upload-overlay {
+    opacity: 1;
+}
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-bg py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8 scroll-reveal">
+            <h1 class="text-3xl font-bold text-edu-deep mb-2">Account Settings</h1>
+            <p class="text-edu-dark">Manage your profile and account preferences</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="settings-form">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Profile Section -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- Basic Information -->
+                    <div class="settings-section rounded-xl p-6 scroll-reveal">
+                        <h2 class="text-xl font-semibold text-edu-deep mb-6">Basic Information</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- First Name -->
+                            <div class="form-floating">
+                                <input
+                                    type="text"
+                                    id="{{ user_form.first_name.id_for_label }}"
+                                    name="{{ user_form.first_name.name }}"
+                                    value="{{ user_form.first_name.value|default:'' }}"
+                                    placeholder="First Name"
+                                >
+                                <label for="{{ user_form.first_name.id_for_label }}">First Name</label>
+                                {% if user_form.first_name.errors %}
+                                    <div class="mt-2 text-sm text-red-600">
+                                        {% for error in user_form.first_name.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Last Name -->
+                            <div class="form-floating">
+                                <input
+                                    type="text"
+                                    id="{{ user_form.last_name.id_for_label }}"
+                                    name="{{ user_form.last_name.name }}"
+                                    value="{{ user_form.last_name.value|default:'' }}"
+                                    placeholder="Last Name"
+                                >
+                                <label for="{{ user_form.last_name.id_for_label }}">Last Name</label>
+                                {% if user_form.last_name.errors %}
+                                    <div class="mt-2 text-sm text-red-600">
+                                        {% for error in user_form.last_name.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-floating">
+                            <input
+                                type="email"
+                                id="{{ user_form.email.id_for_label }}"
+                                name="{{ user_form.email.name }}"
+                                value="{{ user_form.email.value|default:'' }}"
+                                placeholder="Email Address"
+                            >
+                            <label for="{{ user_form.email.id_for_label }}">Email Address</label>
+                            {% if user_form.email.errors %}
+                                <div class="mt-2 text-sm text-red-600">
+                                    {% for error in user_form.email.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Extended Profile -->
+                    {% if profile_form %}
+                    <div class="settings-section rounded-xl p-6 scroll-reveal">
+                        <h2 class="text-xl font-semibold text-edu-deep mb-6">Additional Information</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Phone -->
+                            {% if profile_form.phone %}
+                            <div class="form-floating">
+                                <input
+                                    type="tel"
+                                    id="{{ profile_form.phone.id_for_label }}"
+                                    name="{{ profile_form.phone.name }}"
+                                    value="{{ profile_form.phone.value|default:'' }}"
+                                    placeholder="Phone Number"
+                                >
+                                <label for="{{ profile_form.phone.id_for_label }}">Phone Number</label>
+                            </div>
+                            {% endif %}
+
+                            <!-- Date of Birth -->
+                            {% if profile_form.date_of_birth %}
+                            <div class="form-floating">
+                                <input
+                                    type="date"
+                                    id="{{ profile_form.date_of_birth.id_for_label }}"
+                                    name="{{ profile_form.date_of_birth.name }}"
+                                    value="{{ profile_form.date_of_birth.value|default:'' }}"
+                                >
+                                <label for="{{ profile_form.date_of_birth.id_for_label }}">Date of Birth</label>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Bio -->
+                        {% if profile_form.bio %}
+                        <div class="form-floating">
+                            <textarea
+                                id="{{ profile_form.bio.id_for_label }}"
+                                name="{{ profile_form.bio.name }}"
+                                rows="4"
+                                placeholder="Tell us about yourself..."
+                            >{{ profile_form.bio.value|default:'' }}</textarea>
+                            <label for="{{ profile_form.bio.id_for_label }}">Bio</label>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sidebar -->
+                <div class="space-y-8">
+                    <!-- Profile Picture -->
+                    <div class="settings-section rounded-xl p-6 scroll-reveal">
+                        <h3 class="text-lg font-semibold text-edu-deep mb-4">Profile Picture</h3>
+                        
+                        <div class="text-center">
+                            <div class="avatar-upload">
+                                {% if user.profile.avatar %}
+                                    <img src="{{ user.profile.avatar.url }}" alt="Profile Picture" class="avatar-preview mx-auto">
+                                {% else %}
+                                    <div class="avatar-preview mx-auto bg-edu-beige flex items-center justify-center text-white text-2xl font-bold">
+                                        {{ user.first_name|first|default:user.username|first|upper }}
+                                    </div>
+                                {% endif %}
+                                <div class="upload-overlay">
+                                    <i class="fas fa-camera text-white text-xl"></i>
+                                </div>
+                                {% if user_form.avatar %}
+                                    <input type="file" name="{{ user_form.avatar.name }}" accept="image/*" id="avatar-input">
+                                {% endif %}
+                            </div>
+                            <p class="text-sm text-gray-500 mt-3">Click to change your profile picture</p>
+                        </div>
+                    </div>
+
+                    <!-- Account Status -->
+                    <div class="settings-section rounded-xl p-6 scroll-reveal">
+                        <h3 class="text-lg font-semibold text-edu-deep mb-4">Account Status</h3>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Member Since</span>
+                                <span class="font-medium text-edu-deep">{{ user.date_joined|date:"M Y" }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Current Plan</span>
+                                <span class="font-medium text-edu-deep">{{ user.subscription_tier|title }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Status</span>
+                                <span class="text-green-600 font-medium">
+                                    <i class="fas fa-check-circle mr-1"></i>Active
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="settings-section rounded-xl p-6 scroll-reveal">
+                        <h3 class="text-lg font-semibold text-edu-deep mb-4">Quick Links</h3>
+                        
+                        <div class="space-y-2">
+                            <a href="{% url 'users:subscription' %}" class="flex items-center space-x-2 text-edu-beige hover:text-edu-dark transition-colors">
+                                <i class="fas fa-crown"></i>
+                                <span>Manage Subscription</span>
+                            </a>
+                            <a href="{% url 'users:billing' %}" class="flex items-center space-x-2 text-edu-beige hover:text-edu-dark transition-colors">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Billing Information</span>
+                            </a>
+                            <a href="{% url 'account_change_password' %}" class="flex items-center space-x-2 text-edu-beige hover:text-edu-dark transition-colors">
+                                <i class="fas fa-lock"></i>
+                                <span>Change Password</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="mt-8 flex justify-end scroll-reveal">
+                <button
+                    type="submit"
+                    class="bg-edu-beige text-white px-8 py-3 rounded-xl font-semibold hover:bg-edu-dark transition-all hover-lift focus:outline-none focus:ring-4 focus:ring-edu-beige focus:ring-opacity-30"
+                    id="save-btn"
+                >
+                    <i class="fas fa-save mr-2"></i>
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+// Initialize floating labels
+function initFloatingLabels() {
+    const inputs = document.querySelectorAll('.form-floating input, .form-floating textarea, .form-floating select');
+    
+    inputs.forEach(input => {
+        // Check initial state
+        checkFloatingLabel(input);
+        
+        // Add event listeners
+        input.addEventListener('focus', () => checkFloatingLabel(input));
+        input.addEventListener('blur', () => checkFloatingLabel(input));
+        input.addEventListener('input', () => checkFloatingLabel(input));
+    });
+}
+
+function checkFloatingLabel(input) {
+    const label = input.nextElementSibling;
+    if (!label || !label.matches('label')) return;
+    
+    if (input.value !== '' || input === document.activeElement) {
+        label.classList.add('active');
+    } else {
+        label.classList.remove('active');
+    }
+}
+
+// Avatar preview
+document.getElementById('avatar-input')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.querySelector('.avatar-preview');
+            if (preview.tagName === 'IMG') {
+                preview.src = e.target.result;
+            } else {
+                // Replace div with img
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = preview.className;
+                img.alt = 'Profile Picture';
+                preview.parentNode.replaceChild(img, preview);
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Form submission
+document.getElementById('settings-form').addEventListener('submit', function(e) {
+    const saveBtn = document.getElementById('save-btn');
+    EduSauti.setLoadingState(saveBtn, true);
+    
+    // Re-enable after timeout in case of issues
+    setTimeout(() => {
+        EduSauti.setLoadingState(saveBtn, false);
+    }, 10000);
+});
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', function() {
+    initFloatingLabels();
+});
+{% endblock %}
