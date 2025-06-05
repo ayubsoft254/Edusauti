@@ -356,53 +356,70 @@
 {% endblock %}
 
 {% block extra_js %}
+// Initialize floating labels
+function initFloatingLabels() {
+    const floatingInputs = document.querySelectorAll('.form-floating input');
+    
+    floatingInputs.forEach(input => {
+        // Check initial state
+        checkFloatingLabel(input);
+        
+        // Add event listeners
+        input.addEventListener('focus', () => checkFloatingLabel(input));
+        input.addEventListener('blur', () => checkFloatingLabel(input));
+        input.addEventListener('input', () => checkFloatingLabel(input));
+    });
+}
+
+function checkFloatingLabel(input) {
+    const label = input.nextElementSibling;
+    if (!label || !label.matches('label')) return;
+    
+    if (input.value !== '' || input === document.activeElement) {
+        label.classList.add('active');
+    } else {
+        label.classList.remove('active');
+    }
+}
+
 // Password toggle functionality
 function togglePassword() {
     const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
     const passwordIcon = document.getElementById('password-icon');
     
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        passwordIcon.classList.remove('fa-eye');
-        passwordIcon.classList.add('fa-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        passwordIcon.classList.remove('fa-eye-slash');
-        passwordIcon.classList.add('fa-eye');
+    if (passwordInput && passwordIcon) {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordIcon.classList.remove('fa-eye');
+            passwordIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            passwordIcon.classList.remove('fa-eye-slash');
+            passwordIcon.classList.add('fa-eye');
+        }
     }
 }
 
-// Form submission with loading state
-document.getElementById('login-form').addEventListener('submit', function(e) {
-    const submitBtn = document.getElementById('login-btn');
-    EduSauti.setLoadingState(submitBtn, true);
-    
-    // Re-enable button after 5 seconds in case of network issues
-    setTimeout(() => {
-        EduSauti.setLoadingState(submitBtn, false);
-    }, 5000);
-});
-
-// Auto-focus first empty field
-document.addEventListener('DOMContentLoaded', function() {
-    const emailInput = document.getElementById('{{ form.login.id_for_label }}');
-    const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
-    
-    if (!emailInput.value) {
-        emailInput.focus();
-    } else if (!passwordInput.value) {
-        passwordInput.focus();
-    }
-});
-
 // Enhanced form validation
 function validateForm() {
-    const email = document.getElementById('{{ form.login.id_for_label }}').value;
-    const password = document.getElementById('{{ form.password.id_for_label }}').value;
+    const emailInput = document.getElementById('{{ form.login.id_for_label }}');
+    const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
     const submitBtn = document.getElementById('login-btn');
     
-    const isValid = EduSauti.validateEmail(email) && EduSauti.validateRequired(password);
+    if (!emailInput || !passwordInput || !submitBtn) return false;
     
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    
+    const isEmailValid = EduSauti.validateEmail(email);
+    const isPasswordValid = EduSauti.validateRequired(password);
+    const isValid = isEmailValid && isPasswordValid;
+    
+    // Update field styling
+    emailInput.classList.toggle('field-error', !isEmailValid && email !== '');
+    emailInput.classList.toggle('field-success', isEmailValid && email !== '');
+    
+    // Update submit button
     if (isValid) {
         submitBtn.disabled = false;
         submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -414,36 +431,84 @@ function validateForm() {
     return isValid;
 }
 
-// Real-time validation
-document.getElementById('{{ form.login.id_for_label }}').addEventListener('input', validateForm);
-document.getElementById('{{ form.password.id_for_label }}').addEventListener('input', validateForm);
-
-// Initial validation
-validateForm();
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-    // Enter key submits form
-    if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
-        e.preventDefault();
-        if (validateForm()) {
-            document.getElementById('login-form').submit();
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize floating labels
+    initFloatingLabels();
+    
+    // Get form elements safely
+    const loginForm = document.getElementById('login-form');
+    const emailInput = document.getElementById('{{ form.login.id_for_label }}');
+    const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
+    const submitBtn = document.getElementById('login-btn');
+    
+    // Set up real-time validation
+    if (emailInput) {
+        emailInput.addEventListener('input', validateForm);
+        emailInput.addEventListener('blur', validateForm);
+    }
+    
+    if (passwordInput) {
+        passwordInput.addEventListener('input', validateForm);
+        passwordInput.addEventListener('blur', validateForm);
+    }
+    
+    // Form submission handler
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                EduSauti.showToast('Please fill in all required fields correctly', 'error');
+                return;
+            }
+            
+            if (submitBtn) {
+                EduSauti.setLoadingState(submitBtn, true);
+                
+                // Re-enable button after 5 seconds in case of network issues
+                setTimeout(() => {
+                    EduSauti.setLoadingState(submitBtn, false);
+                }, 5000);
+            }
+        });
+    }
+    
+    // Auto-focus first empty field
+    setTimeout(() => {
+        if (emailInput && !emailInput.value) {
+            emailInput.focus();
+        } else if (passwordInput && !passwordInput.value) {
+            passwordInput.focus();
         }
+    }, 100);
+    
+    // Initial validation
+    validateForm();
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Enter key submits form
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+            e.preventDefault();
+            if (validateForm() && loginForm) {
+                loginForm.submit();
+            }
+        }
+    });
+    
+    // Social login placeholders (replace with actual implementations)
+    document.querySelectorAll('.social-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const provider = this.textContent.includes('Google') ? 'Google' : 'Facebook';
+            EduSauti.showToast(`${provider} login coming soon!`, 'info');
+        });
+    });
+    
+    // Show success message if redirected with success parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('registered') === 'true') {
+        EduSauti.showToast('Account created successfully! Please sign in.', 'success');
     }
 });
-
-// Social login placeholders (replace with actual implementations)
-document.querySelectorAll('.social-btn').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const provider = this.textContent.includes('Google') ? 'Google' : 'Facebook';
-        EduSauti.showToast(`${provider} login coming soon!`, 'info');
-    });
-});
-
-// Show success message if redirected with success parameter
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('registered') === 'true') {
-    EduSauti.showToast('Account created successfully! Please sign in.', 'success');
-}
 {% endblock %}
