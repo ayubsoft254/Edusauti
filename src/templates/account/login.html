@@ -174,101 +174,9 @@
             <form method="post" class="space-y-6" id="login-form">
                 {% csrf_token %}
                 
-                <!-- Email Field -->
-                <div class="form-floating">
-                    <input
-                        id="{{ form.login.id_for_label }}"
-                        name="{{ form.login.name }}"
-                        type="email"
-                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
-                        placeholder=" "
-                        required
-                        {% if form.login.value %}value="{{ form.login.value }}"{% endif %}
-                    >
-                    <label for="{{ form.login.id_for_label }}" class="form-label">
-                        Email address
-                    </label>
-                    {% if form.login.errors %}
-                        <div class="mt-1 text-sm text-red-600">
-                            {% for error in form.login.errors %}
-                                <p class="flex items-center">
-                                    <i class="fas fa-exclamation-circle mr-1"></i>
-                                    {{ error }}
-                                </p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- Password Field -->
-                <div class="form-floating">
-                    <input
-                        id="{{ form.password.id_for_label }}"
-                        name="{{ form.password.name }}"
-                        type="password"
-                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white"
-                        placeholder=" "
-                        required
-                    >
-                    <label for="{{ form.password.id_for_label }}" class="form-label">
-                        Password
-                    </label>
-                    <button
-                        type="button"
-                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-edu-beige transition-colors"
-                        onclick="togglePassword()"
-                        id="password-toggle"
-                    >
-                        <i class="fas fa-eye" id="password-icon"></i>
-                    </button>
-                    {% if form.password.errors %}
-                        <div class="mt-1 text-sm text-red-600">
-                            {% for error in form.password.errors %}
-                                <p class="flex items-center">
-                                    <i class="fas fa-exclamation-circle mr-1"></i>
-                                    {{ error }}
-                                </p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- Remember Me & Forgot Password -->
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input
-                            id="{{ form.remember.id_for_label }}"
-                            name="{{ form.remember.name }}"
-                            type="checkbox"
-                            class="h-4 w-4 text-edu-beige focus:ring-edu-beige border-gray-300 rounded transition-colors"
-                            {% if form.remember.value %}checked{% endif %}
-                        >
-                        <label for="{{ form.remember.id_for_label }}" class="ml-2 block text-sm text-gray-700">
-                            Remember me
-                        </label>
-                    </div>
-                    <div class="text-sm">
-                        <a href="{% url 'account_reset_password' %}" class="text-edu-beige hover:text-edu-dark transition-colors font-medium">
-                            Forgot your password?
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <button
-                    type="submit"
-                    class="w-full bg-edu-beige text-white py-4 px-6 rounded-xl font-semibold hover:bg-edu-dark transition-all hover-lift focus:outline-none focus:ring-4 focus:ring-edu-beige focus:ring-opacity-30"
-                    id="login-btn"
-                >
-                    <span class="flex items-center justify-center">
-                        <i class="fas fa-sign-in-alt mr-2"></i>
-                        Sign in to your account
-                    </span>
-                </button>
-
-                <!-- Form Errors -->
+                <!-- Form Errors at Top -->
                 {% if form.non_field_errors %}
-                    <div class="rounded-lg bg-red-50 p-4 border border-red-200">
+                    <div class="mb-6 rounded-lg bg-red-50 p-4 border border-red-200">
                         <div class="flex">
                             <div class="flex-shrink-0">
                                 <i class="fas fa-exclamation-circle text-red-400"></i>
@@ -288,6 +196,104 @@
                         </div>
                     </div>
                 {% endif %}
+                
+                <!-- Email Field -->
+                <div class="form-floating">
+                    <input
+                        id="{{ form.login.id_for_label }}"
+                        name="{{ form.login.name }}"
+                        type="email"
+                        class="form-input {% if form.login.errors %}field-error{% endif %}"
+                        placeholder="your@email.com"
+                        required
+                        {% if form.login.value %}value="{{ form.login.value }}"{% endif %}
+                        autocomplete="email"
+                    >
+                    <label for="{{ form.login.id_for_label }}">
+                        Email address
+                    </label>
+                    {% if form.login.errors %}
+                        <div class="mt-2 text-sm text-red-600">
+                            {% for error in form.login.errors %}
+                                <p class="flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-floating">
+                    <input
+                        id="{{ form.password.id_for_label }}"
+                        name="{{ form.password.name }}"
+                        type="password"
+                        class="form-input {% if form.password.errors %}field-error{% endif %}"
+                        placeholder="Password"
+                        required
+                        autocomplete="current-password"
+                    >
+                    <label for="{{ form.password.id_for_label }}">
+                        Password
+                    </label>
+                    <button
+                        type="button"
+                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-edu-beige transition-colors z-10"
+                        onclick="togglePassword()"
+                        id="password-toggle"
+                    >
+                        <i class="fas fa-eye" id="password-icon"></i>
+                    </button>
+                    {% if form.password.errors %}
+                        <div class="mt-2 text-sm text-red-600">
+                            {% for error in form.password.errors %}
+                                <p class="flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="flex items-center justify-between">
+                    {% if form.remember %}
+                    <div class="flex items-center">
+                        <input
+                            id="{{ form.remember.id_for_label }}"
+                            name="{{ form.remember.name }}"
+                            type="checkbox"
+                            class="h-4 w-4 text-edu-beige focus:ring-edu-beige border-gray-300 rounded transition-colors"
+                            {% if form.remember.value %}checked{% endif %}
+                        >
+                        <label for="{{ form.remember.id_for_label }}" class="ml-2 block text-sm text-gray-700">
+                            Remember me
+                        </label>
+                    </div>
+                    {% else %}
+                    <div></div>
+                    {% endif %}
+                    <div class="text-sm">
+                        <a href="{% url 'account_reset_password' %}" class="text-edu-beige hover:text-edu-dark transition-colors font-medium">
+                            Forgot your password?
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                    type="submit"
+                    class="w-full bg-edu-beige text-white py-4 px-6 rounded-xl font-semibold hover:bg-edu-dark transition-all hover-lift focus:outline-none focus:ring-4 focus:ring-edu-beige focus:ring-opacity-30"
+                    id="login-btn"
+                >
+                    <span class="flex items-center justify-center">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Sign in to your account
+                    </span>
+                </button>
             </form>
         </div>
 
