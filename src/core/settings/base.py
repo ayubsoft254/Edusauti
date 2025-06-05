@@ -112,9 +112,10 @@ ACCOUNT_EMAIL_CONFIRM_EXPIRE_DAYS = 3
 ACCOUNT_RATE_LIMITS = {
     'login_failed': '5/5m',  # 5 attempts per 5 minutes
 }
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
-ACCOUNT_LOGIN_REDIRECT_URL = '/dashboard/'
-ACCOUNT_SIGNUP_REDIRECT_URL = '/dashboard/'
+
+LOGIN_URL = 'account_login'  # Use allauth's login URL
+LOGIN_REDIRECT_URL = '/dashboard/'  # Where to redirect after successful login
+LOGOUT_REDIRECT_URL = 'account_login'  # Where to redirect after logout
 
 # Email confirmation settings
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
