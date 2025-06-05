@@ -1,0 +1,646 @@
+{% extends 'base.html' %}
+
+{% block title %}Documents Dashboard - EduSauti{% endblock %}
+
+{% block meta_description %}Manage your uploaded documents, view processing status, and access your learning materials{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <span class="mx-2 text-gray-400">/</span>
+        <span class="text-gray-600">Documents</span>
+    </li>
+{% endblock %}
+
+{% block extra_css %}
+.dashboard-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(153, 135, 111, 0.1);
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    border-color: rgba(153, 135, 111, 0.3);
+    box-shadow: 0 10px 30px rgba(153, 135, 111, 0.1);
+}
+
+.document-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(153, 135, 111, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.document-card:hover {
+    border-color: rgba(153, 135, 111, 0.3);
+    box-shadow: 0 10px 30px rgba(153, 135, 111, 0.1);
+    transform: translateY(-2px);
+}
+
+.document-thumbnail {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #99876f, #7d6b57);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.status-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-completed {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.status-processing {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+}
+
+.status-failed {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+
+.status-uploaded {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+
+.search-input {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(153, 135, 111, 0.2);
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #99876f;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(153, 135, 111, 0.1);
+}
+
+.filter-btn {
+    background: rgba(153, 135, 111, 0.1);
+    color: #99876f;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: #99876f;
+    color: white;
+}
+
+.upload-cta {
+    background: linear-gradient(135deg, rgba(153, 135, 111, 0.1) 0%, rgba(245, 243, 240, 0.8) 100%);
+    border: 2px dashed rgba(153, 135, 111, 0.3);
+    transition: all 0.3s ease;
+}
+
+.upload-cta:hover {
+    border-color: #99876f;
+    background: linear-gradient(135deg, rgba(153, 135, 111, 0.2) 0%, rgba(245, 243, 240, 0.9) 100%);
+}
+
+.progress-ring {
+    transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+    fill: transparent;
+    stroke: #99876f;
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.3s;
+}
+
+.document-actions {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.document-card:hover .document-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.pagination-container .pagination-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(153, 135, 111, 0.2);
+    color: #99876f;
+    transition: all 0.3s ease;
+}
+
+.pagination-container .pagination-btn:hover,
+.pagination-container .pagination-btn.active {
+    background: #99876f;
+    color: white;
+    border-color: #99876f;
+}
+
+.empty-state {
+    background: linear-gradient(135deg, rgba(153, 135, 111, 0.05) 0%, rgba(245, 243, 240, 0.5) 100%);
+}
+
+@keyframes pulse-processing {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.processing-indicator {
+    animation: pulse-processing 2s ease-in-out infinite;
+}
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-bg py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header Section -->
+        <div class="mb-8 scroll-reveal">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-edu-deep mb-2">
+                        Document Dashboard
+                    </h1>
+                    <p class="text-edu-dark">
+                        Manage your uploaded documents and track processing status
+                    </p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <a href="{% url 'documents:upload' %}" class="bg-edu-beige text-white px-6 py-3 rounded-xl font-semibold hover:bg-edu-dark transition-all hover-lift inline-flex items-center">
+                        <i class="fas fa-plus mr-2"></i>
+                        Upload New Document
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="dashboard-card rounded-xl p-6 scroll-reveal">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Documents</p>
+                        <p class="text-2xl font-bold text-edu-deep">{{ stats.total_documents }}</p>
+                    </div>
+                    <div class="document-thumbnail">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-card rounded-xl p-6 scroll-reveal">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Completed</p>
+                        <p class="text-2xl font-bold text-green-600">{{ stats.completed_documents }}</p>
+                    </div>
+                    <div class="document-thumbnail" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-card rounded-xl p-6 scroll-reveal">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Processing</p>
+                        <p class="text-2xl font-bold text-blue-600">{{ stats.processing_documents }}</p>
+                    </div>
+                    <div class="document-thumbnail processing-indicator" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                        <i class="fas fa-cog fa-spin"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-card rounded-xl p-6 scroll-reveal">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Failed</p>
+                        <p class="text-2xl font-bold text-red-600">{{ stats.failed_documents }}</p>
+                    </div>
+                    <div class="document-thumbnail" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="dashboard-card rounded-xl p-6 mb-8 scroll-reveal">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                <!-- Search -->
+                <div class="relative flex-1 md:max-w-md">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input
+                        type="text"
+                        id="search-input"
+                        placeholder="Search documents..."
+                        value="{{ search_query|default:'' }}"
+                        class="search-input w-full pl-10 pr-4 py-3 rounded-lg focus:outline-none"
+                    >
+                </div>
+
+                <!-- Status Filters -->
+                <div class="flex flex-wrap gap-2">
+                    <button class="filter-btn px-4 py-2 rounded-lg font-medium {% if not status_filter %}active{% endif %}" data-status="">
+                        All
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-lg font-medium {% if status_filter == 'completed' %}active{% endif %}" data-status="completed">
+                        Completed
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-lg font-medium {% if status_filter == 'processing' %}active{% endif %}" data-status="processing">
+                        Processing
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-lg font-medium {% if status_filter == 'failed' %}active{% endif %}" data-status="failed">
+                        Failed
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents Grid -->
+        {% if documents %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {% for document in documents %}
+                    <div class="document-card rounded-xl p-6 scroll-reveal">
+                        <!-- Status Badge -->
+                        <div class="status-badge status-{{ document.status }}">
+                            {% if document.status == 'completed' %}
+                                <i class="fas fa-check-circle mr-1"></i>Ready
+                            {% elif document.status == 'processing' %}
+                                <i class="fas fa-cog fa-spin mr-1"></i>Processing
+                            {% elif document.status == 'failed' %}
+                                <i class="fas fa-exclamation-triangle mr-1"></i>Failed
+                            {% elif document.status == 'uploaded' %}
+                                <i class="fas fa-clock mr-1"></i>Queued
+                            {% endif %}
+                        </div>
+
+                        <!-- Document Info -->
+                        <div class="flex items-start space-x-4 mb-4">
+                            <div class="document-thumbnail">
+                                {% if document.file_type == 'pdf' %}
+                                    <i class="fas fa-file-pdf"></i>
+                                {% elif document.file_type in 'doc,docx' %}
+                                    <i class="fas fa-file-word"></i>
+                                {% elif document.file_type in 'ppt,pptx' %}
+                                    <i class="fas fa-file-powerpoint"></i>
+                                {% else %}
+                                    <i class="fas fa-file-alt"></i>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-semibold text-edu-deep text-lg mb-1 truncate">
+                                    {{ document.title }}
+                                </h3>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    Uploaded {{ document.created_at|timesince }} ago
+                                </p>
+                                {% if document.description %}
+                                    <p class="text-sm text-gray-500 line-clamp-2">
+                                        {{ document.description|truncatewords:15 }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Document Stats -->
+                        <div class="flex items-center justify-between text-sm text-gray-600 mb-4">
+                            <div class="flex items-center space-x-4">
+                                <span class="flex items-center">
+                                    <i class="fas fa-eye mr-1"></i>
+                                    {{ document.view_count }} views
+                                </span>
+                                <span class="flex items-center">
+                                    <i class="fas fa-question-circle mr-1"></i>
+                                    {{ document.total_questions_asked }} questions
+                                </span>
+                            </div>
+                            <span class="text-xs">
+                                {{ document.file_size_human }}
+                            </span>
+                        </div>
+
+                        <!-- Progress Bar (for processing documents) -->
+                        {% if document.status == 'processing' %}
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
+                                    <span>Processing...</span>
+                                    <span>{{ document.processing_progress|default:0 }}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: {{ document.processing_progress|default:0 }}%"></div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Action Buttons -->
+                        <div class="document-actions flex items-center justify-between">
+                            {% if document.status == 'completed' %}
+                                <a href="{% url 'documents:detail' document.id %}" class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-colors flex items-center">
+                                    <i class="fas fa-eye mr-2"></i>
+                                    View
+                                </a>
+                                <div class="flex items-center space-x-2">
+                                    {% if document.audio_summaries.exists %}
+                                        <button class="text-edu-beige hover:text-edu-dark transition-colors" title="Play Audio" onclick="playAudio('{{ document.id }}')">
+                                            <i class="fas fa-play-circle text-xl"></i>
+                                        </button>
+                                    {% endif %}
+                                    <button class="text-edu-beige hover:text-edu-dark transition-colors" title="Share Document" onclick="shareDocument('{{ document.id }}')">
+                                        <i class="fas fa-share-alt text-xl"></i>
+                                    </button>
+                                    <button class="text-red-500 hover:text-red-700 transition-colors" title="Delete Document" onclick="deleteDocument('{{ document.id }}')">
+                                        <i class="fas fa-trash text-xl"></i>
+                                    </button>
+                                </div>
+                            {% elif document.status == 'failed' %}
+                                <button class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center" onclick="retryProcessing('{{ document.id }}')">
+                                    <i class="fas fa-redo mr-2"></i>
+                                    Retry
+                                </button>
+                                <button class="text-red-500 hover:text-red-700 transition-colors" title="Delete Document" onclick="deleteDocument('{{ document.id }}')">
+                                    <i class="fas fa-trash text-xl"></i>
+                                </button>
+                            {% else %}
+                                <div class="flex items-center text-gray-500">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    Processing in progress...
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if documents.has_other_pages %}
+                <div class="pagination-container flex justify-center items-center space-x-2 scroll-reveal">
+                    {% if documents.has_previous %}
+                        <a href="?page={{ documents.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                           class="pagination-btn px-4 py-2 rounded-lg">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    {% endif %}
+
+                    {% for num in documents.paginator.page_range %}
+                        {% if num == documents.number %}
+                            <span class="pagination-btn px-4 py-2 rounded-lg active">{{ num }}</span>
+                        {% elif num > documents.number|add:'-3' and num < documents.number|add:'3' %}
+                            <a href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                               class="pagination-btn px-4 py-2 rounded-lg">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if documents.has_next %}
+                        <a href="?page={{ documents.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                           class="pagination-btn px-4 py-2 rounded-lg">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state rounded-xl p-12 text-center scroll-reveal">
+                {% if search_query or status_filter %}
+                    <div class="text-6xl mb-6">🔍</div>
+                    <h3 class="text-xl font-semibold text-edu-deep mb-4">No documents found</h3>
+                    <p class="text-gray-600 mb-6">
+                        {% if search_query %}
+                            No documents match your search for "{{ search_query }}"
+                        {% else %}
+                            No documents with status "{{ status_filter }}"
+                        {% endif %}
+                    </p>
+                    <button onclick="clearFilters()" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-colors">
+                        Clear Filters
+                    </button>
+                {% else %}
+                    <div class="upload-cta rounded-xl p-8 mb-6">
+                        <div class="text-6xl mb-6">📄</div>
+                        <h3 class="text-xl font-semibold text-edu-deep mb-4">Upload your first document</h3>
+                        <p class="text-gray-600 mb-6">
+                            Get started by uploading a document to create your first AI-powered summary and Q&A session.
+                        </p>
+                        <a href="{% url 'documents:upload' %}" class="bg-edu-beige text-white px-8 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift inline-flex items-center">
+                            <i class="fas fa-upload mr-2"></i>
+                            Upload Document
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div id="share-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-edu-deep">Share Document</h3>
+            <button onclick="closeShareModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Share Link</label>
+                <div class="flex">
+                    <input type="text" id="share-link" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg" readonly>
+                    <button onclick="copyShareLink()" class="bg-edu-beige text-white px-4 py-2 rounded-r-lg hover:bg-edu-dark transition-colors">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <label class="flex items-center">
+                    <input type="checkbox" id="can-view" checked class="mr-2">
+                    <span class="text-sm">Can view</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="checkbox" id="can-ask-questions" class="mr-2">
+                    <span class="text-sm">Can ask questions</span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+let currentDocumentId = null;
+
+// Search functionality
+const searchInput = document.getElementById('search-input');
+let searchTimeout;
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        updateURL();
+    }, 500);
+});
+
+// Filter functionality
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Remove active class from all buttons
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        // Add active class to clicked button
+        this.classList.add('active');
+        updateURL();
+    });
+});
+
+function updateURL() {
+    const searchQuery = searchInput.value.trim();
+    const activeFilter = document.querySelector('.filter-btn.active').dataset.status;
+    
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('search', searchQuery);
+    if (activeFilter) params.set('status', activeFilter);
+    
+    const newURL = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    window.history.pushState({}, '', newURL);
+    
+    // Reload page with new filters
+    window.location.href = newURL;
+}
+
+function clearFilters() {
+    window.location.href = window.location.pathname;
+}
+
+// Document actions
+function playAudio(documentId) {
+    // This would integrate with your audio player
+    EduSauti.showToast('Loading audio player...', 'info');
+    window.location.href = `/documents/${documentId}/`;
+}
+
+function shareDocument(documentId) {
+    currentDocumentId = documentId;
+    
+    // Generate share link (this would be an API call)
+    fetch(`/api/documents/${documentId}/share/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': EduSauti.csrfToken
+        },
+        body: JSON.stringify({
+            can_view: true,
+            can_ask_questions: false
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('share-link').value = data.share_url;
+        document.getElementById('share-modal').classList.remove('hidden');
+    })
+    .catch(error => {
+        EduSauti.showToast('Error creating share link', 'error');
+    });
+}
+
+function closeShareModal() {
+    document.getElementById('share-modal').classList.add('hidden');
+    currentDocumentId = null;
+}
+
+function copyShareLink() {
+    const shareLink = document.getElementById('share-link');
+    shareLink.select();
+    document.execCommand('copy');
+    EduSauti.showToast('Share link copied to clipboard!', 'success');
+}
+
+function deleteDocument(documentId) {
+    if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+        fetch(`/api/documents/${documentId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': EduSauti.csrfToken
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                EduSauti.showToast('Document deleted successfully', 'success');
+                // Remove the document card from the grid
+                document.querySelector(`[data-document-id="${documentId}"]`)?.remove();
+                // Reload page to update stats
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                throw new Error('Failed to delete document');
+            }
+        })
+        .catch(error => {
+            EduSauti.showToast('Error deleting document', 'error');
+        });
+    }
+}
+
+function retryProcessing(documentId) {
+    fetch(`/api/documents/${documentId}/retry/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': EduSauti.csrfToken
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            EduSauti.showToast('Document requeued for processing', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            throw new Error('Failed to retry processing');
+        }
+    })
+    .catch(error => {
+        EduSauti.showToast('Error retrying document processing', 'error');
+    });
+}
+
+// Auto-refresh processing documents every 30 seconds
+if (document.querySelector('.status-processing')) {
+    setInterval(() => {
+        location.reload();
+    }, 30000);
+}
+
+// Close modal when clicking outside
+document.getElementById('share-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeShareModal();
+    }
+});
+
+// Handle initial page load animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate statistics cards
+    const statCards = document.querySelectorAll('.dashboard-card');
+    statCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.classList.add('scroll-reveal', 'revealed');
+        }, index * 100);
+    });
+});
+{% endblock %}
