@@ -13,29 +13,66 @@
 
 .form-floating {
     position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.form-floating input {
+    width: 100%;
+    padding: 1.25rem 1rem 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background-color: #f9fafb;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.form-floating input:focus {
+    outline: none;
+    border-color: #99876f;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(153, 135, 111, 0.1);
+}
+
+.form-floating input::placeholder {
+    color: transparent;
 }
 
 .form-floating label {
     position: absolute;
-    top: 50%;
+    top: 1.25rem;
     left: 1rem;
-    transform: translateY(-50%);
-    color: #7d6b57;
+    color: #6b7280;
     pointer-events: none;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease-in-out;
+    transform-origin: 0 0;
+    font-size: 1rem;
+    line-height: 1.5;
     z-index: 1;
 }
 
-.form-floating input {
-    padding: 1rem 1rem 0.5rem 1rem;
+.form-floating input:focus + label,
+.form-floating input:not(:placeholder-shown) + label,
+.form-floating input[value]:not([value=""]) + label {
+    top: 0.25rem;
+    left: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #99876f;
+    transform: scale(1);
 }
 
-.form-floating input:focus + label,
-.form-floating input:not(:placeholder-shown) + label {
-    top: 0.75rem;
-    font-size: 0.75rem;
-    color: #99876f;
-    transform: translateY(0);
+.form-floating input.field-error {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.form-floating input.field-error + label {
+    color: #ef4444;
+}
+
+.form-floating input.field-success {
+    border-color: #10b981;
 }
 
 .social-btn {
