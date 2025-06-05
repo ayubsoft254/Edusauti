@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+
+{% block title %}Subscription - EduSauti{% endblock %}
+
+{% block meta_description %}Manage your EduSauti subscription and billing{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <span class="mx-2 text-gray-400">/</span>
+        <span class="text-gray-600">Subscription</span>
+    </li>
+{% endblock %}
+
+{% block extra_css %}
+.subscription-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(153, 135, 111, 0.1);
+    transition: all 0.3s ease;
+}
+
+.subscription-card:hover {
+    border-color: rgba(153, 135, 111, 0.3);
+    box-shadow: 0 10px 30px rgba(153, 135, 111, 0.1);
+}
+
+.subscription-card.current {
+    border-color: #99876f;
+    box-shadow: 0 0 0 3px rgba(153, 135, 111, 0.1);
+}
+
+.plan-badge {
+    background: linear-gradient(135deg, #99876f, #7d6b57);
+}
+
+.feature-check {
+    color: #10b981;
+}
+
+.feature-cross {
+    color: #ef4444;
+}
+
+.history-item {
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    background: rgba(153, 135, 111, 0.05);
+}
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-bg py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8 scroll-reveal">
+            <h1 class="text-3xl font-bold text-edu-deep mb-2">Subscription Management</h1>
+            <p class="text-edu-dark">Manage your plan and view billing history</p>
+        </div>
+
+        <!-- Current Plan -->
+        <div class="mb-8 scroll-reveal">
+            <div class="subscription-card current rounded-xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-edu-deep">Current Plan</h2>
+                        <div class="flex items-center space-x-3 mt-2">
+                            <span class="plan-badge text-white px-3 py-1 rounded-full text-sm font-medium">
+                                {{ user.subscription_tier|title }}
+                            </span>
+                            {% if user.subscription_expires_at %}
+                                <span class="text-sm text-gray-600">
+                                    Expires {{ user.subscription_expires_at|date:"M d, Y" }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-2xl font-bold text-edu-deep">
+                            {% if user.subscription_tier == 'free' %}
+                                $0/month
+                            {% elif user.subscription_tier == 'basic' %}
+                                $9.99/month
+                            {% elif user.subscription_tier == 'premium' %}
+                                $19.99/month
+                            {% elif user.subscription_tier == 'enterprise' %}
+                                $49.99/month
+                            {% endif %}
+                        </p>
+                        {% if user.subscription_tier != 'free' %}
+                            <p class="text-sm text-gray-600">Auto-renews monthly</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">Documents per month</p>
+                        <p class="text-xl font-bold text-edu-deep">{{ user.monthly_document_limit }}</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">Questions per month</p>
+                        <p class="text-xl font-bold text-edu-deep">{{ user.monthly_question_limit }}</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">Premium Features</p>
+                        <p class="text-xl font-bold {% if user.has_premium_features %}text-green-600{% else %}text-gray-400{% endif %}">
+                            {% if user.has_premium_features %}✓ Active{% else %}✗ Not Available{% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Plans -->
+        <div class="mb-12 scroll-reveal">
+            <h2 class="text-2xl font-semibold text-edu-deep mb-6">Available Plans</h2>
+            
+            <form method="post" action="{% url 'users:upgrade-subscription' %}" id="upgrade-form">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Free Plan -->
+                    <div class="subscription-card rounded-xl p-6 {% if user.subscription_tier == 'free' %}current{% endif %}">
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-edu-deep mb-2">Free</h3>
+                            <div class="text-3xl font-bold text-edu-deep mb-2">$0</div>
+                            <p class="text-gray-600">per month</p>
+                        </div>
+
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">5 documents/month</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">25 questions/month</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-times feature-cross"></i>
+                                <span class="text-sm">No voice summaries</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-times feature-cross"></i>
+                                <span class="text-sm">Limited file types</span>
+                            </li>
+                        </ul>
+
+                        {% if user.subscription_tier == 'free' %}
+                            <button type="button" class="w-full bg-gray-300 text-gray-600 py-2 rounded-lg cursor-not-allowed" disabled>
+                                Current Plan
+                            </button>
+                        {% else %}
+                            <button type="submit" name="tier" value="free" class="w-full bg-edu-beige text-white py-2 rounded-lg hover:bg-edu-dark transition-colors">
+                                Downgrade
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Basic Plan -->
+                    <div class="subscription-card rounded-xl p-6 {% if user.subscription_tier == 'basic' %}current{% endif %}">
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-edu-deep mb-2">Basic</h3>
+                            <div class="text-3xl font-bold text-edu-deep mb-2">$9.99</div>
+                            <p class="text-gray-600">per month</p>
+                        </div>
+
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">25 documents/month</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">100 questions/month</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">Voice summaries</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">All file types</span>
+                            </li>
+                        </ul>
+
+                        {% if user.subscription_tier == 'basic' %}
+                            <button type="button" class="w-full bg-gray-300 text-gray-600 py-2 rounded-lg cursor-not-allowed" disabled>
+                                Current Plan
+                            </button>
+                        {% else %}
+                            <button type="submit" name="tier" value="basic" class="w-full bg-edu-beige text-white py-2 rounded-lg hover:bg-edu-dark transition-colors">
+                                {% if user.subscription_tier == 'free' %}Upgrade{% else %}Change Plan{% endif %}
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Premium Plan -->
+                    <div class="subscription-card rounded-xl p-6 {% if user.subscription_tier == 'premium' %}current{% endif %} relative">
+                        {% if user.subscription_tier != 'premium' %}
+                            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                                <span class="bg-edu-beige text-white px-3 py-1 rounded-full text-xs font-medium">
+                                    Most Popular
+                                </span>
+                            </div>
+                        {% endif %}
+
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-edu-deep mb-2">Premium</h3>
+                            <div class="text-3xl font-bold text-edu-deep mb-2">$19.99</div>
+                            <p class="text-gray-600">per month</p>
+                        </div>
+
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">100 documents/month</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">500 questions/month</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">Advanced AI features</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">Priority support</span>
+                            </li>
+                        </ul>
+
+                        {% if user.subscription_tier == 'premium' %}
+                            <button type="button" class="w-full bg-gray-300 text-gray-600 py-2 rounded-lg cursor-not-allowed" disabled>
+                                Current Plan
+                            </button>
+                        {% else %}
+                            <button type="submit" name="tier" value="premium" class="w-full bg-edu-beige text-white py-2 rounded-lg hover:bg-edu-dark transition-colors">
+                                {% if user.subscription_tier in 'free,basic' %}Upgrade{% else %}Change Plan{% endif %}
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Enterprise Plan -->
+                    <div class="subscription-card rounded-xl p-6 {% if user.subscription_tier == 'enterprise' %}current{% endif %}">
+                        <div class="text-center mb-6">
+                            <h3 class="text-xl font-bold text-edu-deep mb-2">Enterprise</h3>
+                            <div class="text-3xl font-bold text-edu-deep mb-2">$49.99</div>
+                            <p class="text-gray-600">per month</p>
+                        </div>
+
+                        <ul class="space-y-3 mb-6">
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">Unlimited documents</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">Unlimited questions</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">Custom integrations</span>
+                            </li>
+                            <li class="flex items-center space-x-3">
+                                <i class="fas fa-check feature-check"></i>
+                                <span class="text-sm">Dedicated support</span>
+                            </li>
+                        </ul>
+
+                        {% if user.subscription_tier == 'enterprise' %}
+                            <button type="button" class="w-full bg-gray-300 text-gray-600 py-2 rounded-lg cursor-not-allowed" disabled>
+                                Current Plan
+                            </button>
+                        {% else %}
+                            <button type="submit" name="tier" value="enterprise" class="w-full bg-edu-beige text-white py-2 rounded-lg hover:bg-edu-dark transition-colors">
+                                Upgrade
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Billing Cycle -->
+                <div class="mt-6 text-center">
+                    <div class="inline-flex items-center space-x-4 bg-white rounded-lg p-2">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" name="billing_cycle" value="monthly" checked class="text-edu-beige">
+                            <span class="text-sm font-medium">Monthly</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" name="billing_cycle" value="yearly" class="text-edu-beige">
+                            <span class="text-sm font-medium">Yearly (Save 20%)</span>
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Subscription History -->
+        {% if subscription_history %}
+        <div class="scroll-reveal">
+            <h2 class="text-2xl font-semibold text-edu-deep mb-6">Billing History</h2>
+            
+            <div class="subscription-card rounded-xl p-6">
+                <div class="space-y-4">
+                    {% for subscription in subscription_history %}
+                        <div class="history-item rounded-lg p-4 border border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 bg-edu-cream rounded-full flex items-center justify-center">
+                                        <i class="fas fa-receipt text-edu-beige"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-edu-deep">{{ subscription.get_tier_display }} Plan</h3>
+                                        <p class="text-sm text-gray-600">{{ subscription.created_at|date:"M d, Y" }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-edu-deep">${{ subscription.amount_paid }}</p>
+                                    <p class="text-sm {% if subscription.is_active %}text-green-600{% else %}text-gray-600{% endif %}">
+                                        {% if subscription.is_active %}Active{% else %}Expired{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mt-6 text-center">
+                    <a href="{% url 'users:billing-history' %}" class="text-edu-beige hover:text-edu-dark transition-colors">
+                        View Full History →
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+// Form submission handler
+document.getElementById('upgrade-form').addEventListener('submit', function(e) {
+    const tier = e.submitter.value;
+    const tierName = e.submitter.value.charAt(0).toUpperCase() + e.submitter.value.slice(1);
+    
+    if (!confirm(`Are you sure you want to change your plan to ${tierName}?`)) {
+        e.preventDefault();
+        return;
+    }
+    
+    // Show loading state
+    EduSauti.setLoadingState(e.submitter, true);
+});
+
+// Show success message if just upgraded
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('upgraded') === 'true') {
+    setTimeout(() => {
+        EduSauti.showToast('Subscription updated successfully!', 'success');
+    }, 500);
+}
+{% endblock %}
