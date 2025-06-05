@@ -181,14 +181,17 @@ def billing_view(request):
     # Calculate current billing cycle info
     current_subscription = subscription_history.filter(is_active=True).first()
     
-    # Get usage for current billing period
+    # Get usage for current billing period - FIX THE DATETIME ISSUE HERE
     if current_subscription:
-        usage_start_date = current_subscription.start_date.date()
+        # Convert datetime to date properly
+        usage_start_date = current_subscription.start_date
+        if hasattr(usage_start_date, 'date'):
+            usage_start_date = usage_start_date.date()
     else:
         # Use month start for free users
-        from datetime import date
-        today = date.today()
-        usage_start_date = date(today.year, today.month, 1)
+        from django.utils import timezone
+        today = timezone.now().date()
+        usage_start_date = today.replace(day=1)
     
     # Calculate AI service costs (if ai_services app is available)
     try:
@@ -216,10 +219,16 @@ def billing_view(request):
     
     # Add AI service costs to upcoming charges if significant
     if ai_costs['total_cost'] > 1.0:  # Only show if over $1
+        # Create next month's first day as date object
+        if usage_start_date.month == 12:
+            next_month = usage_start_date.replace(year=usage_start_date.year + 1, month=1, day=1)
+        else:
+            next_month = usage_start_date.replace(month=usage_start_date.month + 1, day=1)
+            
         upcoming_charges.append({
             'description': 'AI Services Usage',
             'amount': ai_costs['total_cost'],
-            'date': usage_start_date.replace(day=1),  # First of next month
+            'date': next_month,
             'type': 'usage'
         })
     
