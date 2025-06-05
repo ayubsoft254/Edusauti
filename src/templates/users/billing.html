@@ -1,0 +1,545 @@
+{% extends 'base.html' %}
+
+{% block title %}Billing & Payments - EduSauti{% endblock %}
+
+{% block meta_description %}Manage your EduSauti billing, view payment history, and update payment methods{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <span class="mx-2 text-gray-400">/</span>
+        <span class="text-gray-600">Billing</span>
+    </li>
+{% endblock %}
+
+{% block extra_css %}
+.billing-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(153, 135, 111, 0.1);
+    transition: all 0.3s ease;
+}
+
+.billing-card:hover {
+    border-color: rgba(153, 135, 111, 0.3);
+    box-shadow: 0 10px 30px rgba(153, 135, 111, 0.1);
+}
+
+.cost-breakdown {
+    background: linear-gradient(135deg, rgba(153, 135, 111, 0.05) 0%, rgba(245, 243, 240, 0.5) 100%);
+}
+
+.payment-method-card {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(153, 135, 111, 0.1);
+    transition: all 0.3s ease;
+}
+
+.payment-method-card:hover {
+    border-color: rgba(153, 135, 111, 0.3);
+    transform: translateY(-2px);
+}
+
+.payment-method-card.primary {
+    border-color: #99876f;
+    background: rgba(153, 135, 111, 0.05);
+}
+
+.invoice-item {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(153, 135, 111, 0.1);
+    transition: all 0.3s ease;
+}
+
+.invoice-item:hover {
+    background: rgba(153, 135, 111, 0.05);
+    border-color: rgba(153, 135, 111, 0.2);
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-paid {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+
+.status-failed {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+
+.cost-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(153, 135, 111, 0.1);
+}
+
+.cost-item:last-child {
+    border-bottom: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.upcoming-charge {
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-bg py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8 scroll-reveal">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-edu-deep mb-2">
+                        Billing & Payments
+                    </h1>
+                    <p class="text-edu-dark">
+                        Manage your subscription, view invoices, and track usage costs
+                    </p>
+                </div>
+                <div class="mt-4 md:mt-0 flex space-x-4">
+                    <a href="{% url 'billing-history' %}" class="bg-white text-edu-beige border border-edu-beige px-4 py-2 rounded-lg hover:bg-edu-beige hover:text-white transition-all">
+                        <i class="fas fa-history mr-2"></i>
+                        View History
+                    </a>
+                    <a href="{% url 'update-billing' %}" class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-all">
+                        <i class="fas fa-credit-card mr-2"></i>
+                        Update Payment
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Month Summary -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <!-- Current Bill -->
+            <div class="lg:col-span-2">
+                <div class="billing-card rounded-xl p-6 scroll-reveal">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-semibold text-edu-deep">Current Month</h2>
+                        <span class="text-sm text-gray-600">
+                            Period: {{ usage_start_date|date:"M d" }} - Present
+                        </span>
+                    </div>
+
+                    <!-- Cost Breakdown -->
+                    <div class="cost-breakdown rounded-lg p-4 mb-6">
+                        {% if current_subscription %}
+                            <div class="cost-item">
+                                <div class="flex items-center">
+                                    <i class="fas fa-crown mr-3 text-edu-beige"></i>
+                                    <span>{{ current_subscription.get_tier_display }} Subscription</span>
+                                </div>
+                                <span class="font-semibold">${{ subscription_cost|floatformat:2 }}</span>
+                            </div>
+                        {% endif %}
+
+                        {% if ai_costs.total_cost > 0 %}
+                            <div class="cost-item">
+                                <div class="flex items-center">
+                                    <i class="fas fa-robot mr-3 text-blue-500"></i>
+                                    <span>AI Services Usage</span>
+                                </div>
+                                <span class="font-semibold">${{ ai_costs.total_cost|floatformat:2 }}</span>
+                            </div>
+
+                            <!-- AI Cost Breakdown -->
+                            {% for service, cost in ai_costs.costs_by_service.items %}
+                                {% if cost > 0 %}
+                                    <div class="cost-item ml-6 text-sm text-gray-600">
+                                        <span>{{ service|title }}</span>
+                                        <span>${{ cost|floatformat:2 }}</span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+
+                        <div class="cost-item text-edu-deep">
+                            <span>Total This Month</span>
+                            <span class="text-xl">${{ total_this_month|floatformat:2 }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Current Subscription Info -->
+                    {% if current_subscription %}
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="font-semibold text-green-800">Active Subscription</h3>
+                                    <p class="text-sm text-green-600">
+                                        {{ current_subscription.get_tier_display }} Plan
+                                        {% if current_subscription.get_next_billing_date %}
+                                            • Next billing: {{ current_subscription.get_next_billing_date|date:"M d, Y" }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <a href="{% url 'subscription' %}" class="text-green-600 hover:text-green-800 text-sm font-medium">
+                                        Manage
+                                    </a>
+                                    <a href="{% url 'subscription-cancel-api' %}" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                        Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="font-semibold text-blue-800">Free Plan</h3>
+                                    <p class="text-sm text-blue-600">
+                                        Upgrade to unlock premium features and higher limits
+                                    </p>
+                                </div>
+                                <a href="{% url 'subscription' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                    Upgrade Now
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="space-y-6">
+                <!-- Payment Method -->
+                <div class="billing-card rounded-xl p-6 scroll-reveal">
+                    <h3 class="text-lg font-semibold text-edu-deep mb-4">Payment Method</h3>
+                    
+                    {% if payment_methods %}
+                        {% for method in payment_methods %}
+                            <div class="payment-method-card rounded-lg p-4 mb-3 {% if method.is_primary %}primary{% endif %}">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-credit-card text-edu-beige text-lg"></i>
+                                        <div>
+                                            <p class="font-medium text-edu-deep">
+                                                •••• {{ method.last_four }}
+                                            </p>
+                                            <p class="text-sm text-gray-600">
+                                                {{ method.brand|title }} • Expires {{ method.exp_month }}/{{ method.exp_year }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {% if method.is_primary %}
+                                        <span class="text-xs bg-edu-beige text-white px-2 py-1 rounded">Primary</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-6">
+                            <i class="fas fa-credit-card text-gray-300 text-3xl mb-3"></i>
+                            <p class="text-gray-600 mb-4">No payment method on file</p>
+                            <a href="{% url 'update-billing' %}" class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-colors text-sm">
+                                Add Payment Method
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="billing-card rounded-xl p-6 scroll-reveal">
+                    <h3 class="text-lg font-semibold text-edu-deep mb-4">Quick Actions</h3>
+                    
+                    <div class="space-y-3">
+                        <a href="{% url 'subscription' %}" class="flex items-center justify-between p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-crown text-edu-beige group-hover:text-white"></i>
+                                <span class="font-medium">Manage Subscription</span>
+                            </div>
+                            <i class="fas fa-arrow-right text-sm"></i>
+                        </a>
+                        
+                        <a href="{% url 'billing-history' %}" class="flex items-center justify-between p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-receipt text-edu-beige group-hover:text-white"></i>
+                                <span class="font-medium">Download Invoices</span>
+                            </div>
+                            <i class="fas fa-arrow-right text-sm"></i>
+                        </a>
+                        
+                        <a href="{% url 'usage-stats' %}" class="flex items-center justify-between p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-chart-bar text-edu-beige group-hover:text-white"></i>
+                                <span class="font-medium">Usage Statistics</span>
+                            </div>
+                            <i class="fas fa-arrow-right text-sm"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Charges -->
+        {% if upcoming_charges %}
+        <div class="billing-card rounded-xl p-6 mb-8 scroll-reveal">
+            <h2 class="text-xl font-semibold text-edu-deep mb-6">Upcoming Charges</h2>
+            
+            <div class="space-y-4">
+                {% for charge in upcoming_charges %}
+                    <div class="upcoming-charge rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    {% if charge.type == 'subscription' %}
+                                        <i class="fas fa-crown text-blue-600"></i>
+                                    {% else %}
+                                        <i class="fas fa-robot text-blue-600"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-edu-deep">{{ charge.description }}</h3>
+                                    <p class="text-sm text-gray-600">Due {{ charge.date|date:"M d, Y" }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold text-edu-deep text-lg">${{ charge.amount|floatformat:2 }}</p>
+                                <p class="text-sm text-gray-600">{{ charge.type|title }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recent Invoices -->
+        <div class="billing-card rounded-xl p-6 scroll-reveal">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-edu-deep">Recent Invoices</h2>
+                <a href="{% url 'billing-history' %}" class="text-edu-beige hover:text-edu-dark transition-colors text-sm font-medium">
+                    View All →
+                </a>
+            </div>
+
+            {% if subscription_history %}
+                <div class="space-y-4">
+                    {% for invoice in subscription_history %}
+                        <div class="invoice-item rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 bg-edu-cream rounded-full flex items-center justify-center">
+                                        <i class="fas fa-file-invoice text-edu-beige"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-edu-deep">
+                                            INV-{{ invoice.id|stringformat:"06d" }}
+                                        </h3>
+                                        <p class="text-sm text-gray-600">
+                                            {{ invoice.get_tier_display }} Plan • {{ invoice.created_at|date:"M d, Y" }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-right">
+                                        <p class="font-semibold text-edu-deep">${{ invoice.amount_paid|floatformat:2 }}</p>
+                                        <span class="status-badge {% if invoice.is_active %}status-paid{% else %}status-pending{% endif %}">
+                                            {% if invoice.is_active %}Paid{% else %}Inactive{% endif %}
+                                        </span>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <a href="{% url 'download-invoice' invoice.id %}" 
+                                           class="text-edu-beige hover:text-edu-dark transition-colors" 
+                                           title="Download Invoice">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <button onclick="viewInvoiceDetails({{ invoice.id }})" 
+                                                class="text-edu-beige hover:text-edu-dark transition-colors" 
+                                                title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <div class="text-4xl mb-4">📄</div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No invoices yet</h3>
+                    <p class="text-gray-500 mb-4">Your billing history will appear here once you make a purchase</p>
+                    {% if not current_subscription %}
+                        <a href="{% url 'subscription' %}" class="bg-edu-beige text-white px-6 py-2 rounded-lg hover:bg-edu-dark transition-colors">
+                            Upgrade Now
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Billing Information -->
+        {% if billing_profile %}
+        <div class="billing-card rounded-xl p-6 mt-8 scroll-reveal">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-edu-deep">Billing Information</h2>
+                <a href="{% url 'update_billing' %}" class="text-edu-beige hover:text-edu-dark transition-colors text-sm font-medium">
+                    Edit →
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">Billing Address</h3>
+                    <div class="text-sm text-gray-600 space-y-1">
+                        {% if billing_profile.company_name %}
+                            <p>{{ billing_profile.company_name }}</p>
+                        {% endif %}
+                        <p>{{ billing_profile.first_name }} {{ billing_profile.last_name }}</p>
+                        <p>{{ billing_profile.address_line_1 }}</p>
+                        {% if billing_profile.address_line_2 %}
+                            <p>{{ billing_profile.address_line_2 }}</p>
+                        {% endif %}
+                        <p>{{ billing_profile.city }}, {{ billing_profile.state }} {{ billing_profile.postal_code }}</p>
+                        <p>{{ billing_profile.country }}</p>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-900 mb-2">Contact Information</h3>
+                    <div class="text-sm text-gray-600 space-y-1">
+                        <p>{{ billing_profile.email }}</p>
+                        {% if billing_profile.phone %}
+                            <p>{{ billing_profile.phone }}</p>
+                        {% endif %}
+                        {% if billing_profile.tax_id %}
+                            <p>Tax ID: {{ billing_profile.tax_id }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Invoice Details Modal -->
+<div id="invoice-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-edu-deep">Invoice Details</h3>
+            <button onclick="closeInvoiceModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="invoice-details-content">
+            <!-- Content will be loaded dynamically -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+// Invoice details modal
+function viewInvoiceDetails(invoiceId) {
+    // Fetch invoice details
+    fetch(`/api/billing/invoice/${invoiceId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const content = `
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Invoice Number:</span>
+                        <span class="font-medium">INV-${invoiceId.toString().padStart(6, '0')}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Date:</span>
+                        <span class="font-medium">${new Date(data.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Plan:</span>
+                        <span class="font-medium">${data.tier_display}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Amount:</span>
+                        <span class="font-medium">$${parseFloat(data.amount_paid).toFixed(2)}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Status:</span>
+                        <span class="font-medium ${data.is_active ? 'text-green-600' : 'text-gray-600'}">
+                            ${data.is_active ? 'Paid' : 'Inactive'}
+                        </span>
+                    </div>
+                    <div class="mt-6 flex space-x-3">
+                        <a href="/users/download-invoice/${invoiceId}/" 
+                           class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-colors flex-1 text-center">
+                            <i class="fas fa-download mr-2"></i>Download PDF
+                        </a>
+                        <button onclick="closeInvoiceModal()" 
+                                class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('invoice-details-content').innerHTML = content;
+            document.getElementById('invoice-modal').classList.remove('hidden');
+        })
+        .catch(error => {
+            console.error('Error fetching invoice details:', error);
+            EduSauti.showToast('Error loading invoice details', 'error');
+        });
+}
+
+function closeInvoiceModal() {
+    document.getElementById('invoice-modal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+document.getElementById('invoice-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeInvoiceModal();
+    }
+});
+
+// Auto-refresh billing data every 30 seconds if there are pending charges
+{% if upcoming_charges %}
+setInterval(() => {
+    // Check for updates to billing status
+    fetch('/api/billing/summary/')
+        .then(response => response.json())
+        .then(data => {
+            // Update the page if there are significant changes
+            if (data.status_changed) {
+                location.reload();
+            }
+        })
+        .catch(error => console.log('Background billing check failed'));
+}, 30000);
+{% endif %}
+
+// Show success message if payment was just processed
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('payment') === 'success') {
+    setTimeout(() => {
+        EduSauti.showToast('Payment processed successfully!', 'success');
+    }, 500);
+}
+
+// Format currency values
+document.addEventListener('DOMContentLoaded', function() {
+    // Add any additional initialization here
+    console.log('Billing page loaded');
+});
+{% endblock %}
