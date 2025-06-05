@@ -163,16 +163,17 @@
                         id="{{ form.email.id_for_label }}"
                         name="{{ form.email.name }}"
                         type="email"
-                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white {% if form.email.errors %}field-error{% endif %}"
-                        placeholder=" "
+                        class="form-input {% if form.email.errors %}field-error{% endif %}"
+                        placeholder="your@email.com"
                         required
-                        {% if form.email.value %}value="{{ form.email.value }}"{% endif %}
+                        {% if form.email.value %}value="{{ form.email.value|default:'' }}"{% endif %}
+                        autocomplete="email"
                     >
-                    <label for="{{ form.email.id_for_label }}" class="form-label">
-                        Email address
+                    <label for="{{ form.email.id_for_label }}">
+                        Email address *
                     </label>
                     {% if form.email.errors %}
-                        <div class="mt-1 text-sm text-red-600">
+                        <div class="mt-2 text-sm text-red-600">
                             {% for error in form.email.errors %}
                                 <p class="flex items-center">
                                     <i class="fas fa-exclamation-circle mr-1"></i>
@@ -190,16 +191,17 @@
                         id="{{ form.first_name.id_for_label }}"
                         name="{{ form.first_name.name }}"
                         type="text"
-                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white {% if form.first_name.errors %}field-error{% endif %}"
-                        placeholder=" "
+                        class="form-input {% if form.first_name.errors %}field-error{% endif %}"
+                        placeholder="First name"
                         {% if form.first_name.field.required %}required{% endif %}
-                        {% if form.first_name.value %}value="{{ form.first_name.value }}"{% endif %}
+                        {% if form.first_name.value %}value="{{ form.first_name.value|default:'' }}"{% endif %}
+                        autocomplete="given-name"
                     >
-                    <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                    <label for="{{ form.first_name.id_for_label }}">
                         First name{% if form.first_name.field.required %} *{% endif %}
                     </label>
                     {% if form.first_name.errors %}
-                        <div class="mt-1 text-sm text-red-600">
+                        <div class="mt-2 text-sm text-red-600">
                             {% for error in form.first_name.errors %}
                                 <p class="flex items-center">
                                     <i class="fas fa-exclamation-circle mr-1"></i>
@@ -218,16 +220,17 @@
                         id="{{ form.last_name.id_for_label }}"
                         name="{{ form.last_name.name }}"
                         type="text"
-                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white {% if form.last_name.errors %}field-error{% endif %}"
-                        placeholder=" "
+                        class="form-input {% if form.last_name.errors %}field-error{% endif %}"
+                        placeholder="Last name"
                         {% if form.last_name.field.required %}required{% endif %}
-                        {% if form.last_name.value %}value="{{ form.last_name.value }}"{% endif %}
+                        {% if form.last_name.value %}value="{{ form.last_name.value|default:'' }}"{% endif %}
+                        autocomplete="family-name"
                     >
-                    <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                    <label for="{{ form.last_name.id_for_label }}">
                         Last name{% if form.last_name.field.required %} *{% endif %}
                     </label>
                     {% if form.last_name.errors %}
-                        <div class="mt-1 text-sm text-red-600">
+                        <div class="mt-2 text-sm text-red-600">
                             {% for error in form.last_name.errors %}
                                 <p class="flex items-center">
                                     <i class="fas fa-exclamation-circle mr-1"></i>
@@ -245,21 +248,22 @@
                         id="{{ form.password1.id_for_label }}"
                         name="{{ form.password1.name }}"
                         type="password"
-                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white {% if form.password1.errors %}field-error{% endif %}"
-                        placeholder=" "
+                        class="form-input {% if form.password1.errors %}field-error{% endif %}"
+                        placeholder="Password"
                         required
+                        autocomplete="new-password"
                     >
-                    <label for="{{ form.password1.id_for_label }}" class="form-label">
-                        Password
+                    <label for="{{ form.password1.id_for_label }}">
+                        Password *
                     </label>
                     <div class="password-strength">
                         <div class="password-strength-fill" id="password-strength-fill"></div>
                     </div>
-                    <p class="mt-1 text-xs text-gray-500" id="password-help">
+                    <p class="mt-2 text-xs text-gray-500" id="password-help">
                         Password strength: <span id="strength-text">Enter a password</span>
                     </p>
                     {% if form.password1.errors %}
-                        <div class="mt-1 text-sm text-red-600">
+                        <div class="mt-2 text-sm text-red-600">
                             {% for error in form.password1.errors %}
                                 <p class="flex items-center">
                                     <i class="fas fa-exclamation-circle mr-1"></i>
@@ -275,18 +279,19 @@
                         id="{{ form.password2.id_for_label }}"
                         name="{{ form.password2.name }}"
                         type="password"
-                        class="form-input w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-edu-beige focus:ring-0 transition-all bg-gray-50 focus:bg-white {% if form.password2.errors %}field-error{% endif %}"
-                        placeholder=" "
+                        class="form-input {% if form.password2.errors %}field-error{% endif %}"
+                        placeholder="Confirm password"
                         required
+                        autocomplete="new-password"
                     >
-                    <label for="{{ form.password2.id_for_label }}" class="form-label">
-                        Confirm password
+                    <label for="{{ form.password2.id_for_label }}">
+                        Confirm password *
                     </label>
-                    <div class="mt-1 text-xs" id="password-match">
+                    <div class="mt-2 text-xs" id="password-match">
                         <span class="text-gray-500">Passwords must match</span>
                     </div>
                     {% if form.password2.errors %}
-                        <div class="mt-1 text-sm text-red-600">
+                        <div class="mt-2 text-sm text-red-600">
                             {% for error in form.password2.errors %}
                                 <p class="flex items-center">
                                     <i class="fas fa-exclamation-circle mr-1"></i>
