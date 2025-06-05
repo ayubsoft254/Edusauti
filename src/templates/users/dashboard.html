@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - EduSauti{% endblock %}
+
+{% block meta_description %}Your EduSauti learning dashboard with documents, usage stats, and recent activity{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <span class="mx-2 text-gray-400">/</span>
+        <span class="text-gray-600">Dashboard</span>
+    </li>
+{% endblock %}
+
+{% block extra_css %}
+.dashboard-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(153, 135, 111, 0.1);
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    border-color: rgba(153, 135, 111, 0.3);
+    box-shadow: 0 10px 30px rgba(153, 135, 111, 0.1);
+}
+
+.usage-progress {
+    background: linear-gradient(90deg, #10b981, #059669);
+    transition: width 0.8s ease;
+}
+
+.usage-progress-bg {
+    background: rgba(153, 135, 111, 0.1);
+}
+
+.stat-icon {
+    background: linear-gradient(135deg, #99876f, #7d6b57);
+}
+
+.activity-item {
+    transition: all 0.3s ease;
+}
+
+.activity-item:hover {
+    background: rgba(153, 135, 111, 0.05);
+    transform: translateX(4px);
+}
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-bg py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8 scroll-reveal">
+            <h1 class="text-3xl font-bold text-edu-deep mb-2">
+                Welcome back, {{ user.first_name|default:user.username }}! 👋
+            </h1>
+            <p class="text-edu-dark">
+                Here's your learning overview for today
+            </p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Documents Used -->
+            <div class="dashboard-card rounded-xl p-6 scroll-reveal">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Documents This Month</p>
+                        <p class="text-2xl font-bold text-edu-deep">{{ documents_used }}/{{ documents_limit }}</p>
+                    </div>
+                    <div class="stat-icon w-12 h-12 rounded-full flex items-center justify-center">
+                        <i class="fas fa-file-alt text-white"></i>
+                    </div>
+                </div>
+                <div class="usage-progress-bg rounded-full h-2">
+                    <div class="usage-progress h-2 rounded-full" 
+                         style="width: {% widthratio documents_used documents_limit 100 %}%"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">
+                    {{ documents_limit|add:"-"|add:documents_used }} remaining
+                </p>
+            </div>
+
+            <!-- Questions Asked -->
+            <div class="dashboard-card rounded-xl p-6 scroll-reveal">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Questions This Month</p>
+                        <p class="text-2xl font-bold text-edu-deep">{{ questions_used }}/{{ questions_limit }}</p>
+                    </div>
+                    <div class="stat-icon w-12 h-12 rounded-full flex items-center justify-center">
+                        <i class="fas fa-question-circle text-white"></i>
+                    </div>
+                </div>
+                <div class="usage-progress-bg rounded-full h-2">
+                    <div class="usage-progress h-2 rounded-full" 
+                         style="width: {% widthratio questions_used questions_limit 100 %}%"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">
+                    {{ questions_limit|add:"-"|add:questions_used }} remaining
+                </p>
+            </div>
+
+            <!-- Subscription Status -->
+            <div class="dashboard-card rounded-xl p-6 scroll-reveal">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Current Plan</p>
+                        <p class="text-2xl font-bold text-edu-deep">{{ subscription_tier|title }}</p>
+                    </div>
+                    <div class="stat-icon w-12 h-12 rounded-full flex items-center justify-center">
+                        <i class="fas fa-{% if has_premium %}crown{% else %}user{% endif %} text-white"></i>
+                    </div>
+                </div>
+                {% if has_premium %}
+                    <p class="text-green-600 text-sm font-medium">✓ Premium Features Active</p>
+                {% else %}
+                    <a href="{% url 'users:subscription' %}" class="text-edu-beige hover:text-edu-dark text-sm font-medium transition-colors">
+                        Upgrade to Premium →
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Recent Documents -->
+            <div class="lg:col-span-2">
+                <div class="dashboard-card rounded-xl p-6 scroll-reveal">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-semibold text-edu-deep">Recent Documents</h2>
+                        <a href="{% url 'documents:list' %}" class="text-edu-beige hover:text-edu-dark transition-colors text-sm font-medium">
+                            View All →
+                        </a>
+                    </div>
+                    
+                    {% if recent_documents %}
+                        <div class="space-y-4">
+                            {% for document in recent_documents %}
+                                <div class="activity-item rounded-lg p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-edu-cream rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-file-alt text-edu-beige"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-medium text-edu-deep">{{ document.title }}</h3>
+                                                <p class="text-sm text-gray-500">
+                                                    Uploaded {{ document.created_at|timesince }} ago
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <a href="{{ document.get_absolute_url }}" class="text-edu-beige hover:text-edu-dark transition-colors">
+                                            <i class="fas fa-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <div class="text-4xl mb-4">📄</div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No documents yet</h3>
+                            <p class="text-gray-500 mb-4">Upload your first document to get started</p>
+                            <a href="{% url 'documents:upload' %}" class="bg-edu-beige text-white px-6 py-2 rounded-lg hover:bg-edu-dark transition-colors">
+                                Upload Document
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="space-y-6">
+                <!-- Upload Document -->
+                <div class="dashboard-card rounded-xl p-6 scroll-reveal">
+                    <h3 class="text-lg font-semibold text-edu-deep mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <a href="{% url 'documents:upload' %}" class="flex items-center space-x-3 p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
+                            <i class="fas fa-upload text-edu-beige group-hover:text-white"></i>
+                            <span class="font-medium">Upload Document</span>
+                        </a>
+                        <a href="{% url 'users:usage-stats' %}" class="flex items-center space-x-3 p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
+                            <i class="fas fa-chart-bar text-edu-beige group-hover:text-white"></i>
+                            <span class="font-medium">View Usage Stats</span>
+                        </a>
+                        <a href="{% url 'users:billing' %}" class="flex items-center space-x-3 p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
+                            <i class="fas fa-credit-card text-edu-beige group-hover:text-white"></i>
+                            <span class="font-medium">Manage Billing</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Usage Summary -->
+                <div class="dashboard-card rounded-xl p-6 scroll-reveal">
+                    <h3 class="text-lg font-semibold text-edu-deep mb-4">This Month's Activity</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Documents Processed</span>
+                            <span class="font-semibold text-edu-deep">{{ documents_used }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Questions Asked</span>
+                            <span class="font-semibold text-edu-deep">{{ questions_used }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Plan Status</span>
+                            <span class="font-semibold {% if has_premium %}text-green-600{% else %}text-gray-600{% endif %}">
+                                {{ subscription_tier|title }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+// Animate progress bars on load
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBars = document.querySelectorAll('.usage-progress');
+    progressBars.forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => {
+            bar.style.width = width;
+        }, 500);
+    });
+    
+    // Show welcome message
+    setTimeout(() => {
+        EduSauti.showToast('Welcome to your dashboard!', 'info', 3000);
+    }, 1000);
+});
+{% endblock %}
