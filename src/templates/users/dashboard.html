@@ -116,7 +116,7 @@
                 {% if has_premium %}
                     <p class="text-green-600 text-sm font-medium">✓ Premium Features Active</p>
                 {% else %}
-                    <a href="{% url 'users:subscription' %}" class="text-edu-beige hover:text-edu-dark text-sm font-medium transition-colors">
+                    <a href="{% url 'subscription' %}" class="text-edu-beige hover:text-edu-dark text-sm font-medium transition-colors">
                         Upgrade to Premium →
                     </a>
                 {% endif %}
@@ -129,7 +129,7 @@
                 <div class="dashboard-card rounded-xl p-6 scroll-reveal">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-xl font-semibold text-edu-deep">Recent Documents</h2>
-                        <a href="{% url 'documents:list' %}" class="text-edu-beige hover:text-edu-dark transition-colors text-sm font-medium">
+                        <a href="{% url 'document-list-create' %}" class="text-edu-beige hover:text-edu-dark transition-colors text-sm font-medium">
                             View All →
                         </a>
                     </div>
@@ -162,7 +162,7 @@
                             <div class="text-4xl mb-4">📄</div>
                             <h3 class="text-lg font-medium text-gray-900 mb-2">No documents yet</h3>
                             <p class="text-gray-500 mb-4">Upload your first document to get started</p>
-                            <a href="{% url 'documents:upload' %}" class="bg-edu-beige text-white px-6 py-2 rounded-lg hover:bg-edu-dark transition-colors">
+                            <a href="{% url 'upload' %}" class="bg-edu-beige text-white px-6 py-2 rounded-lg hover:bg-edu-dark transition-colors">
                                 Upload Document
                             </a>
                         </div>
@@ -176,15 +176,15 @@
                 <div class="dashboard-card rounded-xl p-6 scroll-reveal">
                     <h3 class="text-lg font-semibold text-edu-deep mb-4">Quick Actions</h3>
                     <div class="space-y-3">
-                        <a href="{% url 'documents:upload' %}" class="flex items-center space-x-3 p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
+                        <a href="{% url 'upload' %}" class="flex items-center space-x-3 p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
                             <i class="fas fa-upload text-edu-beige group-hover:text-white"></i>
                             <span class="font-medium">Upload Document</span>
                         </a>
-                        <a href="{% url 'users:usage-stats' %}" class="flex items-center space-x-3 p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
+                        <a href="{% url 'usage-stats' %}" class="flex items-center space-x-3 p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
                             <i class="fas fa-chart-bar text-edu-beige group-hover:text-white"></i>
                             <span class="font-medium">View Usage Stats</span>
                         </a>
-                        <a href="{% url 'users:billing' %}" class="flex items-center space-x-3 p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
+                        <a href="{% url 'billing' %}" class="flex items-center space-x-3 p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
                             <i class="fas fa-credit-card text-edu-beige group-hover:text-white"></i>
                             <span class="font-medium">Manage Billing</span>
                         </a>

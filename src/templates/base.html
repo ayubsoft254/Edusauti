@@ -287,9 +287,9 @@
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-8">
                     {% if user.is_authenticated %}
-                        <a href="{% url 'users:dashboard' %}" class="text-edu-deep hover:text-edu-beige transition-colors">Dashboard</a>
-                        <a href="{% url 'documents:list' %}" class="text-edu-deep hover:text-edu-beige transition-colors">Documents</a>
-                        <a href="{% url 'users:usage-stats' %}" class="text-edu-deep hover:text-edu-beige transition-colors">Usage</a>
+                        <a href="{% url 'dashboard' %}" class="text-edu-deep hover:text-edu-beige transition-colors">Dashboard</a>
+                        <a href="{% url 'document-list-create' %}" class="text-edu-deep hover:text-edu-beige transition-colors">Documents</a>
+                        <a href="{% url 'usage-stats' %}" class="text-edu-deep hover:text-edu-beige transition-colors">Usage</a>
                         
                         <!-- User Dropdown -->
                         <div class="relative" id="user-dropdown">
@@ -307,13 +307,13 @@
                             
                             <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 hidden" id="user-menu">
                                 <div class="py-2">
-                                    <a href="{% url 'users:profile' %}" class="block px-4 py-2 text-edu-deep hover:bg-edu-cream transition-colors">
+                                    <a href="{% url 'profile' %}" class="block px-4 py-2 text-edu-deep hover:bg-edu-cream transition-colors">
                                         <i class="fas fa-user mr-2"></i>Profile
                                     </a>
-                                    <a href="{% url 'users:settings' %}" class="block px-4 py-2 text-edu-deep hover:bg-edu-cream transition-colors">
+                                    <a href="{% url 'settings' %}" class="block px-4 py-2 text-edu-deep hover:bg-edu-cream transition-colors">
                                         <i class="fas fa-cog mr-2"></i>Settings
                                     </a>
-                                    <a href="{% url 'users:billing' %}" class="block px-4 py-2 text-edu-deep hover:bg-edu-cream transition-colors">
+                                    <a href="{% url 'billing' %}" class="block px-4 py-2 text-edu-deep hover:bg-edu-cream transition-colors">
                                         <i class="fas fa-credit-card mr-2"></i>Billing
                                     </a>
                                     <div class="border-t border-gray-100 my-1"></div>
@@ -346,12 +346,12 @@
         <div class="md:hidden hidden bg-white shadow-lg" id="mobile-menu">
             <div class="px-4 pt-2 pb-4 space-y-2">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'users:dashboard' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Dashboard</a>
-                    <a href="{% url 'documents:list' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Documents</a>
-                    <a href="{% url 'users:usage-stats' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Usage</a>
-                    <a href="{% url 'users:profile' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Profile</a>
-                    <a href="{% url 'users:settings' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Settings</a>
-                    <a href="{% url 'users:billing' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Billing</a>
+                    <a href="{% url 'dashboard' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Dashboard</a>
+                    <a href="{% url 'document-list-create' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Documents</a>
+                    <a href="{% url 'usage-stats' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Usage</a>
+                    <a href="{% url 'profile' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Profile</a>
+                    <a href="{% url 'settings' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Settings</a>
+                    <a href="{% url 'billing' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Billing</a>
                     <a href="{% url 'account_logout' %}" class="block py-2 text-red-600 hover:text-red-800">Logout</a>
                 {% else %}
                     <a href="/#features" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Features</a>
@@ -375,7 +375,7 @@
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <ol class="flex items-center space-x-2 text-sm">
                         <li>
-                            <a href="{% url 'users:dashboard' %}" class="text-edu-dark hover:text-edu-beige transition-colors">
+                            <a href="{% url 'dashboard' %}" class="text-edu-dark hover:text-edu-beige transition-colors">
                                 <i class="fas fa-home mr-1"></i>Dashboard
                             </a>
                         </li>

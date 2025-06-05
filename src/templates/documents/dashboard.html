@@ -181,7 +181,7 @@
                     </p>
                 </div>
                 <div class="mt-4 md:mt-0">
-                    <a href="{% url 'documents:upload' %}" class="bg-edu-beige text-white px-6 py-3 rounded-xl font-semibold hover:bg-edu-dark transition-all hover-lift inline-flex items-center">
+                    <a href="{% url 'upload' %}" class="bg-edu-beige text-white px-6 py-3 rounded-xl font-semibold hover:bg-edu-dark transition-all hover-lift inline-flex items-center">
                         <i class="fas fa-plus mr-2"></i>
                         Upload New Document
                     </a>
@@ -354,7 +354,7 @@
                         <!-- Action Buttons -->
                         <div class="document-actions flex items-center justify-between">
                             {% if document.status == 'completed' %}
-                                <a href="{% url 'documents:detail' document.id %}" class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-colors flex items-center">
+                                <a href="{% url 'detail' document.id %}" class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-colors flex items-center">
                                     <i class="fas fa-eye mr-2"></i>
                                     View
                                 </a>
@@ -441,7 +441,7 @@
                         <p class="text-gray-600 mb-6">
                             Get started by uploading a document to create your first AI-powered summary and Q&A session.
                         </p>
-                        <a href="{% url 'documents:upload' %}" class="bg-edu-beige text-white px-8 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift inline-flex items-center">
+                        <a href="{% url 'upload' %}" class="bg-edu-beige text-white px-8 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift inline-flex items-center">
                             <i class="fas fa-upload mr-2"></i>
                             Upload Document
                         </a>

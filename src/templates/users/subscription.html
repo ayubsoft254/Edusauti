@@ -117,7 +117,7 @@
         <div class="mb-12 scroll-reveal">
             <h2 class="text-2xl font-semibold text-edu-deep mb-6">Available Plans</h2>
             
-            <form method="post" action="{% url 'users:upgrade-subscription' %}" id="upgrade-form">
+            <form method="post" action="{% url 'upgrade-subscription' %}" id="upgrade-form">
                 {% csrf_token %}
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -329,7 +329,7 @@
                 </div>
                 
                 <div class="mt-6 text-center">
-                    <a href="{% url 'users:billing-history' %}" class="text-edu-beige hover:text-edu-dark transition-colors">
+                    <a href="{% url 'billing-history' %}" class="text-edu-beige hover:text-edu-dark transition-colors">
                         View Full History →
                     </a>
                 </div>
