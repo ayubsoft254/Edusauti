@@ -364,6 +364,32 @@
 {% endblock %}
 
 {% block extra_js %}
+// Initialize floating labels
+function initFloatingLabels() {
+    const floatingInputs = document.querySelectorAll('.form-floating input');
+    
+    floatingInputs.forEach(input => {
+        // Check initial state
+        checkFloatingLabel(input);
+        
+        // Add event listeners
+        input.addEventListener('focus', () => checkFloatingLabel(input));
+        input.addEventListener('blur', () => checkFloatingLabel(input));
+        input.addEventListener('input', () => checkFloatingLabel(input));
+    });
+}
+
+function checkFloatingLabel(input) {
+    const label = input.nextElementSibling;
+    if (!label || !label.matches('label')) return;
+    
+    if (input.value !== '' || input === document.activeElement) {
+        label.classList.add('active');
+    } else {
+        label.classList.remove('active');
+    }
+}
+
 // Safely get form field IDs
 function getFieldId(fieldName) {
     const element = document.querySelector(`[name="${fieldName}"]`);
@@ -514,6 +540,9 @@ function validateForm() {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize floating labels
+    initFloatingLabels();
+    
     // Set up event listeners for password fields
     const password1Id = getFieldId('password1');
     const password2Id = getFieldId('password2');
@@ -559,11 +588,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial validation
     validateForm();
     
-    // Auto-focus first field
-    const firstField = document.querySelector('#signup-form input:not([type="hidden"])');
-    if (firstField) {
-        firstField.focus();
-    }
+    // Auto-focus first field with delay to ensure proper label animation
+    setTimeout(() => {
+        const firstField = document.querySelector('#signup-form input:not([type="hidden"])');
+        if (firstField) {
+            firstField.focus();
+        }
+    }, 100);
 });
 
 // Debug function (remove in production)
