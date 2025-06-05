@@ -812,8 +812,8 @@ def billing_summary_api(request):
     # Calculate current month costs
     try:
         from ai_services.utils import calculate_monthly_cost
-        from datetime import date
-        today = date.today()
+        from django.utils import timezone
+        today = timezone.now().date()  # Use timezone.now().date() instead of date.today()
         ai_costs = calculate_monthly_cost(user, today.month, today.year)
     except ImportError:
         ai_costs = {'total_cost': 0}

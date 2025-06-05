@@ -13,6 +13,8 @@ class User(AbstractUser):
         ('edu', 'Classroom Learn'),
         ('enterprise', 'Institution Learn'),
     ]
+
+    SUBSCRIPTION_CHOICES = SUBSCRIPTION_TIERS
     
     # Keep both username and email
     username = models.CharField(max_length=150, unique=True)  # Add this back
@@ -240,8 +242,8 @@ class SubscriptionHistory(models.Model):
         if not self.is_active or not self.end_date:
             return None
         
-        # If subscription hasn't ended yet, return end_date
-        if self.end_date > timezone.now().date():
+        # Fix: Compare datetime with datetime, not datetime with date
+        if self.end_date > timezone.now():
             return self.end_date
         
         return None
