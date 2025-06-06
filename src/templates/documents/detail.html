@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load document_tags %}
 
 {% block title %}{{ document.title }} - EduSauti{% endblock %}
 
@@ -60,6 +61,11 @@
     .tag:hover {
         background: rgba(153, 135, 111, 0.3);
         transform: translateY(-1px);
+    }
+    
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
     }
 </style>
 {% endblock %}
@@ -126,7 +132,6 @@
                     </div>
                     
                     <!-- Tags -->
-                    <!-- Tags section -->
                     {% if document.get_tags_list %}
                         <div class="flex flex-wrap gap-2 mb-6 scroll-reveal">
                             {% for tag in document.get_tags_list %}
@@ -183,7 +188,7 @@
                                 </span>
                                 <span>
                                     <i class="fas fa-file-audio mr-1"></i>
-                                    {{ audio_summary.audio_size_mb|floatformat:1 }} MB
+                                    {{ audio_summary.audio_size|audio_size_mb }} MB
                                 </span>
                             </div>
                         </div>
@@ -249,7 +254,7 @@
                             <textarea 
                                 id="question-input" 
                                 placeholder="Ask a question about this document..."
-                                class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-edu-beige focus:border-transparent resize-none"
+                                class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:border-transparent resize-none"
                                 rows="3"
                                 required
                             ></textarea>
@@ -356,7 +361,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Size:</span>
-                            <span class="text-gray-900">{{ document.file_size_mb|floatformat:1 }} MB</span>
+                            <span class="text-gray-900">{{ document.file_size_mb }} MB</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Language:</span>
@@ -522,11 +527,10 @@ document.addEventListener('DOMContentLoaded', function() {
             this.textContent = newSpeed + 'x Speed';
         });
     }
-    
+
     // Question Form
     const questionForm = document.getElementById('question-form');
     const questionInput = document.getElementById('question-input');
-    const questionsContainer = document.getElementById('questions-container');
     
     if (questionForm) {
         questionForm.addEventListener('submit', async function(e) {
@@ -536,14 +540,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!question) return;
             
             const submitBtn = this.querySelector('button[type="submit"]');
-            EduSauti.setLoadingState(submitBtn, true);
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+            submitBtn.disabled = true;
             
             try {
-                const response = await fetch(`/documents/{{ document.id }}/questions/`, {
+                const response = await fetch(`/api/documents/{{ document.id }}/questions/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': EduSauti.csrfToken
+                        'X-CSRFToken': window.CSRF_TOKEN
                     },
                     body: JSON.stringify({
                         question_text: question
@@ -551,169 +557,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 if (response.ok) {
-                    const data = await response.json();
                     questionInput.value = '';
-                    
-                    // Add question to the list
-                    addQuestionToList(question, data.id);
-                    
-                    EduSauti.showToast('Question submitted successfully!', 'success');
-                    
-                    // Poll for answer
-                    pollForAnswer(data.id);
+                    window.EduSauti.showToast('Question submitted successfully!', 'success');
+                    // Optionally reload the page or update the questions list
+                    setTimeout(() => window.location.reload(), 1000);
                 } else {
                     const error = await response.json();
-                    EduSauti.showToast(error.error || 'Failed to submit question', 'error');
+                    window.EduSauti.showToast(error.error || 'Failed to submit question', 'error');
                 }
             } catch (error) {
-                EduSauti.showToast('Network error. Please try again.', 'error');
+                window.EduSauti.showToast('Network error. Please try again.', 'error');
             } finally {
-                EduSauti.setLoadingState(submitBtn, false);
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             }
         });
-    }
-    
-    function addQuestionToList(questionText, questionId) {
-        const questionHTML = `
-            <div class="question-item" data-question-id="${questionId}">
-                <div class="question-bubble p-4 rounded-lg mb-3">
-                    <div class="flex items-start space-x-3">
-                        <div class="w-8 h-8 bg-edu-beige rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-user text-white text-sm"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-gray-900">${questionText}</p>
-                            <p class="text-sm text-gray-500 mt-2">
-                                <i class="fas fa-clock mr-1"></i>
-                                Just now
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="answer-bubble p-4 rounded-lg ml-8">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-spinner fa-spin text-white text-sm"></i>
-                        </div>
-                        <p class="text-gray-600">Processing your question...</p>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        if (questionsContainer.querySelector('.text-center')) {
-            questionsContainer.innerHTML = questionHTML;
-        } else {
-            questionsContainer.insertAdjacentHTML('afterbegin', questionHTML);
-        }
-    }
-    
-    function pollForAnswer(questionId, attempts = 0) {
-        if (attempts >= 30) { // Stop after 30 attempts (1 minute)
-            EduSauti.showToast('Question processing is taking longer than expected', 'warning');
-            return;
-        }
-        
-        setTimeout(async () => {
-            try {
-                const response = await fetch(`/documents/{{ document.id }}/questions/`);
-                const data = await response.json();
-                
-                const question = data.results.find(q => q.id === questionId);
-                if (question && question.is_answered) {
-                    updateQuestionWithAnswer(questionId, question);
-                } else {
-                    pollForAnswer(questionId, attempts + 1);
-                }
-            } catch (error) {
-                console.error('Error polling for answer:', error);
-                pollForAnswer(questionId, attempts + 1);
-            }
-        }, 2000); // Poll every 2 seconds
-    }
-    
-    function updateQuestionWithAnswer(questionId, questionData) {
-        const questionElement = document.querySelector(`[data-question-id="${questionId}"]`);
-        if (questionElement) {
-            const answerDiv = questionElement.querySelector('.answer-bubble');
-            answerDiv.innerHTML = `
-                <div class="flex items-start space-x-3">
-                    <div class="w-8 h-8 bg-edu-accent rounded-full flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-robot text-white text-sm"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-gray-900">${questionData.answer_text}</p>
-                        <div class="flex items-center justify-between mt-3">
-                            <p class="text-sm text-gray-500">
-                                <i class="fas fa-clock mr-1"></i>
-                                Just answered
-                                ${questionData.answer_confidence ? `
-                                    <span class="ml-3">
-                                        <i class="fas fa-chart-line mr-1"></i>
-                                        ${Math.round(questionData.answer_confidence)}% confidence
-                                    </span>
-                                ` : ''}
-                            </p>
-                            
-                            <div class="flex items-center space-x-1">
-                                ${[1,2,3,4,5].map(i => `
-                                    <button class="rating-star text-gray-300 hover:text-yellow-400 transition-colors" 
-                                            data-question="${questionId}" 
-                                            data-rating="${i}">
-                                        <i class="fas fa-star"></i>
-                                    </button>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-    }
-    
-    // Rating System
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.rating-star')) {
-            const button = e.target.closest('.rating-star');
-            const questionId = button.dataset.question;
-            const rating = parseInt(button.dataset.rating);
-            
-            // Update visual feedback
-            const stars = document.querySelectorAll(`[data-question="${questionId}"].rating-star`);
-            stars.forEach((star, index) => {
-                const icon = star.querySelector('i');
-                if (index < rating) {
-                    icon.classList.remove('text-gray-300');
-                    icon.classList.add('text-yellow-400');
-                } else {
-                    icon.classList.remove('text-yellow-400');
-                    icon.classList.add('text-gray-300');
-                }
-            });
-            
-            // Submit rating
-            submitRating(questionId, rating);
-        }
-    });
-    
-    async function submitRating(questionId, rating) {
-        try {
-            const response = await fetch(`/questions/${questionId}/rate/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': EduSauti.csrfToken
-                },
-                body: JSON.stringify({ rating: rating })
-            });
-            
-            if (response.ok) {
-                EduSauti.showToast('Thank you for your rating!', 'success');
-            }
-        } catch (error) {
-            console.error('Error submitting rating:', error);
-        }
     }
     
     // Share Modal
