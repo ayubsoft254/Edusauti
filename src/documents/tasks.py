@@ -607,3 +607,187 @@ def regenerate_audio_summary(self, document_id, voice_name, speech_rate='medium'
     except Exception as exc:
         logger.error(f"Audio regeneration failed for document {document_id}: {str(exc)}")
         raise exc
+
+
+def process_document_sync(document_id):
+    """
+    Synchronous version of document processing for development
+    """
+    try:
+        # Step 1: Extract text
+        extract_text_sync(document_id)
+        
+        # Step 2: Generate summary
+        generate_summary_sync(document_id)
+        
+        # Step 3: Generate audio
+        generate_audio_sync(document_id)
+        
+    except Exception as exc:
+        logger.error(f"Synchronous processing failed for document {document_id}: {str(exc)}")
+        try:
+            document = Document.objects.get(id=document_id)
+            document.status = 'failed'
+            document.error_message = f"Processing error: {str(exc)}"
+            document.save(update_fields=['status', 'error_message'])
+        except:
+            pass
+        raise exc
+
+
+def extract_text_sync(document_id):
+    """Synchronous text extraction"""
+    try:
+        document = Document.objects.get(id=document_id)
+        
+        ProcessingLog.objects.create(
+            document=document,
+            step='text_extraction',
+            level='info',
+            message='Starting text extraction'
+        )
+        
+        # Initialize Document Intelligence service
+        doc_intel_service = DocumentIntelligenceService()
+        
+        # Extract text from document
+        extraction_result = doc_intel_service.extract_text(document.file.path)
+        
+        # Update document with extracted content
+        document.extracted_text = extraction_result['text']
+        document.text_extraction_confidence = extraction_result.get('confidence', 0.0)
+        document.page_count = extraction_result.get('page_count', 1)
+        document.word_count = len(extraction_result['text'].split()) if extraction_result['text'] else 0
+        document.save(update_fields=[
+            'extracted_text', 'text_extraction_confidence', 'page_count', 'word_count'
+        ])
+        
+        ProcessingLog.objects.create(
+            document=document,
+            step='text_extraction',
+            level='info',
+            message=f'Text extraction completed. {document.word_count} words extracted.'
+        )
+        
+    except Exception as exc:
+        logger.error(f"Text extraction failed for document {document_id}: {str(exc)}")
+        raise exc
+
+
+def generate_summary_sync(document_id):
+    """Synchronous summary generation"""
+    try:
+        document = Document.objects.get(id=document_id)
+        
+        if not document.extracted_text:
+            raise ValueError("No extracted text available for summarization")
+        
+        ProcessingLog.objects.create(
+            document=document,
+            step='summarization',
+            level='info',
+            message='Starting AI summarization'
+        )
+        
+        # Initialize OpenAI service
+        openai_service = OpenAIService()
+        
+        # Generate summary
+        summary_result = openai_service.generate_summary(
+            text=document.extracted_text,
+            style='teacher',
+            length=document.summary_length or 'medium',
+            subject_area=document.subject_area or '',
+            difficulty_level=document.difficulty_level or 'intermediate'
+        )
+        
+        # Update document with summary
+        document.summary_text = summary_result['summary']
+        document.save(update_fields=['summary_text'])
+        
+        ProcessingLog.objects.create(
+            document=document,
+            step='summarization',
+            level='info',
+            message='AI summary generated successfully.'
+        )
+        
+    except Exception as exc:
+        logger.error(f"AI summarization failed for document {document_id}: {str(exc)}")
+        raise exc
+
+
+def generate_audio_sync(document_id, voice_name=None):
+    """Synchronous audio generation"""
+    try:
+        document = Document.objects.get(id=document_id)
+        
+        if not document.summary_text:
+            raise ValueError("No summary text available for audio generation")
+        
+        # Use default voice if not specified
+        if not voice_name:
+            voice_name = 'en-US-JennyNeural'
+        
+        ProcessingLog.objects.create(
+            document=document,
+            step='audio_generation',
+            level='info',
+            message=f'Starting audio generation with voice {voice_name}'
+        )
+        
+        # Create AudioSummary record
+        audio_summary = AudioSummary.objects.create(
+            document=document,
+            voice_name=voice_name,
+            speech_rate='medium',
+            speech_pitch='medium',
+            status='generating'
+        )
+        
+        # Initialize Speech service
+        speech_service = SpeechService()
+        
+        # Generate audio
+        audio_result = speech_service.text_to_speech(
+            text=document.summary_text,
+            voice_name=voice_name,
+            speech_rate='medium',
+            speech_pitch='medium'
+        )
+        
+        # Save audio file
+        audio_filename = f"summary_{document_id}_{timezone.now().strftime('%Y%m%d_%H%M%S')}.mp3"
+        audio_path = f"audio/{document.user.id}/{timezone.now().year}/{timezone.now().month}/"
+        
+        # Ensure directory exists
+        full_audio_path = os.path.join(settings.MEDIA_ROOT, audio_path)
+        os.makedirs(full_audio_path, exist_ok=True)
+        
+        # Save audio file
+        full_audio_filename = os.path.join(full_audio_path, audio_filename)
+        with open(full_audio_filename, 'wb') as audio_file:
+            audio_file.write(audio_result['audio_data'])
+        
+        # Update AudioSummary record
+        audio_summary.audio_file = os.path.join(audio_path, audio_filename)
+        audio_summary.audio_duration = audio_result['duration']
+        audio_summary.audio_size = len(audio_result['audio_data'])
+        audio_summary.status = 'completed'
+        audio_summary.save()
+        
+        # Mark document as completed
+        document.status = 'completed'
+        document.processing_completed_at = timezone.now()
+        document.save(update_fields=['status', 'processing_completed_at'])
+        
+        ProcessingLog.objects.create(
+            document=document,
+            step='completion',
+            level='info',
+            message='Document processing completed successfully'
+        )
+        
+    except Exception as exc:
+        logger.error(f"Audio generation failed for document {document_id}: {str(exc)}")
+        raise exc
