@@ -182,17 +182,16 @@ class DocumentListCreateView(generics.ListCreateAPIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        response = super().create(request, *args, **kwargs)
+        return super(DocumentListCreateView, self).create(request, *args, **kwargs)
+    
+    def perform_create(self, serializer):
+        document = serializer.save(user=self.request.user)
         
-        if response.status_code == status.HTTP_201_CREATED:
-            # Increment user's document count
-            request.user.increment_document_count()
-            
-            # Start processing the document asynchronously
-            document = Document.objects.get(id=response.data['id'])
-            # TODO: Trigger async processing task
-            
-        return response
+        # Increment user's document count
+        self.request.user.increment_document_count()
+        
+        # TODO: Trigger async processing task
+        # process_document_async.delay(document.id)
 
 
 class DocumentDetailView(generics.RetrieveUpdateDestroyAPIView):
