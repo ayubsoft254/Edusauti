@@ -96,8 +96,11 @@ class Command(BaseCommand):
             if not skip_api_calls:
                 # Test validation method
                 try:
-                    service.validate_input(file_path="/nonexistent/file.pdf")
-                    self.stdout.write(self.style.WARNING('  ⚠ Validation should have failed for non-existent file'))
+                    validation_result = service.validate_input(file_path="/nonexistent/file.pdf")
+                    if validation_result and validation_result.get('valid', True):
+                        self.stdout.write(self.style.WARNING('  ⚠ Validation should have failed for non-existent file'))
+                    else:
+                        self.stdout.write(self.style.SUCCESS('  ✓ Input validation working correctly'))
                 except Exception:
                     self.stdout.write(self.style.SUCCESS('  ✓ Input validation working correctly'))
                 
