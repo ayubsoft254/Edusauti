@@ -2,6 +2,7 @@ from typing import Dict, Any, BinaryIO, List
 import azure.cognitiveservices.speech as speechsdk
 from django.conf import settings
 from .base import BaseAIService, RateLimitExceeded, ServiceUnavailable, InvalidInput
+import time
 
 
 class SpeechService(BaseAIService):
@@ -69,6 +70,8 @@ class SpeechService(BaseAIService):
             request_size=len(text.encode('utf-8'))
         )
         
+        start_time = time.time()
+        
         try:
             # Configure voice and speech parameters
             self.speech_config.speech_synthesis_voice_name = voice_name
@@ -87,6 +90,8 @@ class SpeechService(BaseAIService):
             
             # Synthesize speech
             result = synthesizer.speak_ssml_async(ssml_text).get()
+            
+            response_time = time.time() - start_time
             
             # Check result
             if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
@@ -117,6 +122,15 @@ class SpeechService(BaseAIService):
                     success=True
                 )
                 
+                # Log successful request
+                AIServiceLog.log_request(
+                    service_type='speech_synthesis',
+                    operation='text_to_speech',
+                    success=True,
+                    response_time=response_time,
+                    estimated_cost=estimated_cost
+                )
+                
                 return {
                     'audio_data': audio_data,
                     'duration': duration,
@@ -145,6 +159,17 @@ class SpeechService(BaseAIService):
                 raise ServiceUnavailable(error_msg)
                 
         except Exception as e:
+            response_time = time.time() - start_time
+            
+            # Log failed request
+            AIServiceLog.log_request(
+                service_type='speech_synthesis',
+                operation='text_to_speech',
+                success=False,
+                error_message=str(e),
+                response_time=response_time
+            )
+            
             if log_entry.status == 'pending':
                 self.handle_error(log_entry, e)
             
