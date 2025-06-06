@@ -48,8 +48,8 @@ class AIServiceLog(models.Model):
     estimated_cost = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
     
     # Error handling
-    error_code = models.CharField(max_length=50, blank=True)
-    error_message = models.TextField(blank=True)
+    error_code = models.CharField(max_length=50, blank=True, null=True)
+    error_message = models.TextField(blank=True, null=True)
     
     # Metadata
     additional_data = models.JSONField(null=True, blank=True)
