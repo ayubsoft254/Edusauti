@@ -1,6 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.contrib import messages
 from django.core.paginator import Paginator
 from rest_framework import generics, status, permissions
@@ -76,8 +76,80 @@ def upload_document(request):
     if request.method == 'POST':
         # Handle file upload via AJAX or form
         if request.FILES.get('file'):
-            # This will be handled by the API endpoint
-            pass
+            # Check if user can upload more documents
+            if not request.user.can_upload_document:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return Response(
+                        {'error': f'Monthly upload limit of {request.user.monthly_document_limit} documents reached.'},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+                else:
+                    messages.error(request, f'You have reached your monthly limit of {request.user.monthly_document_limit} documents.')
+                    return render(request, 'documents/upload.html', {'limit_reached': True})
+            
+            try:
+                # Create document instance
+                document = Document(
+                    user=request.user,
+                    title=request.POST.get('title', request.FILES['file'].name),
+                    description=request.POST.get('description', ''),
+                    file=request.FILES['file'],
+                    status='uploaded'
+                )
+                
+                # Validate file type and size
+                if not document.is_valid_file_type():
+                    error_msg = 'Invalid file type. Please upload PDF, DOCX, TXT, or PPTX files.'
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return JsonResponse({'error': error_msg}, status=400)
+                    else:
+                        messages.error(request, error_msg)
+                        return render(request, 'documents/upload.html')
+                
+                if not document.is_valid_file_size():
+                    error_msg = f'File size exceeds maximum limit of {document.MAX_FILE_SIZE // (1024*1024)}MB.'
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return JsonResponse({'error': error_msg}, status=400)
+                    else:
+                        messages.error(request, error_msg)
+                        return render(request, 'documents/upload.html')
+                
+                # Save the document
+                document.save()
+                
+                # Increment user's document count
+                request.user.increment_document_count()
+                
+                # Start document processing (you'll need to implement this)
+                # TODO: Trigger async processing task
+                # process_document_async.delay(document.id)
+                
+                # Return success response
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Document uploaded successfully!',
+                        'document_id': document.id,
+                        'redirect_url': f'/documents/{document.id}/'
+                    })
+                else:
+                    messages.success(request, 'Document uploaded successfully!')
+                    return redirect('documents:document_detail', document_id=document.id)
+                    
+            except Exception as e:
+                error_msg = f'Error uploading document: {str(e)}'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'error': error_msg}, status=500)
+                else:
+                    messages.error(request, error_msg)
+                    return render(request, 'documents/upload.html')
+        else:
+            error_msg = 'No file selected for upload.'
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'error': error_msg}, status=400)
+            else:
+                messages.error(request, error_msg)
+                return render(request, 'documents/upload.html')
     
     # Check if user can upload more documents
     if not request.user.can_upload_document:
