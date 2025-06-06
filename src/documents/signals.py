@@ -29,9 +29,11 @@ def document_post_save(sender, instance, created, **kwargs):
         )
         
         # Update status to processing
-        instance.status = 'processing'
-        instance.processing_started_at = timezone.now()
-        instance.save(update_fields=['status', 'processing_started_at'])
+        Document.objects.filter(id=instance.id).update(
+            status='processing',
+            processing_started_at=timezone.now()
+        )
+        instance.refresh_from_db()
         
         # Process synchronously for development
         try:
@@ -49,9 +51,10 @@ def document_post_save(sender, instance, created, **kwargs):
         except Exception as e:
             logger.error(f"Failed to start processing pipeline for document {instance.id}: {str(e)}")
             # Update status to failed if we can't start processing
-            instance.status = 'failed'
-            instance.error_message = f"Failed to start processing: {str(e)}"
-            instance.save(update_fields=['status', 'error_message'])
+            Document.objects.filter(id=instance.id).update(
+                status='failed',
+                error_message=f"Failed to start processing: {str(e)}"
+            )
             
             ProcessingLog.objects.create(
                 document=instance,
