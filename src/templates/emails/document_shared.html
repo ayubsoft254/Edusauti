@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Document Shared - EduSauti</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: #f8f9fa; padding: 30px; border-radius: 10px;">
+        <h2 style="color: #333; margin-bottom: 20px;">{{ sharer_name }} shared a document with you</h2>
+        
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #99876f; margin-top: 0;">{{ document.title }}</h3>
+            {% if document.description %}
+                <p style="color: #666;">{{ document.description }}</p>
+            {% endif %}
+            
+            <div style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
+                <strong>Permissions:</strong>
+                <ul style="color: #666; margin: 10px 0;">
+                    {% if share.can_view %}<li>View document</li>{% endif %}
+                    {% if share.can_ask_questions %}<li>Ask questions</li>{% endif %}
+                    {% if share.can_download %}<li>Download document</li>{% endif %}
+                </ul>
+            </div>
+        </div>
+        
+        <a href="{{ share_url }}" style="background: #99876f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            View Document
+        </a>
+        
+        <p style="color: #999; font-size: 12px; margin-top: 20px;">
+            This link will expire on {{ share.expires_at|date:"F d, Y" }}.
+        </p>
+    </div>
+</body>
+</html>
