@@ -1,0 +1,661 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ profile_user.get_full_name|default:profile_user.email }} - Profile - EduSauti{% endblock %}
+
+{% block meta_description %}View and manage your EduSauti profile, subscription details, and account settings.{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <span class="text-gray-400 mx-2">/</span>
+        <span class="text-edu-beige">Profile</span>
+    </li>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-avatar {
+        transition: all 0.3s ease;
+    }
+    
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 30px rgba(153, 135, 111, 0.3);
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, rgba(153, 135, 111, 0.05) 0%, rgba(212, 165, 116, 0.05) 100%);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        background: linear-gradient(135deg, rgba(153, 135, 111, 0.1) 0%, rgba(212, 165, 116, 0.1) 100%);
+        transform: translateY(-2px);
+    }
+    
+    .subscription-badge {
+        animation: glow 2s ease-in-out infinite alternate;
+    }
+    
+    .activity-item {
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+    }
+    
+    .activity-item:hover {
+        border-left-color: #99876f;
+        background: rgba(153, 135, 111, 0.05);
+        transform: translateX(5px);
+    }
+    
+    .progress-bar {
+        background: linear-gradient(90deg, #99876f, #d4a574);
+        animation: progress-shine 2s ease-in-out infinite;
+    }
+    
+    @keyframes progress-shine {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+    
+    .achievement-badge {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+    
+    .profile-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(153, 135, 111, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen gradient-bg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Profile Header -->
+        <div class="profile-card rounded-2xl p-8 mb-8 scroll-reveal shadow-xl">
+            <div class="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
+                <!-- Avatar Section -->
+                <div class="flex-shrink-0 text-center">
+                    <div class="relative inline-block">
+                        <div class="profile-avatar w-32 h-32 rounded-full overflow-hidden border-4 border-edu-beige shadow-lg">
+                            {% if profile_user.avatar %}
+                                <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.get_full_name }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full bg-gradient-to-br from-edu-beige to-edu-accent flex items-center justify-center text-white text-4xl font-bold">
+                                    {{ profile_user.first_name|first|default:profile_user.email|first|upper }}{{ profile_user.last_name|first|upper }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Online Status Indicator -->
+                        <div class="absolute bottom-2 right-2 w-6 h-6 bg-green-400 rounded-full border-2 border-white shadow-lg"></div>
+                    </div>
+                    
+                    <!-- Quick Actions for Own Profile -->
+                    {% if profile_user == user %}
+                        <div class="mt-4 space-y-2">
+                            <button id="upload-avatar-btn" class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-all hover-lift text-sm">
+                                <i class="fas fa-camera mr-2"></i>Change Photo
+                            </button>
+                            <input type="file" id="avatar-upload" accept="image/*" class="hidden">
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Profile Info -->
+                <div class="flex-1 text-center lg:text-left">
+                    <div class="mb-4">
+                        <h1 class="text-4xl font-bold text-gray-900 mb-2">
+                            {{ profile_user.get_full_name|default:profile_user.email }}
+                        </h1>
+                        <p class="text-lg text-gray-600 mb-4">{{ profile_user.email }}</p>
+                        
+                        <!-- Subscription Badge -->
+                        <div class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium subscription-badge
+                            {% if profile_user.subscription_tier == 'premium' %}bg-gradient-to-r from-purple-500 to-pink-500 text-white
+                            {% elif profile_user.subscription_tier == 'pro' %}bg-gradient-to-r from-blue-500 to-cyan-500 text-white
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            <i class="fas fa-crown mr-2"></i>
+                            {{ profile_user.get_subscription_tier_display }}
+                            {% if profile_user.subscription_tier != 'free' %}
+                                Member
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Profile Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="text-left">
+                            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Member Since</h3>
+                            <p class="text-lg font-semibold text-gray-900">{{ profile_user.date_joined|date:"M Y" }}</p>
+                        </div>
+                        
+                        <div class="text-left">
+                            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Last Active</h3>
+                            <p class="text-lg font-semibold text-gray-900">
+                                {% if profile_user.last_login %}
+                                    {{ profile_user.last_login|timesince }} ago
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </p>
+                        </div>
+                        
+                        {% if profile_user.profile.location %}
+                            <div class="text-left">
+                                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Location</h3>
+                                <p class="text-lg font-semibold text-gray-900">
+                                    <i class="fas fa-map-marker-alt mr-2 text-edu-beige"></i>
+                                    {{ profile_user.profile.location }}
+                                </p>
+                            </div>
+                        {% endif %}
+                        
+                        {% if profile_user.profile.organization %}
+                            <div class="text-left">
+                                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Organization</h3>
+                                <p class="text-lg font-semibold text-gray-900">
+                                    <i class="fas fa-building mr-2 text-edu-beige"></i>
+                                    {{ profile_user.profile.organization }}
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Bio -->
+                    {% if profile_user.profile.bio %}
+                        <div class="mb-6">
+                            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">About</h3>
+                            <p class="text-gray-700 leading-relaxed">{{ profile_user.profile.bio }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Action Buttons -->
+                    {% if profile_user == user %}
+                        <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
+                            <a href="{% url 'users:profile_edit' %}" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift">
+                                <i class="fas fa-edit mr-2"></i>Edit Profile
+                            </a>
+                            <a href="{% url 'users:settings' %}" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-all hover-lift">
+                                <i class="fas fa-cog mr-2"></i>Settings
+                            </a>
+                            <a href="{% url 'users:billing' %}" class="bg-edu-accent text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift">
+                                <i class="fas fa-credit-card mr-2"></i>Billing
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Usage Statistics -->
+                <div class="profile-card rounded-2xl p-6 scroll-reveal shadow-lg">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-chart-line mr-3 text-edu-beige"></i>
+                        Usage Statistics
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Documents Usage -->
+                        <div class="stat-card p-6 rounded-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Documents This Month</p>
+                                    <p class="text-3xl font-bold text-gray-900">
+                                        {{ profile_user.documents_uploaded_this_month|default:0 }}
+                                        <span class="text-base text-gray-500">/ {{ profile_user.monthly_document_limit }}</span>
+                                    </p>
+                                </div>
+                                <div class="w-16 h-16 bg-edu-beige rounded-full flex items-center justify-center">
+                                    <i class="fas fa-file-text text-white text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <div class="bg-gray-200 rounded-full h-3">
+                                    <div class="progress-bar h-3 rounded-full transition-all duration-1000" 
+                                         style="width: {{ profile_user.documents_uploaded_this_month|default:0|div:profile_user.monthly_document_limit|mul:100 }}%"></div>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-2">
+                                    {{ profile_user.monthly_document_limit|sub:profile_user.documents_uploaded_this_month|default:profile_user.monthly_document_limit }} remaining
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Questions Usage -->
+                        <div class="stat-card p-6 rounded-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Questions This Month</p>
+                                    <p class="text-3xl font-bold text-gray-900">
+                                        {{ profile_user.questions_asked_this_month|default:0 }}
+                                        <span class="text-base text-gray-500">/ {{ profile_user.monthly_question_limit }}</span>
+                                    </p>
+                                </div>
+                                <div class="w-16 h-16 bg-edu-accent rounded-full flex items-center justify-center">
+                                    <i class="fas fa-question-circle text-white text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <div class="bg-gray-200 rounded-full h-3">
+                                    <div class="bg-gradient-to-r from-edu-accent to-edu-beige h-3 rounded-full transition-all duration-1000" 
+                                         style="width: {{ profile_user.questions_asked_this_month|default:0|div:profile_user.monthly_question_limit|mul:100 }}%"></div>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-2">
+                                    {{ profile_user.monthly_question_limit|sub:profile_user.questions_asked_this_month|default:profile_user.monthly_question_limit }} remaining
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upgrade Prompt for Free Users -->
+                    {% if profile_user.subscription_tier == 'free' %}
+                        <div class="mt-6 p-4 bg-gradient-to-r from-edu-cream to-edu-light rounded-lg border border-edu-beige">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="font-semibold text-edu-deep">Want more?</h3>
+                                    <p class="text-sm text-gray-600">Upgrade to Pro or Premium for unlimited access</p>
+                                </div>
+                                <a href="{% url 'users:subscription' %}" class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-all text-sm">
+                                    Upgrade Now
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="profile-card rounded-2xl p-6 scroll-reveal shadow-lg">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-history mr-3 text-edu-beige"></i>
+                        Recent Activity
+                    </h2>
+                    
+                    {% if recent_documents %}
+                        <div class="space-y-4">
+                            {% for document in recent_documents %}
+                                <div class="activity-item p-4 rounded-lg transition-all">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="w-10 h-10 bg-edu-cream rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-file-{{ document.file_type|default:'alt' }} text-edu-deep"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-semibold text-gray-900">{{ document.title }}</h3>
+                                                <p class="text-sm text-gray-500">
+                                                    Uploaded {{ document.created_at|timesince }} ago
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                {% if document.status == 'completed' %}bg-green-100 text-green-800
+                                                {% elif document.status == 'processing' %}bg-yellow-100 text-yellow-800
+                                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                                {{ document.get_status_display }}
+                                            </span>
+                                            {% if document.status == 'completed' %}
+                                                <a href="{% url 'document_detail' document.id %}" class="text-edu-beige hover:text-edu-dark transition-colors">
+                                                    <i class="fas fa-arrow-right"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mt-6 text-center">
+                            <a href="{% url 'dashboard' %}" class="text-edu-beige hover:text-edu-dark transition-colors font-medium">
+                                View All Documents →
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <i class="fas fa-file-upload text-4xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 mb-4">No documents uploaded yet</p>
+                            {% if profile_user == user %}
+                                <a href="{% url 'upload_document' %}" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all">
+                                    Upload Your First Document
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Achievements (if user has any) -->
+                {% if profile_user == user %}
+                    <div class="profile-card rounded-2xl p-6 scroll-reveal shadow-lg">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                            <i class="fas fa-trophy mr-3 text-edu-beige"></i>
+                            Achievements
+                        </h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- First Document -->
+                            {% if profile_user.documents.exists %}
+                                <div class="achievement-badge text-white p-4 rounded-lg text-center">
+                                    <i class="fas fa-file-plus text-2xl mb-2"></i>
+                                    <h3 class="font-semibold">First Upload</h3>
+                                    <p class="text-sm opacity-90">Uploaded your first document</p>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Active User -->
+                            {% if profile_user.documents.count >= 5 %}
+                                <div class="achievement-badge text-white p-4 rounded-lg text-center bg-gradient-to-br from-green-500 to-emerald-600">
+                                    <i class="fas fa-user-graduate text-2xl mb-2"></i>
+                                    <h3 class="font-semibold">Active Learner</h3>
+                                    <p class="text-sm opacity-90">Uploaded 5+ documents</p>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Premium Member -->
+                            {% if profile_user.subscription_tier != 'free' %}
+                                <div class="achievement-badge text-white p-4 rounded-lg text-center bg-gradient-to-br from-purple-500 to-pink-600">
+                                    <i class="fas fa-crown text-2xl mb-2"></i>
+                                    <h3 class="font-semibold">Premium Member</h3>
+                                    <p class="text-sm opacity-90">Upgraded to {{ profile_user.get_subscription_tier_display }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Account Info -->
+                <div class="profile-card rounded-2xl p-6 scroll-reveal shadow-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 uppercase tracking-wide">User ID</label>
+                            <p class="text-gray-900 font-mono text-sm">#{{ profile_user.id|stringformat:"06d" }}</p>
+                        </div>
+                        
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 uppercase tracking-wide">Account Status</label>
+                            <div class="flex items-center mt-1">
+                                <div class="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                                <span class="text-sm text-gray-900">Active</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-sm font-medium text-gray-500 uppercase tracking-wide">Subscription</label>
+                            <p class="text-gray-900">{{ profile_user.get_subscription_tier_display }}</p>
+                            {% if profile_user.subscription_expires_at %}
+                                <p class="text-xs text-gray-500">
+                                    Expires {{ profile_user.subscription_expires_at|date:"M d, Y" }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        
+                        {% if profile_user.profile.timezone %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 uppercase tracking-wide">Timezone</label>
+                                <p class="text-gray-900">{{ profile_user.profile.timezone }}</p>
+                            </div>
+                        {% endif %}
+                        
+                        {% if profile_user.profile.language %}
+                            <div>
+                                <label class="text-sm font-medium text-gray-500 uppercase tracking-wide">Language</label>
+                                <p class="text-gray-900">{{ profile_user.profile.get_language_display }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="profile-card rounded-2xl p-6 scroll-reveal shadow-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Total Documents</span>
+                            <span class="font-semibold text-gray-900">{{ profile_user.documents.count|default:0 }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Total Questions</span>
+                            <span class="font-semibold text-gray-900">{{ profile_user.total_questions_asked|default:0 }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Documents Viewed</span>
+                            <span class="font-semibold text-gray-900">{{ profile_user.total_document_views|default:0 }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Account Age</span>
+                            <span class="font-semibold text-gray-900">{{ profile_user.date_joined|timesince }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact/Social (if profile user is current user) -->
+                {% if profile_user == user %}
+                    <div class="profile-card rounded-2xl p-6 scroll-reveal shadow-lg">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Actions</h3>
+                        <div class="space-y-3">
+                            <a href="{% url 'users:settings' %}" class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
+                                <i class="fas fa-cog mr-3"></i>Account Settings
+                            </a>
+                            
+                            <a href="{% url 'users:usage_stats' %}" class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
+                                <i class="fas fa-chart-bar mr-3"></i>Usage Statistics
+                            </a>
+                            
+                            <a href="{% url 'users:billing' %}" class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
+                                <i class="fas fa-credit-card mr-3"></i>Billing & Plans
+                            </a>
+                            
+                            <button id="export-data-btn" class="w-full bg-gray-100 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-200 transition-all flex items-center">
+                                <i class="fas fa-download mr-3"></i>Export Data
+                            </button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Avatar Upload Modal -->
+{% if profile_user == user %}
+<div id="avatar-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold">Change Profile Photo</h3>
+            <button id="close-avatar-modal" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="text-center">
+            <div id="avatar-preview" class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-edu-beige">
+                {% if profile_user.avatar %}
+                    <img src="{{ profile_user.avatar.url }}" alt="Preview" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full bg-gradient-to-br from-edu-beige to-edu-accent flex items-center justify-center text-white text-2xl font-bold">
+                        {{ profile_user.first_name|first|default:profile_user.email|first|upper }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <input type="file" id="avatar-file-input" accept="image/*" class="hidden">
+            <button id="select-avatar-btn" class="bg-edu-beige text-white px-6 py-2 rounded-lg hover:bg-edu-dark transition-all mb-4">
+                Select New Photo
+            </button>
+            
+            <div class="flex space-x-3">
+                <button id="upload-avatar-confirm" class="flex-1 bg-edu-beige text-white py-2 px-4 rounded-lg hover:bg-edu-dark transition-all">
+                    Upload
+                </button>
+                <button id="cancel-avatar-upload" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition-all">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if profile_user == user %}
+    // Avatar upload functionality
+    const uploadAvatarBtn = document.getElementById('upload-avatar-btn');
+    const avatarModal = document.getElementById('avatar-modal');
+    const closeAvatarModal = document.getElementById('close-avatar-modal');
+    const avatarFileInput = document.getElementById('avatar-file-input');
+    const selectAvatarBtn = document.getElementById('select-avatar-btn');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const uploadConfirmBtn = document.getElementById('upload-avatar-confirm');
+    const cancelUploadBtn = document.getElementById('cancel-avatar-upload');
+    
+    if (uploadAvatarBtn) {
+        uploadAvatarBtn.addEventListener('click', () => {
+            avatarModal.classList.remove('hidden');
+        });
+    }
+    
+    if (closeAvatarModal) {
+        closeAvatarModal.addEventListener('click', () => {
+            avatarModal.classList.add('hidden');
+        });
+    }
+    
+    if (cancelUploadBtn) {
+        cancelUploadBtn.addEventListener('click', () => {
+            avatarModal.classList.add('hidden');
+        });
+    }
+    
+    if (selectAvatarBtn) {
+        selectAvatarBtn.addEventListener('click', () => {
+            avatarFileInput.click();
+        });
+    }
+    
+    if (avatarFileInput) {
+        avatarFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    if (uploadConfirmBtn) {
+        uploadConfirmBtn.addEventListener('click', async function() {
+            const file = avatarFileInput.files[0];
+            if (!file) {
+                window.EduSauti.showToast('Please select an image first', 'warning');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('avatar', file);
+            
+            window.EduSauti.setLoadingState(this, true);
+            
+            try {
+                const response = await fetch('{% url "users:profile_edit" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': window.CSRF_TOKEN
+                    }
+                });
+                
+                if (response.ok) {
+                    window.EduSauti.showToast('Profile photo updated successfully!', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    const error = await response.json();
+                    window.EduSauti.showToast(error.error || 'Failed to update photo', 'error');
+                }
+            } catch (error) {
+                window.EduSauti.showToast('Network error. Please try again.', 'error');
+            } finally {
+                window.EduSauti.setLoadingState(this, false);
+                avatarModal.classList.add('hidden');
+            }
+        });
+    }
+    
+    // Export data functionality
+    const exportDataBtn = document.getElementById('export-data-btn');
+    if (exportDataBtn) {
+        exportDataBtn.addEventListener('click', async function() {
+            window.EduSauti.setLoadingState(this, true);
+            
+            try {
+                const response = await fetch('/api/users/export-data/', {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': window.CSRF_TOKEN
+                    }
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'edusauti-data-export.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    
+                    window.EduSauti.showToast('Data export downloaded successfully!', 'success');
+                } else {
+                    window.EduSauti.showToast('Failed to export data', 'error');
+                }
+            } catch (error) {
+                window.EduSauti.showToast('Network error. Please try again.', 'error');
+            } finally {
+                window.EduSauti.setLoadingState(this, false);
+            }
+        });
+    }
+    {% endif %}
+    
+    // Animate progress bars on page load
+    setTimeout(() => {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 500);
+        });
+    }, 1000);
+    
+    // Add click animation to stat cards
+    document.querySelectorAll('.stat-card').forEach(card => {
+        card.addEventListener('click', function() {
+            this.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+});
+</script>
+{% endblock %}
