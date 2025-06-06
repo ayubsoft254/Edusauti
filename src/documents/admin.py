@@ -71,6 +71,21 @@ class DocumentAdmin(admin.ModelAdmin):
     def file_size_mb(self, obj):
         return obj.file_size_mb
     file_size_mb.short_description = 'File Size (MB)'
+    
+    def save_model(self, request, obj, form, change):
+        """Override save_model to set file metadata"""
+        if not change and hasattr(obj, 'file') and obj.file:
+            # Set file metadata for new documents
+            obj.original_filename = obj.file.name
+            obj.file_size = obj.file.size
+            
+            # Determine file type from extension
+            if '.' in obj.file.name:
+                extension = obj.file.name.split('.')[-1].lower()
+                obj.file_type = extension
+        
+        # Call parent save_model method
+        super(DocumentAdmin, self).save_model(request, obj, form, change)
 
 
 @admin.register(AudioSummary)
