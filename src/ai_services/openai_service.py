@@ -5,6 +5,7 @@ from openai import AzureOpenAI
 from django.conf import settings
 from django.utils import timezone
 from .base import BaseAIService, RateLimitExceeded, ServiceUnavailable, InvalidInput
+from .models import AIServiceLog
 
 
 class OpenAIService(BaseAIService):
@@ -98,54 +99,35 @@ class OpenAIService(BaseAIService):
                 presence_penalty=0.0
             )
             
+            response_time = time.time() - start_time
+            
             # Extract the summary
             summary = response.choices[0].message.content.strip()
             
-            # Calculate tokens and cost
-            output_tokens = response.usage.completion_tokens
-            total_tokens = response.usage.total_tokens
-            estimated_cost = self.estimate_cost(tokens=total_tokens)
-            
-            # Update log entry
-            log_entry.mark_completed(
-                status='success',
-                response_size=len(summary.encode('utf-8'))
-            )
-            log_entry.tokens_used = total_tokens
-            log_entry.estimated_cost = estimated_cost
-            log_entry.azure_request_id = response.id
-            log_entry.save()
-            
-            # Update usage stats
-            self.update_usage_stats(
-                user=user,
-                tokens=total_tokens,
-                cost=estimated_cost,
-                success=True
-            )
-            
             result = {
                 'summary': summary,
-                'input_tokens': input_tokens,
-                'output_tokens': output_tokens,
-                'total_tokens': total_tokens,
-                'estimated_cost': estimated_cost,
-                'request_id': response.id,
+                'total_tokens': response.usage.total_tokens,
+                'prompt_tokens': response.usage.prompt_tokens,
+                'completion_tokens': response.usage.completion_tokens,
+                'estimated_cost': self._calculate_cost(response.usage.total_tokens),
+                'response_time': response_time,
                 'style': style,
-                'length': length,
-                'subject_area': subject_area,
-                'difficulty_level': difficulty_level
+                'length': length
             }
             
             # Log successful request
-            AIServiceLog.log_request(
-                service_type='openai_chat',
-                operation='generate_summary',
-                success=True,
-                response_time=response_time,
-                tokens_used=response.usage.total_tokens,
-                estimated_cost=result['estimated_cost']
-            )
+            try:
+                AIServiceLog.log_request(
+                    service_type='openai_chat',
+                    operation='generate_summary',
+                    success=True,
+                    response_time=response_time,
+                    tokens_used=response.usage.total_tokens,
+                    estimated_cost=result['estimated_cost']
+                )
+            except Exception as log_error:
+                # Don't fail the main operation if logging fails
+                print(f"Logging error: {log_error}")
             
             return result
             
@@ -153,13 +135,16 @@ class OpenAIService(BaseAIService):
             response_time = time.time() - start_time
             
             # Log failed request
-            AIServiceLog.log_request(
-                service_type='openai_chat',
-                operation='generate_summary',
-                success=False,
-                error_message=str(e),
-                response_time=response_time
-            )
+            try:
+                AIServiceLog.log_request(
+                    service_type='openai_chat',
+                    operation='generate_summary',
+                    success=False,
+                    error_message=str(e),
+                    response_time=response_time
+                )
+            except Exception as log_error:
+                print(f"Logging error: {log_error}")
             
             raise e
     
@@ -378,3 +363,18 @@ Always base your response on the document content provided."""
         # For simplicity, using average cost
         cost_per_1k_tokens = 0.045  # Average between input and output
         return (tokens / 1000) * cost_per_1k_tokens
+    
+    def _get_max_tokens(self, length):
+        """Get max tokens based on length setting"""
+        length_tokens = {
+            'short': 50,
+            'medium': 150,
+            'long': 300
+        }
+        return length_tokens.get(length, 150)
+    
+    def _calculate_cost(self, total_tokens):
+        """Calculate estimated cost based on tokens"""
+        # GPT-3.5-turbo pricing (adjust based on your model)
+        cost_per_1k_tokens = 0.002  # $0.002 per 1K tokens
+        return (total_tokens / 1000) * cost_per_1k_tokens
