@@ -4,6 +4,7 @@ from django.conf import settings
 from .base import BaseAIService, RateLimitExceeded, ServiceUnavailable, InvalidInput
 from .models import AIServiceLog
 import time
+import io
 
 
 class SpeechService(BaseAIService):
@@ -81,7 +82,7 @@ class SpeechService(BaseAIService):
             ssml_text = self._create_ssml(text, voice_name, speech_rate, speech_pitch)
             
             # Create synthesizer with memory stream
-            audio_stream = speechsdk.AudioOutputStream.create_push_stream()
+            audio_stream = io.BytesIO()
             audio_config = speechsdk.audio.AudioOutputConfig(stream=audio_stream)
             
             synthesizer = speechsdk.SpeechSynthesizer(
@@ -97,7 +98,7 @@ class SpeechService(BaseAIService):
             # Check result
             if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
                 # Get audio data
-                audio_data = bytes(result.audio_data)
+                audio_data = result.audio_data
                 
                 # Calculate audio duration (approximate)
                 duration = self._calculate_audio_duration(audio_data, text)
