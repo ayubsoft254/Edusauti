@@ -28,17 +28,23 @@ def document_post_save(sender, instance, created, **kwargs):
             }
         )
         
-        # Start processing pipeline
-        from .tasks import process_document_pipeline
-        
         # Update status to processing
         instance.status = 'processing'
         instance.processing_started_at = timezone.now()
         instance.save(update_fields=['status', 'processing_started_at'])
         
-        # Trigger async processing (assuming Celery is set up)
+        # Process synchronously for development
         try:
-            process_document_pipeline.delay(instance.id)
+            from django.conf import settings
+            if getattr(settings, 'CELERY_TASK_ALWAYS_EAGER', False) or settings.DEBUG:
+                # Process synchronously in development
+                from .tasks import process_document_sync
+                process_document_sync(instance.id)
+            else:
+                # Use Celery in production
+                from .tasks import process_document_pipeline
+                process_document_pipeline.delay(instance.id)
+                
             logger.info(f"Started processing pipeline for document {instance.id}")
         except Exception as e:
             logger.error(f"Failed to start processing pipeline for document {instance.id}: {str(e)}")
