@@ -1,4 +1,5 @@
 import uuid
+import time
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -35,7 +36,7 @@ class AIServiceLog(models.Model):
     # Response details
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     response_size = models.PositiveIntegerField(null=True, blank=True, help_text="Response size in bytes")
-    response_time = models.PositiveIntegerField(help_text="Response time in milliseconds")
+    response_time = models.FloatField(null=True, blank=True)  # Make it nullable temporarily
     
     # Azure specific
     azure_request_id = models.CharField(max_length=100, blank=True)
@@ -79,6 +80,20 @@ class AIServiceLog(models.Model):
             self.response_time = int((self.completed_at - self.created_at).total_seconds() * 1000)
         
         self.save()
+    
+    @classmethod
+    def log_request(cls, service_type, operation, success=True, error_message=None, **kwargs):
+        """Helper method to create log entries with proper response_time"""
+        return cls.objects.create(
+            service_type=service_type,
+            operation=operation,
+            success=success,
+            error_message=error_message,
+            response_time=kwargs.get('response_time', 0.0),  # Default to 0.0 if not provided
+            tokens_used=kwargs.get('tokens_used', 0),
+            estimated_cost=kwargs.get('estimated_cost', 0.0),
+            **{k: v for k, v in kwargs.items() if k not in ['response_time', 'tokens_used', 'estimated_cost']}
+        )
 
 
 class AIServiceUsage(models.Model):

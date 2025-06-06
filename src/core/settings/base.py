@@ -144,6 +144,7 @@ AZURE_OPENAI_KEY = config('AZURE_OPENAI_KEY', default='')
 AZURE_OPENAI_API_VERSION = config('AZURE_OPENAI_API_VERSION', default='2024-02-15-preview')
 AZURE_SPEECH_KEY = config('AZURE_SPEECH_KEY', default='')
 AZURE_SPEECH_REGION = config('AZURE_SPEECH_REGION', default='')
+AZURE_OPENAI_DEPLOYMENT_NAME = config('AZURE_OPENAI_DEPLOYMENT_NAME')
 
 # Redis Configuration
 REDIS_URL = config('REDIS_URL', default='redis://localhost:6379/0')
