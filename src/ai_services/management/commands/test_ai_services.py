@@ -110,6 +110,12 @@ class Command(BaseCommand):
     def _test_openai_service(self, verbose, skip_api_calls):
         self.stdout.write('\nTesting OpenAI Service...')
         try:
+            # Check if deployment name is configured
+            from django.conf import settings
+            if not getattr(settings, 'AZURE_OPENAI_DEPLOYMENT_NAME', None):
+                self.stdout.write(self.style.ERROR('  ✗ AZURE_OPENAI_DEPLOYMENT_NAME not configured'))
+                return
+                
             service = OpenAIService()
             self.stdout.write(self.style.SUCCESS('  ✓ Service initialized successfully'))
             
@@ -119,11 +125,11 @@ class Command(BaseCommand):
                 self.stdout.write(f"  API Version: {service.api_version}")
                 
             if not skip_api_calls:
-                # Test with a simple summarization (only if API calls are allowed)
+                # Test with a simple summarization
                 self.stdout.write('  Testing text summarization (this will make an API call)...')
                 try:
                     result = service.generate_summary(
-                        text="This is a test document. It contains some sample text for testing the AI summarization service. The service should be able to create a brief summary of this content.",
+                        text="This is a test document. It contains some sample text for testing the AI summarization service.",
                         style='simple',
                         length='short'
                     )
@@ -132,10 +138,14 @@ class Command(BaseCommand):
                     if verbose:
                         self.stdout.write(f"  Summary: {result['summary'][:100]}...")
                         self.stdout.write(f"  Tokens used: {result['total_tokens']}")
+                        self.stdout.write(f"  Response time: {result['response_time']:.2f}s")
                         self.stdout.write(f"  Estimated cost: ${result['estimated_cost']:.4f}")
                         
                 except Exception as api_error:
                     self.stdout.write(self.style.ERROR(f'  ✗ API call failed: {api_error}'))
+                    if verbose:
+                        import traceback
+                        self.stdout.write(f"  Full error: {traceback.format_exc()}")
             else:
                 self.stdout.write('  Skipping API calls (use without --skip-api-calls to test)')
                 
