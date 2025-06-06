@@ -121,16 +121,6 @@ class SpeechService(BaseAIService):
                     success=True
                 )
                 
-                # Log successful request
-                AIServiceLog.log_request(
-                    service_type='speech_synthesis',
-                    endpoint=f"https://{self.speech_region}.tts.speech.microsoft.com/cognitiveservices/v1",
-                    success=True,
-                    response_time=response_time,
-                    estimated_cost=estimated_cost,
-                    characters_processed=character_count
-                )
-                
                 return {
                     'audio_data': audio_data,
                     'duration': duration,
