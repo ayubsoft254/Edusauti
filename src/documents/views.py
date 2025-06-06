@@ -62,8 +62,14 @@ def document_detail(request, document_id):
     # Increment view count
     document.increment_view_count()
     
+    # Process tags for template
+    document_tags = []
+    if document.tags:
+        document_tags = [tag.strip() for tag in document.tags.split(',') if tag.strip()]
+    
     context = {
         'document': document,
+        'document_tags': document_tags,
         'audio_summary': audio_summary,
         'recent_questions': recent_questions,
     }
