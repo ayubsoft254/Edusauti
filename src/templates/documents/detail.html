@@ -1,0 +1,796 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ document.title }} - EduSauti{% endblock %}
+
+{% block meta_description %}{{ document.description|default:"AI-generated summary and Q&A for "|add:document.title }}{% endblock %}
+
+{% block og_title %}{{ document.title }} - EduSauti{% endblock %}
+{% block og_description %}{{ document.description|default:"Interactive AI-powered document analysis with voice summaries and Q&A" }}{% endblock %}
+
+{% block breadcrumbs %}
+    <li>
+        <span class="text-gray-400 mx-2">/</span>
+        <a href="{% url 'dashboard' %}" class="text-edu-dark hover:text-edu-beige transition-colors">Documents</a>
+    </li>
+    <li>
+        <span class="text-gray-400 mx-2">/</span>
+        <span class="text-edu-beige">{{ document.title|truncatechars:30 }}</span>
+    </li>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .document-content {
+        line-height: 1.8;
+    }
+    
+    .audio-player {
+        background: linear-gradient(135deg, #f5f3f0 0%, #e8e0d7 100%);
+        border: 2px solid #99876f;
+    }
+    
+    .question-bubble {
+        background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
+        border-left: 4px solid #99876f;
+    }
+    
+    .answer-bubble {
+        background: linear-gradient(135deg, #f5f3f0 0%, #e8e0d7 100%);
+        border-left: 4px solid #d4a574;
+    }
+    
+    .processing-animation {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 2s infinite;
+    }
+    
+    .document-stats {
+        background: rgba(153, 135, 111, 0.1);
+        backdrop-filter: blur(10px);
+    }
+    
+    .tag {
+        background: rgba(153, 135, 111, 0.2);
+        color: #5c5246;
+        transition: all 0.3s ease;
+    }
+    
+    .tag:hover {
+        background: rgba(153, 135, 111, 0.3);
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-bg">
+    <!-- Document Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <!-- Status Badge -->
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                            {% if document.status == 'completed' %}
+                                bg-green-100 text-green-800
+                            {% elif document.status == 'processing' %}
+                                bg-yellow-100 text-yellow-800
+                            {% elif document.status == 'failed' %}
+                                bg-red-100 text-red-800
+                            {% else %}
+                                bg-gray-100 text-gray-800
+                            {% endif %}">
+                            <i class="fas 
+                                {% if document.status == 'completed' %}fa-check-circle
+                                {% elif document.status == 'processing' %}fa-clock
+                                {% elif document.status == 'failed' %}fa-exclamation-circle
+                                {% else %}fa-file
+                                {% endif %} mr-2"></i>
+                            {{ document.get_status_display }}
+                        </span>
+                        
+                        <!-- File Type Badge -->
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-edu-cream text-edu-deep">
+                            <i class="fas fa-file-{{ document.file_type|default:'alt' }} mr-2"></i>
+                            {{ document.file_type|upper|default:'FILE' }}
+                        </span>
+                    </div>
+                    
+                    <h1 class="text-3xl font-bold text-gray-900 mb-4 scroll-reveal">{{ document.title }}</h1>
+                    
+                    {% if document.description %}
+                        <p class="text-lg text-gray-600 mb-6 scroll-reveal">{{ document.description }}</p>
+                    {% endif %}
+                    
+                    <!-- Document Stats -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="document-stats rounded-lg p-4 text-center scroll-reveal">
+                            <div class="text-2xl font-bold text-edu-deep">{{ document.page_count|default:0 }}</div>
+                            <div class="text-sm text-gray-600">Pages</div>
+                        </div>
+                        <div class="document-stats rounded-lg p-4 text-center scroll-reveal">
+                            <div class="text-2xl font-bold text-edu-deep">{{ document.word_count|default:0 }}</div>
+                            <div class="text-sm text-gray-600">Words</div>
+                        </div>
+                        <div class="document-stats rounded-lg p-4 text-center scroll-reveal">
+                            <div class="text-2xl font-bold text-edu-deep">{{ document.view_count|default:0 }}</div>
+                            <div class="text-sm text-gray-600">Views</div>
+                        </div>
+                        <div class="document-stats rounded-lg p-4 text-center scroll-reveal">
+                            <div class="text-2xl font-bold text-edu-deep">{{ document.total_questions_asked|default:0 }}</div>
+                            <div class="text-sm text-gray-600">Questions</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tags -->
+                    {% if document.tags %}
+                        <div class="flex flex-wrap gap-2 mb-6 scroll-reveal">
+                            {% for tag in document.tags.split:',' %}
+                                <span class="tag px-3 py-1 rounded-full text-sm">{{ tag|title }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row lg:flex-col space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-0 lg:space-y-2 lg:ml-8">
+                    {% if document.status == 'completed' %}
+                        <button id="share-btn" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift flex items-center justify-center">
+                            <i class="fas fa-share-alt mr-2"></i>Share
+                        </button>
+                        <button id="download-btn" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-all hover-lift flex items-center justify-center">
+                            <i class="fas fa-download mr-2"></i>Download
+                        </button>
+                    {% endif %}
+                    <button id="regenerate-btn" class="bg-edu-accent text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift flex items-center justify-center">
+                        <i class="fas fa-refresh mr-2"></i>Regenerate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Audio Player Section -->
+                {% if document.status == 'completed' and audio_summary %}
+                    <div class="glass-effect rounded-xl p-6 scroll-reveal">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                            <i class="fas fa-volume-up mr-3 text-edu-beige"></i>
+                            Audio Summary
+                        </h2>
+                        
+                        <div class="audio-player rounded-lg p-6">
+                            <audio id="audio-player" controls class="w-full mb-4">
+                                <source src="{{ audio_summary.audio_file.url }}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                            
+                            <div class="flex items-center justify-between text-sm text-gray-600">
+                                <span>
+                                    <i class="fas fa-microphone mr-1"></i>
+                                    {{ audio_summary.voice_name|default:'Jenny Neural' }}
+                                </span>
+                                <span>
+                                    <i class="fas fa-clock mr-1"></i>
+                                    {{ audio_summary.audio_duration|default:0 }} seconds
+                                </span>
+                                <span>
+                                    <i class="fas fa-file-audio mr-1"></i>
+                                    {{ audio_summary.audio_size_mb|floatformat:1 }} MB
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Audio Controls -->
+                        <div class="flex items-center justify-center space-x-4 mt-4">
+                            <button id="play-pause-btn" class="bg-edu-beige text-white p-3 rounded-full hover:bg-edu-dark transition-all">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button id="speed-btn" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-all" data-speed="1">
+                                1x Speed
+                            </button>
+                            <button id="regenerate-audio-btn" class="bg-edu-accent text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-all">
+                                <i class="fas fa-refresh mr-2"></i>New Voice
+                            </button>
+                        </div>
+                    </div>
+                {% elif document.status == 'processing' %}
+                    <div class="glass-effect rounded-xl p-6 scroll-reveal">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                            <i class="fas fa-cogs mr-3 text-edu-beige"></i>
+                            Processing Document
+                        </h2>
+                        <div class="processing-animation h-4 rounded-full mb-4"></div>
+                        <p class="text-gray-600 text-center">Your document is being processed. This usually takes 1-3 minutes.</p>
+                    </div>
+                {% elif document.status == 'failed' %}
+                    <div class="glass-effect rounded-xl p-6 scroll-reveal">
+                        <h2 class="text-2xl font-bold text-red-600 mb-4 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-3"></i>
+                            Processing Failed
+                        </h2>
+                        <p class="text-gray-600 mb-4">{{ document.error_message|default:"An error occurred while processing your document." }}</p>
+                        <button id="retry-processing-btn" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all">
+                            <i class="fas fa-refresh mr-2"></i>Retry Processing
+                        </button>
+                    </div>
+                {% endif %}
+
+                <!-- Summary Text Section -->
+                {% if document.summary_text %}
+                    <div class="glass-effect rounded-xl p-6 scroll-reveal">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                            <i class="fas fa-file-text mr-3 text-edu-beige"></i>
+                            AI Summary
+                        </h2>
+                        <div class="document-content prose prose-lg max-w-none">
+                            {{ document.summary_text|linebreaks }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Questions & Answers Section -->
+                <div class="glass-effect rounded-xl p-6 scroll-reveal">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-question-circle mr-3 text-edu-beige"></i>
+                        Questions & Answers
+                    </h2>
+                    
+                    <!-- Ask Question Form -->
+                    <form id="question-form" class="mb-8">
+                        <div class="relative">
+                            <textarea 
+                                id="question-input" 
+                                placeholder="Ask a question about this document..."
+                                class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-edu-beige focus:border-transparent resize-none"
+                                rows="3"
+                                required
+                            ></textarea>
+                            <button 
+                                type="submit" 
+                                class="absolute bottom-3 right-3 bg-edu-beige text-white px-6 py-2 rounded-lg hover:bg-edu-dark transition-all"
+                            >
+                                <i class="fas fa-paper-plane mr-2"></i>Ask
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Questions List -->
+                    <div id="questions-container" class="space-y-6">
+                        {% for question in recent_questions %}
+                            <div class="question-item">
+                                <!-- Question -->
+                                <div class="question-bubble p-4 rounded-lg mb-3">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-8 h-8 bg-edu-beige rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-user text-white text-sm"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-gray-900">{{ question.question_text }}</p>
+                                            <p class="text-sm text-gray-500 mt-2">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                {{ question.asked_at|timesince }} ago
+                                                {% if question.audio_timestamp %}
+                                                    <span class="ml-3">
+                                                        <i class="fas fa-headphones mr-1"></i>
+                                                        at {{ question.audio_timestamp }}s
+                                                    </span>
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Answer -->
+                                {% if question.is_answered %}
+                                    <div class="answer-bubble p-4 rounded-lg ml-8">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="w-8 h-8 bg-edu-accent rounded-full flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-robot text-white text-sm"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-gray-900">{{ question.answer_text }}</p>
+                                                <div class="flex items-center justify-between mt-3">
+                                                    <p class="text-sm text-gray-500">
+                                                        <i class="fas fa-clock mr-1"></i>
+                                                        Answered {{ question.answered_at|timesince }} ago
+                                                        {% if question.answer_confidence %}
+                                                            <span class="ml-3">
+                                                                <i class="fas fa-chart-line mr-1"></i>
+                                                                {{ question.answer_confidence|floatformat:0 }}% confidence
+                                                            </span>
+                                                        {% endif %}
+                                                    </p>
+                                                    
+                                                    <!-- Rating -->
+                                                    <div class="flex items-center space-x-1">
+                                                        {% for i in "12345" %}
+                                                            <button class="rating-star text-gray-300 hover:text-yellow-400 transition-colors" 
+                                                                    data-question="{{ question.id }}" 
+                                                                    data-rating="{{ i }}">
+                                                                <i class="fas fa-star {% if question.user_rating and i|add:0 <= question.user_rating %}text-yellow-400{% endif %}"></i>
+                                                            </button>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="answer-bubble p-4 rounded-lg ml-8">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-spinner fa-spin text-white text-sm"></i>
+                                            </div>
+                                            <p class="text-gray-600">Processing your question...</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% empty %}
+                            <div class="text-center py-8">
+                                <i class="fas fa-comments text-4xl text-gray-300 mb-4"></i>
+                                <p class="text-gray-500">No questions asked yet. Be the first to ask!</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Document Info -->
+                <div class="glass-effect rounded-xl p-6 scroll-reveal">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Document Info</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Uploaded:</span>
+                            <span class="text-gray-900">{{ document.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Size:</span>
+                            <span class="text-gray-900">{{ document.file_size_mb|floatformat:1 }} MB</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Language:</span>
+                            <span class="text-gray-900">{{ document.get_language_display|default:'English' }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Difficulty:</span>
+                            <span class="text-gray-900">{{ document.get_difficulty_level_display|default:'Intermediate' }}</span>
+                        </div>
+                        {% if document.subject_area %}
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Subject:</span>
+                                <span class="text-gray-900">{{ document.subject_area|title }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Related Actions -->
+                <div class="glass-effect rounded-xl p-6 scroll-reveal">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
+                    <div class="space-y-3">
+                        <button class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
+                            <i class="fas fa-edit mr-3"></i>Edit Details
+                        </button>
+                        <button class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
+                            <i class="fas fa-copy mr-3"></i>Duplicate
+                        </button>
+                        <button class="w-full bg-red-50 text-red-600 px-4 py-3 rounded-lg hover:bg-red-100 transition-all flex items-center">
+                            <i class="fas fa-trash mr-3"></i>Delete
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="glass-effect rounded-xl p-6 scroll-reveal">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3 text-sm">
+                            <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                            <span class="text-gray-600">Document processed successfully</span>
+                        </div>
+                        <div class="flex items-center space-x-3 text-sm">
+                            <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                            <span class="text-gray-600">Audio summary generated</span>
+                        </div>
+                        {% if document.total_questions_asked > 0 %}
+                            <div class="flex items-center space-x-3 text-sm">
+                                <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                                <span class="text-gray-600">{{ document.total_questions_asked }} question{{ document.total_questions_asked|pluralize }} asked</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div id="share-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold">Share Document</h3>
+            <button id="close-share-modal" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="share-form">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Share with email (optional)</label>
+                    <input type="email" id="share-email" class="w-full form-input rounded-lg" placeholder="colleague@example.com">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="can-view" checked class="rounded border-gray-300 text-edu-beige focus:ring-edu-beige">
+                            <span class="ml-2 text-sm">Can view document</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="can-ask-questions" class="rounded border-gray-300 text-edu-beige focus:ring-edu-beige">
+                            <span class="ml-2 text-sm">Can ask questions</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="can-download" class="rounded border-gray-300 text-edu-beige focus:ring-edu-beige">
+                            <span class="ml-2 text-sm">Can download</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                    <select id="share-expiry" class="w-full form-input rounded-lg">
+                        <option value="7">7 days</option>
+                        <option value="30">30 days</option>
+                        <option value="90">90 days</option>
+                        <option value="">Never expires</option>
+                    </select>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button type="submit" class="flex-1 bg-edu-beige text-white py-2 px-4 rounded-lg hover:bg-edu-dark transition-all">
+                        Generate Link
+                    </button>
+                    <button type="button" id="close-share-modal-btn" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition-all">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </form>
+        
+        <div id="share-result" class="hidden mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <p class="text-sm text-green-800 mb-2">Share link generated:</p>
+            <div class="flex items-center space-x-2">
+                <input type="text" id="share-link" class="flex-1 text-sm bg-white border border-green-300 rounded px-2 py-1" readonly>
+                <button id="copy-link" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-all">
+                    Copy
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Audio Player Controls
+    const audioPlayer = document.getElementById('audio-player');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const speedBtn = document.getElementById('speed-btn');
+    
+    if (audioPlayer && playPauseBtn) {
+        playPauseBtn.addEventListener('click', function() {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                this.innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                audioPlayer.pause();
+                this.innerHTML = '<i class="fas fa-play"></i>';
+            }
+        });
+        
+        audioPlayer.addEventListener('ended', function() {
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        });
+    }
+    
+    if (speedBtn && audioPlayer) {
+        speedBtn.addEventListener('click', function() {
+            const currentSpeed = parseFloat(this.dataset.speed);
+            const speeds = [0.75, 1, 1.25, 1.5, 2];
+            const currentIndex = speeds.indexOf(currentSpeed);
+            const nextIndex = (currentIndex + 1) % speeds.length;
+            const newSpeed = speeds[nextIndex];
+            
+            audioPlayer.playbackRate = newSpeed;
+            this.dataset.speed = newSpeed;
+            this.textContent = newSpeed + 'x Speed';
+        });
+    }
+    
+    // Question Form
+    const questionForm = document.getElementById('question-form');
+    const questionInput = document.getElementById('question-input');
+    const questionsContainer = document.getElementById('questions-container');
+    
+    if (questionForm) {
+        questionForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const question = questionInput.value.trim();
+            if (!question) return;
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            EduSauti.setLoadingState(submitBtn, true);
+            
+            try {
+                const response = await fetch(`/documents/{{ document.id }}/questions/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': EduSauti.csrfToken
+                    },
+                    body: JSON.stringify({
+                        question_text: question
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    questionInput.value = '';
+                    
+                    // Add question to the list
+                    addQuestionToList(question, data.id);
+                    
+                    EduSauti.showToast('Question submitted successfully!', 'success');
+                    
+                    // Poll for answer
+                    pollForAnswer(data.id);
+                } else {
+                    const error = await response.json();
+                    EduSauti.showToast(error.error || 'Failed to submit question', 'error');
+                }
+            } catch (error) {
+                EduSauti.showToast('Network error. Please try again.', 'error');
+            } finally {
+                EduSauti.setLoadingState(submitBtn, false);
+            }
+        });
+    }
+    
+    function addQuestionToList(questionText, questionId) {
+        const questionHTML = `
+            <div class="question-item" data-question-id="${questionId}">
+                <div class="question-bubble p-4 rounded-lg mb-3">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-edu-beige rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-gray-900">${questionText}</p>
+                            <p class="text-sm text-gray-500 mt-2">
+                                <i class="fas fa-clock mr-1"></i>
+                                Just now
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="answer-bubble p-4 rounded-lg ml-8">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-spinner fa-spin text-white text-sm"></i>
+                        </div>
+                        <p class="text-gray-600">Processing your question...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        if (questionsContainer.querySelector('.text-center')) {
+            questionsContainer.innerHTML = questionHTML;
+        } else {
+            questionsContainer.insertAdjacentHTML('afterbegin', questionHTML);
+        }
+    }
+    
+    function pollForAnswer(questionId, attempts = 0) {
+        if (attempts >= 30) { // Stop after 30 attempts (1 minute)
+            EduSauti.showToast('Question processing is taking longer than expected', 'warning');
+            return;
+        }
+        
+        setTimeout(async () => {
+            try {
+                const response = await fetch(`/documents/{{ document.id }}/questions/`);
+                const data = await response.json();
+                
+                const question = data.results.find(q => q.id === questionId);
+                if (question && question.is_answered) {
+                    updateQuestionWithAnswer(questionId, question);
+                } else {
+                    pollForAnswer(questionId, attempts + 1);
+                }
+            } catch (error) {
+                console.error('Error polling for answer:', error);
+                pollForAnswer(questionId, attempts + 1);
+            }
+        }, 2000); // Poll every 2 seconds
+    }
+    
+    function updateQuestionWithAnswer(questionId, questionData) {
+        const questionElement = document.querySelector(`[data-question-id="${questionId}"]`);
+        if (questionElement) {
+            const answerDiv = questionElement.querySelector('.answer-bubble');
+            answerDiv.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-edu-accent rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-gray-900">${questionData.answer_text}</p>
+                        <div class="flex items-center justify-between mt-3">
+                            <p class="text-sm text-gray-500">
+                                <i class="fas fa-clock mr-1"></i>
+                                Just answered
+                                ${questionData.answer_confidence ? `
+                                    <span class="ml-3">
+                                        <i class="fas fa-chart-line mr-1"></i>
+                                        ${Math.round(questionData.answer_confidence)}% confidence
+                                    </span>
+                                ` : ''}
+                            </p>
+                            
+                            <div class="flex items-center space-x-1">
+                                ${[1,2,3,4,5].map(i => `
+                                    <button class="rating-star text-gray-300 hover:text-yellow-400 transition-colors" 
+                                            data-question="${questionId}" 
+                                            data-rating="${i}">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    // Rating System
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.rating-star')) {
+            const button = e.target.closest('.rating-star');
+            const questionId = button.dataset.question;
+            const rating = parseInt(button.dataset.rating);
+            
+            // Update visual feedback
+            const stars = document.querySelectorAll(`[data-question="${questionId}"].rating-star`);
+            stars.forEach((star, index) => {
+                const icon = star.querySelector('i');
+                if (index < rating) {
+                    icon.classList.remove('text-gray-300');
+                    icon.classList.add('text-yellow-400');
+                } else {
+                    icon.classList.remove('text-yellow-400');
+                    icon.classList.add('text-gray-300');
+                }
+            });
+            
+            // Submit rating
+            submitRating(questionId, rating);
+        }
+    });
+    
+    async function submitRating(questionId, rating) {
+        try {
+            const response = await fetch(`/questions/${questionId}/rate/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': EduSauti.csrfToken
+                },
+                body: JSON.stringify({ rating: rating })
+            });
+            
+            if (response.ok) {
+                EduSauti.showToast('Thank you for your rating!', 'success');
+            }
+        } catch (error) {
+            console.error('Error submitting rating:', error);
+        }
+    }
+    
+    // Share Modal
+    const shareBtn = document.getElementById('share-btn');
+    const shareModal = document.getElementById('share-modal');
+    const closeShareModal = document.getElementById('close-share-modal');
+    const closeShareModalBtn = document.getElementById('close-share-modal-btn');
+    const shareForm = document.getElementById('share-form');
+    const copyLinkBtn = document.getElementById('copy-link');
+    
+    if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            shareModal.classList.remove('hidden');
+        });
+    }
+    
+    if (closeShareModal) {
+        closeShareModal.addEventListener('click', () => {
+            shareModal.classList.add('hidden');
+        });
+    }
+    
+    if (closeShareModalBtn) {
+        closeShareModalBtn.addEventListener('click', () => {
+            shareModal.classList.add('hidden');
+        });
+    }
+    
+    if (shareForm) {
+        shareForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('email', document.getElementById('share-email').value);
+            formData.append('can_view', document.getElementById('can-view').checked);
+            formData.append('can_ask_questions', document.getElementById('can-ask-questions').checked);
+            formData.append('can_download', document.getElementById('can-download').checked);
+            formData.append('expires_in_days', document.getElementById('share-expiry').value);
+            
+            try {
+                const response = await fetch(`/documents/{{ document.id }}/share/`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': EduSauti.csrfToken
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('share-link').value = data.share_url;
+                    document.getElementById('share-result').classList.remove('hidden');
+                    EduSauti.showToast('Share link generated!', 'success');
+                } else {
+                    const error = await response.json();
+                    EduSauti.showToast(error.error || 'Failed to generate share link', 'error');
+                }
+            } catch (error) {
+                EduSauti.showToast('Network error. Please try again.', 'error');
+            }
+        });
+    }
+    
+    if (copyLinkBtn) {
+        copyLinkBtn.addEventListener('click', function() {
+            const linkInput = document.getElementById('share-link');
+            linkInput.select();
+            document.execCommand('copy');
+            EduSauti.showToast('Link copied to clipboard!', 'success');
+        });
+    }
+    
+    // Auto-refresh for processing documents
+    {% if document.status == 'processing' %}
+    setTimeout(() => {
+        window.location.reload();
+    }, 30000); // Refresh every 30 seconds
+    {% endif %}
+});
+</script>
+{% endblock %}
