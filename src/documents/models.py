@@ -34,6 +34,7 @@ class Document(models.Model):
         ('pptx', 'PowerPoint'),
     ]
     
+    # Add these constants
     MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
     ALLOWED_EXTENSIONS = ['pdf', 'docx', 'txt', 'pptx']
     
@@ -148,6 +149,17 @@ class Document(models.Model):
         self.total_questions_asked += 1
         self.save(update_fields=['total_questions_asked'])
     
+    def clean(self):
+        """Model validation"""
+        from django.core.exceptions import ValidationError
+        
+        if self.file:
+            if not self.is_valid_file_type():
+                raise ValidationError('Invalid file type. Only PDF, DOCX, TXT, and PPTX files are allowed.')
+            
+            if not self.is_valid_file_size():
+                raise ValidationError(f'File size exceeds maximum limit of {self.MAX_FILE_SIZE // (1024*1024)}MB.')
+    
     def is_valid_file_type(self):
         """Check if file type is valid"""
         if not self.file:
@@ -162,17 +174,6 @@ class Document(models.Model):
             return False
         
         return self.file.size <= self.MAX_FILE_SIZE
-
-    def clean(self):
-        """Model validation"""
-        from django.core.exceptions import ValidationError
-        
-        if self.file:
-            if not self.is_valid_file_type():
-                raise ValidationError('Invalid file type. Only PDF, DOCX, TXT, and PPTX files are allowed.')
-            
-            if not self.is_valid_file_size():
-                raise ValidationError(f'File size exceeds maximum limit of {self.MAX_FILE_SIZE // (1024*1024)}MB.')
     
     def save(self, *args, **kwargs):
         """Override save to set file metadata"""

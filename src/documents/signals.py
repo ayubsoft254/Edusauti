@@ -53,34 +53,6 @@ def document_post_save(sender, instance, created, **kwargs):
                 level='error',
                 message=f'Failed to start processing pipeline: {str(e)}'
             )
-    
-    # Handle status changes
-    if not created and 'status' in getattr(instance, '_dirty_fields', []):
-        old_status = getattr(instance, '_original_status', None)
-        new_status = instance.status
-        
-        if old_status != new_status:
-            ProcessingLog.objects.create(
-                document=instance,
-                step='completion' if new_status == 'completed' else 'processing',
-                level='info' if new_status == 'completed' else 'warning' if new_status == 'failed' else 'info',
-                message=f'Document status changed from {old_status} to {new_status}'
-            )
-            
-            # If processing completed, log completion time
-            if new_status == 'completed' and instance.processing_completed_at:
-                processing_duration = instance.processing_duration
-                ProcessingLog.objects.create(
-                    document=instance,
-                    step='completion',
-                    level='info',
-                    message=f'Document processing completed in {processing_duration:.2f} seconds',
-                    details={
-                        'processing_duration': processing_duration,
-                        'word_count': instance.word_count,
-                        'page_count': instance.page_count
-                    }
-                )
 
 
 @receiver(pre_delete, sender=Document)
@@ -147,41 +119,6 @@ def audio_summary_post_save(sender, instance, created, **kwargs):
                 'speech_pitch': instance.speech_pitch
             }
         )
-    
-    # Handle status changes
-    if not created and hasattr(instance, '_dirty_fields') and 'status' in instance._dirty_fields:
-        old_status = getattr(instance, '_original_status', None)
-        new_status = instance.status
-        
-        if old_status != new_status:
-            if new_status == 'completed':
-                ProcessingLog.objects.create(
-                    document=instance.document,
-                    step='audio_generation',
-                    level='info',
-                    message=f'Audio summary generated successfully in {instance.generation_time}s',
-                    details={
-                        'audio_duration': instance.audio_duration,
-                        'audio_size': instance.audio_size,
-                        'generation_time': instance.generation_time,
-                        'azure_cost': float(instance.azure_cost) if instance.azure_cost else None
-                    }
-                )
-                
-                # Send notification to user (if notification system is implemented)
-                from .utils import send_audio_ready_notification
-                try:
-                    send_audio_ready_notification(instance.document.user, instance.document)
-                except Exception as e:
-                    logger.error(f"Failed to send audio ready notification: {str(e)}")
-                    
-            elif new_status == 'failed':
-                ProcessingLog.objects.create(
-                    document=instance.document,
-                    step='audio_generation',
-                    level='error',
-                    message=f'Audio summary generation failed'
-                )
 
 
 @receiver(pre_delete, sender=AudioSummary)
@@ -231,88 +168,6 @@ def question_post_save(sender, instance, created, **kwargs):
             logger.info(f"Started processing question {instance.id}")
         except Exception as e:
             logger.error(f"Failed to start question processing for question {instance.id}: {str(e)}")
-    
-    # Handle answer completion
-    if not created and hasattr(instance, '_dirty_fields') and 'is_answered' in instance._dirty_fields:
-        if instance.is_answered and instance.answer_text:
-            ProcessingLog.objects.create(
-                document=instance.document,
-                step='completion',
-                level='info',
-                message=f'Question answered in {instance.processing_time}ms with confidence {instance.answer_confidence}',
-                details={
-                    'processing_time': instance.processing_time,
-                    'answer_confidence': instance.answer_confidence,
-                    'answer_preview': instance.answer_text[:100],
-                    'azure_cost': float(instance.azure_cost) if instance.azure_cost else None
-                }
-            )
-            
-            # Convert answer to speech if user has premium features
-            if instance.user.has_premium_features:
-                from .tasks import generate_answer_audio
-                try:
-                    generate_answer_audio.delay(instance.id)
-                except Exception as e:
-                    logger.error(f"Failed to generate answer audio for question {instance.id}: {str(e)}")
-
-
-# Signal to track field changes for status updates
-@receiver(post_save)
-def track_field_changes(sender, instance, **kwargs):
-    """Generic signal to track field changes"""
-    
-    # Only track specific models
-    if sender not in [Document, AudioSummary, Question]:
-        return
-    
-    # Store original values for comparison in next save
-    if hasattr(instance, 'pk') and instance.pk:
-        try:
-            original = sender.objects.get(pk=instance.pk)
-            
-            # Track status changes for Document
-            if sender == Document:
-                instance._original_status = original.status
-            elif sender == AudioSummary:
-                instance._original_status = original.status
-                
-        except sender.DoesNotExist:
-            pass
-
-
-# Model change tracking for better signal handling
-def __init__(self, *args, **kwargs):
-    """Override model __init__ to track field changes"""
-    super().__init__(*args, **kwargs)
-    self._original_values = {}
-    
-    if self.pk:
-        for field in self._meta.fields:
-            self._original_values[field.name] = getattr(self, field.name)
-
-
-def save(self, *args, **kwargs):
-    """Override model save to track dirty fields"""
-    if self.pk:
-        self._dirty_fields = []
-        for field in self._meta.fields:
-            original_value = self._original_values.get(field.name)
-            current_value = getattr(self, field.name)
-            
-            if original_value != current_value:
-                self._dirty_fields.append(field.name)
-    
-    super().save(*args, **kwargs)
-
-
-# Add methods to models (monkey patching - better to do this in models.py)
-Document.__init__ = __init__
-Document.save = save
-AudioSummary.__init__ = __init__
-AudioSummary.save = save
-Question.__init__ = __init__
-Question.save = save
 
 
 # User analytics update signals
