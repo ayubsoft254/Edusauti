@@ -151,15 +151,6 @@ class SpeechService(BaseAIService):
         except Exception as e:
             response_time = time.time() - start_time
             
-            # Log failed request
-            AIServiceLog.log_request(
-                service_type='speech_synthesis',
-                endpoint=f"https://{self.speech_region}.tts.speech.microsoft.com/cognitiveservices/v1",
-                success=False,
-                error_message=str(e),
-                response_time=response_time
-            )
-            
             if log_entry.status == 'pending':
                 self.handle_error(log_entry, e)
             
