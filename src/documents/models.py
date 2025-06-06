@@ -203,10 +203,10 @@ class AudioSummary(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='audio_summaries')
     
     # Audio file
-    audio_file = models.FileField(upload_to=audio_upload_path)
+    audio_file = models.FileField(upload_to=audio_upload_path, blank=True)
     audio_format = models.CharField(max_length=10, default='mp3')
-    audio_duration = models.PositiveIntegerField(help_text="Duration in seconds")
-    audio_size = models.PositiveIntegerField(help_text="File size in bytes")
+    audio_duration = models.PositiveIntegerField(null=True, blank=True, help_text="Duration in seconds")
+    audio_size = models.PositiveIntegerField(null=True, blank=True, help_text="File size in bytes")
     
     # Voice settings
     voice_name = models.CharField(max_length=50, default='en-US-JennyNeural')
