@@ -120,7 +120,7 @@ class OpenAIService(BaseAIService):
             try:
                 AIServiceLog.log_request(
                     service_type='openai_chat',
-                    operation='generate_summary',
+                    endpoint=f"{self.endpoint}/openai/deployments/{self.deployment_name}/chat/completions",
                     success=True,
                     response_time=response_time,
                     tokens_used=response.usage.total_tokens,
