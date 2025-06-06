@@ -126,9 +126,10 @@
                     </div>
                     
                     <!-- Tags -->
-                    {% if document.tags %}
+                    <!-- Tags section -->
+                    {% if document.get_tags_list %}
                         <div class="flex flex-wrap gap-2 mb-6 scroll-reveal">
-                            {% for tag in document.tags.split:',' %}
+                            {% for tag in document.get_tags_list %}
                                 <span class="tag px-3 py-1 rounded-full text-sm">{{ tag|title }}</span>
                             {% endfor %}
                         </div>
