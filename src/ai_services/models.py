@@ -82,18 +82,29 @@ class AIServiceLog(models.Model):
         self.save()
     
     @classmethod
-    def log_request(cls, service_type, operation, success=True, error_message=None, **kwargs):
+    def log_request(cls, service_type, endpoint, success=True, error_message=None, **kwargs):
         """Helper method to create log entries with proper defaults"""
         try:
+            # Determine status based on success parameter
+            status = 'success' if success else 'failed'
+            
             return cls.objects.create(
                 service_type=service_type,
-                operation=operation,
-                success=success,
+                endpoint=endpoint,
+                status=status,
                 error_message=error_message[:500] if error_message else None,  # Truncate long errors
                 response_time=kwargs.get('response_time', 0.0),
-                tokens_used=kwargs.get('tokens_used', 0),
-                estimated_cost=kwargs.get('estimated_cost', 0.0),
-                created_at=timezone.now()
+                tokens_used=kwargs.get('tokens_used'),
+                estimated_cost=kwargs.get('estimated_cost'),
+                request_size=kwargs.get('request_size', 0),
+                response_size=kwargs.get('response_size'),
+                method=kwargs.get('method', 'POST'),
+                user=kwargs.get('user'),
+                azure_request_id=kwargs.get('azure_request_id', ''),
+                azure_operation_id=kwargs.get('azure_operation_id', ''),
+                characters_processed=kwargs.get('characters_processed'),
+                error_code=kwargs.get('error_code', ''),
+                additional_data=kwargs.get('additional_data'),
             )
         except Exception as e:
             # If logging fails, print error but don't crash the main operation
