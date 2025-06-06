@@ -8,7 +8,7 @@ class Command(BaseCommand):
     
     def add_arguments(self, parser):
         parser.add_argument('--test-only', action='store_true', help='Only remove test logs')
-        parser.add_argument('--days', type=int, default=7, help='Remove logs older than N days')
+        parser.add_argument('--days', type=int, default=1, help='Remove logs older than N days')
     
     def handle(self, *args, **options):
         if options['test_only']:
