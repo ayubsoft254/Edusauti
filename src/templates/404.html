@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Page Not Found - EduSauti{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-bg flex items-center justify-center">
+    <div class="text-center">
+        <div class="mb-8">
+            <i class="fas fa-file-search text-8xl text-gray-300"></i>
+        </div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Page Not Found</h1>
+        <p class="text-xl text-gray-600 mb-8">The document or page you're looking for doesn't exist.</p>
+        <a href="{% url 'dashboard' %}" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all">
+            Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

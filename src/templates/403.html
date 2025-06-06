@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Access Denied - EduSauti{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-bg flex items-center justify-center">
+    <div class="text-center">
+        <div class="mb-8">
+            <i class="fas fa-lock text-8xl text-red-300"></i>
+        </div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Access Denied</h1>
+        <p class="text-xl text-gray-600 mb-8">You don't have permission to access this document.</p>
+        <a href="{% url 'dashboard' %}" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all">
+            Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
