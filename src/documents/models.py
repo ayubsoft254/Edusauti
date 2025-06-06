@@ -245,8 +245,10 @@ class AudioSummary(models.Model):
     
     @property
     def audio_size_mb(self):
-        """Get audio size in MB"""
-        return round(self.audio_size / (1024 * 1024), 2)
+        """Return audio size in MB"""
+        if not self.audio_size:
+            return 0
+        return round(self.audio_size / (1024 * 1024), 1)
 
 
 class Question(models.Model):
