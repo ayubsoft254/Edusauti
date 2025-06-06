@@ -80,14 +80,11 @@ class SpeechService(BaseAIService):
             
             # Create SSML with rate and pitch adjustments
             ssml_text = self._create_ssml(text, voice_name, speech_rate, speech_pitch)
-            
-            # Create synthesizer with memory stream
-            audio_stream = io.BytesIO()
-            audio_config = speechsdk.audio.AudioOutputConfig(stream=audio_stream)
-            
+
+            # Create synthesizer with default audio output (this will work)
             synthesizer = speechsdk.SpeechSynthesizer(
                 speech_config=self.speech_config,
-                audio_config=audio_config
+                audio_config=None  # Use default audio output
             )
             
             # Synthesize speech
@@ -97,7 +94,7 @@ class SpeechService(BaseAIService):
             
             # Check result
             if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
-                # Get audio data
+                # Get audio data directly from result
                 audio_data = result.audio_data
                 
                 # Calculate audio duration (approximate)
