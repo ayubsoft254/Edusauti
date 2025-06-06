@@ -36,7 +36,7 @@ class AIServiceLog(models.Model):
     # Response details
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     response_size = models.PositiveIntegerField(null=True, blank=True, help_text="Response size in bytes")
-    response_time = models.FloatField(null=True, blank=True)  # Make it nullable temporarily
+    response_time = models.FloatField(null=True, blank=True, default=0.0)  # Make it nullable temporarily
     
     # Azure specific
     azure_request_id = models.CharField(max_length=100, blank=True)
@@ -83,17 +83,22 @@ class AIServiceLog(models.Model):
     
     @classmethod
     def log_request(cls, service_type, operation, success=True, error_message=None, **kwargs):
-        """Helper method to create log entries with proper response_time"""
-        return cls.objects.create(
-            service_type=service_type,
-            operation=operation,
-            success=success,
-            error_message=error_message,
-            response_time=kwargs.get('response_time', 0.0),  # Default to 0.0 if not provided
-            tokens_used=kwargs.get('tokens_used', 0),
-            estimated_cost=kwargs.get('estimated_cost', 0.0),
-            **{k: v for k, v in kwargs.items() if k not in ['response_time', 'tokens_used', 'estimated_cost']}
-        )
+        """Helper method to create log entries with proper defaults"""
+        try:
+            return cls.objects.create(
+                service_type=service_type,
+                operation=operation,
+                success=success,
+                error_message=error_message[:500] if error_message else None,  # Truncate long errors
+                response_time=kwargs.get('response_time', 0.0),
+                tokens_used=kwargs.get('tokens_used', 0),
+                estimated_cost=kwargs.get('estimated_cost', 0.0),
+                created_at=timezone.now()
+            )
+        except Exception as e:
+            # If logging fails, print error but don't crash the main operation
+            print(f"Failed to log AI service request: {e}")
+            return None
 
 
 class AIServiceUsage(models.Model):
