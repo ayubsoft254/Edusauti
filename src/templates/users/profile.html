@@ -176,7 +176,7 @@
                     <!-- Action Buttons -->
                     {% if profile_user == user %}
                         <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
-                            <a href="{% url 'profile_edit' %}" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift">
+                            <a href="{% url 'settings' %}" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift">
                                 <i class="fas fa-edit mr-2"></i>Edit Profile
                             </a>
                             <a href="{% url 'settings' %}" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-all hover-lift">
@@ -320,7 +320,7 @@
                             <i class="fas fa-file-upload text-4xl text-gray-300 mb-4"></i>
                             <p class="text-gray-500 mb-4">No documents uploaded yet</p>
                             {% if profile_user == user %}
-                                <a href="{% url 'upload_document' %}" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all">
+                                <a href="{% url 'upload' %}" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all">
                                     Upload Your First Document
                                 </a>
                             {% endif %}
@@ -448,7 +448,7 @@
                                 <i class="fas fa-cog mr-3"></i>Account Settings
                             </a>
                             
-                            <a href="{% url 'usage_stats' %}" class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
+                            <a href="{% url 'usage-stats' %}" class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
                                 <i class="fas fa-chart-bar mr-3"></i>Usage Statistics
                             </a>
                             
@@ -573,7 +573,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.EduSauti.setLoadingState(this, true);
             
             try {
-                const response = await fetch('{% url "profile_edit" %}', {
+                const response = await fetch('{% url "settings" %}', {
                     method: 'POST',
                     body: formData,
                     headers: {
