@@ -234,19 +234,10 @@ def generate_audio_summary(self, document_id, voice_name=None, speech_rate='medi
             message=f'Starting audio generation with voice {voice_name}'
         )
         
-        # Create AudioSummary record
-        audio_summary = AudioSummary.objects.create(
-            document=document,
-            voice_name=voice_name,
-            speech_rate=speech_rate,
-            speech_pitch=speech_pitch,
-            status='generating'
-        )
-        
-        # Initialize Speech service
+        # Initialize Speech service FIRST
         speech_service = SpeechService()
         
-        # Generate audio
+        # Generate audio BEFORE creating AudioSummary record
         audio_result = speech_service.text_to_speech(
             text=document.summary_text,
             voice_name=voice_name,
@@ -267,15 +258,17 @@ def generate_audio_summary(self, document_id, voice_name=None, speech_rate='medi
         with open(full_audio_filename, 'wb') as audio_file:
             audio_file.write(audio_result['audio_data'])
         
-        # Update AudioSummary record
-        audio_summary.audio_file = os.path.join(audio_path, audio_filename)
-        audio_summary.audio_duration = audio_result['duration']
-        audio_summary.audio_size = len(audio_result['audio_data'])
-        audio_summary.generation_time = audio_result.get('generation_time', 0)
-        audio_summary.azure_request_id = audio_result.get('request_id', '')
-        audio_summary.azure_cost = audio_result.get('cost', 0)
-        audio_summary.status = 'completed'
-        audio_summary.save()
+        # NOW create AudioSummary record with all the data
+        audio_summary = AudioSummary.objects.create(
+            document=document,
+            audio_file=os.path.join(audio_path, audio_filename),
+            voice_name=voice_name,
+            speech_rate='medium',
+            speech_pitch='medium',
+            audio_duration=audio_result['duration'],
+            audio_size=len(audio_result['audio_data']),
+            status='completed'
+        )
         
         # Mark document as completed
         document.status = 'completed'
@@ -284,43 +277,20 @@ def generate_audio_summary(self, document_id, voice_name=None, speech_rate='medi
         
         ProcessingLog.objects.create(
             document=document,
-            step='audio_generation',
-            level='info',
-            message=f'Audio generation completed. Duration: {audio_summary.audio_duration_formatted}',
-            details={
-                'audio_duration': audio_summary.audio_duration,
-                'audio_size': audio_summary.audio_size,
-                'generation_time': audio_summary.generation_time,
-                'cost': float(audio_summary.azure_cost) if audio_summary.azure_cost else None
-            }
-        )
-        
-        ProcessingLog.objects.create(
-            document=document,
             step='completion',
             level='info',
             message='Document processing pipeline completed successfully'
         )
         
-    except Document.DoesNotExist:
-        logger.error(f"Document {document_id} not found for audio generation")
-        raise
     except Exception as exc:
         logger.error(f"Audio generation failed for document {document_id}: {str(exc)}")
         
+        # Mark document as failed
         try:
             document = Document.objects.get(id=document_id)
             document.status = 'failed'
             document.error_message = f"Audio generation failed: {str(exc)}"
             document.save(update_fields=['status', 'error_message'])
-            
-            # Update AudioSummary status if it exists
-            try:
-                audio_summary = AudioSummary.objects.get(document=document, status='generating')
-                audio_summary.status = 'failed'
-                audio_summary.save()
-            except AudioSummary.DoesNotExist:
-                pass
             
             ProcessingLog.objects.create(
                 document=document,
@@ -331,10 +301,7 @@ def generate_audio_summary(self, document_id, voice_name=None, speech_rate='medi
         except:
             pass
         
-        if self.request.retries < self.max_retries:
-            raise self.retry(countdown=60 * (2 ** self.request.retries), exc=exc)
-        else:
-            raise exc
+        raise exc
 
 
 @shared_task(bind=True, max_retries=3)
@@ -736,19 +703,10 @@ def generate_audio_sync(document_id, voice_name=None):
             message=f'Starting audio generation with voice {voice_name}'
         )
         
-        # Create AudioSummary record
-        audio_summary = AudioSummary.objects.create(
-            document=document,
-            voice_name=voice_name,
-            speech_rate='medium',
-            speech_pitch='medium',
-            status='generating'
-        )
-        
-        # Initialize Speech service
+        # Initialize Speech service FIRST
         speech_service = SpeechService()
         
-        # Generate audio
+        # Generate audio BEFORE creating AudioSummary record
         audio_result = speech_service.text_to_speech(
             text=document.summary_text,
             voice_name=voice_name,
@@ -769,12 +727,17 @@ def generate_audio_sync(document_id, voice_name=None):
         with open(full_audio_filename, 'wb') as audio_file:
             audio_file.write(audio_result['audio_data'])
         
-        # Update AudioSummary record
-        audio_summary.audio_file = os.path.join(audio_path, audio_filename)
-        audio_summary.audio_duration = audio_result['duration']
-        audio_summary.audio_size = len(audio_result['audio_data'])
-        audio_summary.status = 'completed'
-        audio_summary.save()
+        # NOW create AudioSummary record with all the data
+        audio_summary = AudioSummary.objects.create(
+            document=document,
+            audio_file=os.path.join(audio_path, audio_filename),
+            voice_name=voice_name,
+            speech_rate='medium',
+            speech_pitch='medium',
+            audio_duration=audio_result['duration'],
+            audio_size=len(audio_result['audio_data']),
+            status='completed'
+        )
         
         # Mark document as completed
         document.status = 'completed'
@@ -790,4 +753,21 @@ def generate_audio_sync(document_id, voice_name=None):
         
     except Exception as exc:
         logger.error(f"Audio generation failed for document {document_id}: {str(exc)}")
+        
+        # Mark document as failed
+        try:
+            document = Document.objects.get(id=document_id)
+            document.status = 'failed'
+            document.error_message = f"Audio generation failed: {str(exc)}"
+            document.save(update_fields=['status', 'error_message'])
+            
+            ProcessingLog.objects.create(
+                document=document,
+                step='audio_generation',
+                level='error',
+                message=f'Audio generation failed: {str(exc)}'
+            )
+        except:
+            pass
+        
         raise exc
