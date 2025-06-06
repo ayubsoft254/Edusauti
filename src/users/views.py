@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
@@ -446,6 +446,43 @@ def cancel_subscription(request):
     }
     
     return render(request, 'users/cancel_subscription.html', context)
+
+
+@login_required
+def profile_view(request, user_id=None):
+    """User profile view"""
+    if user_id:
+        profile_user = get_object_or_404(User, id=user_id)
+    else:
+        profile_user = request.user
+    
+    # Get recent documents
+    recent_documents = profile_user.documents.order_by('-created_at')[:5]
+    
+    # Calculate usage statistics
+    documents_uploaded = getattr(profile_user, 'documents_uploaded_this_month', 0) or 0
+    documents_limit = getattr(profile_user, 'monthly_document_limit', 10) or 10
+    questions_asked = getattr(profile_user, 'questions_asked_this_month', 0) or 0
+    questions_limit = getattr(profile_user, 'monthly_question_limit', 100) or 100
+    
+    # Calculate percentages
+    documents_usage_percentage = min((documents_uploaded / documents_limit) * 100, 100) if documents_limit > 0 else 0
+    questions_usage_percentage = min((questions_asked / questions_limit) * 100, 100) if questions_limit > 0 else 0
+    
+    # Calculate remaining
+    documents_remaining = max(documents_limit - documents_uploaded, 0)
+    questions_remaining = max(questions_limit - questions_asked, 0)
+    
+    context = {
+        'profile_user': profile_user,
+        'recent_documents': recent_documents,
+        'documents_usage_percentage': round(documents_usage_percentage, 1),
+        'questions_usage_percentage': round(questions_usage_percentage, 1),
+        'documents_remaining': documents_remaining,
+        'questions_remaining': questions_remaining,
+    }
+    
+    return render(request, 'users/profile.html', context)
 
 
 # ===== API VIEWS =====

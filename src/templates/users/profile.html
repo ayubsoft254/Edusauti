@@ -219,10 +219,10 @@
                             <div class="relative">
                                 <div class="bg-gray-200 rounded-full h-3">
                                     <div class="progress-bar h-3 rounded-full transition-all duration-1000" 
-                                         style="width: {{ profile_user.documents_uploaded_this_month|default:0|div:profile_user.monthly_document_limit|mul:100 }}%"></div>
+                                         style="width: {{ documents_usage_percentage }}%"></div>
                                 </div>
                                 <p class="text-sm text-gray-500 mt-2">
-                                    {{ profile_user.monthly_document_limit|sub:profile_user.documents_uploaded_this_month|default:profile_user.monthly_document_limit }} remaining
+                                    {{ documents_remaining }} remaining
                                 </p>
                             </div>
                         </div>
@@ -244,10 +244,10 @@
                             <div class="relative">
                                 <div class="bg-gray-200 rounded-full h-3">
                                     <div class="bg-gradient-to-r from-edu-accent to-edu-beige h-3 rounded-full transition-all duration-1000" 
-                                         style="width: {{ profile_user.questions_asked_this_month|default:0|div:profile_user.monthly_question_limit|mul:100 }}%"></div>
+                                         style="width: {{ questions_usage_percentage }}%"></div>
                                 </div>
                                 <p class="text-sm text-gray-500 mt-2">
-                                    {{ profile_user.monthly_question_limit|sub:profile_user.questions_asked_this_month|default:profile_user.monthly_question_limit }} remaining
+                                    {{ questions_remaining }} remaining
                                 </p>
                             </div>
                         </div>
