@@ -61,10 +61,10 @@ class DocumentIntelligenceService(BaseAIService):
             with open(file_path, 'rb') as file:
                 file_content = file.read()
             
-            # Analyze the document
+            # Updated API call for newer Azure Document Intelligence SDK
             poller = self.client.begin_analyze_document(
                 model_id="prebuilt-read",
-                analyze_request=file_content,
+                body=file_content,
                 content_type="application/octet-stream"
             )
             
@@ -105,7 +105,8 @@ class DocumentIntelligenceService(BaseAIService):
         except Exception as e:
             self.handle_error(log_entry, e)
             raise
-    
+
+
     def extract_text_from_url(self, document_url: str, user=None) -> Dict[str, Any]:
         """
         Extract text from a document via URL
@@ -130,10 +131,10 @@ class DocumentIntelligenceService(BaseAIService):
         )
         
         try:
-            # Analyze the document from URL
+            # Updated API call for URL-based analysis
             poller = self.client.begin_analyze_document(
                 model_id="prebuilt-read",
-                analyze_request={"urlSource": document_url}
+                body={"urlSource": document_url}
             )
             
             # Wait for completion
