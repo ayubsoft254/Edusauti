@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ document.title }} - Shared Document - EduSauti{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-bg">
+    <!-- Shared document view with limited permissions -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center">
+                <i class="fas fa-share-alt text-yellow-600 mr-3"></i>
+                <p class="text-yellow-800">
+                    This document has been shared with you by {{ document.user.get_full_name|default:document.user.username }}
+                </p>
+            </div>
+        </div>
+        
+        <!-- Document content based on permissions -->
+        <!-- Similar to detail.html but with restricted features -->
+    </div>
+</div>
+{% endblock %}
