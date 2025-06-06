@@ -128,10 +128,10 @@ class SpeechService(BaseAIService):
                 AIServiceLog.log_request(
                     service_type='speech_synthesis',
                     endpoint=f"https://{self.speech_region}.tts.speech.microsoft.com/cognitiveservices/v1",
-                    operation='text_to_speech',
                     success=True,
                     response_time=response_time,
-                    estimated_cost=estimated_cost
+                    estimated_cost=estimated_cost,
+                    characters_processed=character_count
                 )
                 
                 return {
@@ -168,7 +168,6 @@ class SpeechService(BaseAIService):
             AIServiceLog.log_request(
                 service_type='speech_synthesis',
                 endpoint=f"https://{self.speech_region}.tts.speech.microsoft.com/cognitiveservices/v1",
-                operation='text_to_speech',
                 success=False,
                 error_message=str(e),
                 response_time=response_time
