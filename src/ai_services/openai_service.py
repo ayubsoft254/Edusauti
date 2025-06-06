@@ -1,7 +1,9 @@
 import tiktoken
+import time
 from typing import Dict, Any
 from openai import AzureOpenAI
 from django.conf import settings
+from django.utils import timezone
 from .base import BaseAIService, RateLimitExceeded, ServiceUnavailable, InvalidInput
 
 
@@ -122,7 +124,7 @@ class OpenAIService(BaseAIService):
                 success=True
             )
             
-            return {
+            result = {
                 'summary': summary,
                 'input_tokens': input_tokens,
                 'output_tokens': output_tokens,
@@ -135,11 +137,31 @@ class OpenAIService(BaseAIService):
                 'difficulty_level': difficulty_level
             }
             
+            # Log successful request
+            AIServiceLog.log_request(
+                service_type='openai_chat',
+                operation='generate_summary',
+                success=True,
+                response_time=response_time,
+                tokens_used=response.usage.total_tokens,
+                estimated_cost=result['estimated_cost']
+            )
+            
+            return result
+            
         except Exception as e:
-            self.handle_error(log_entry, e)
-            if "rate limit" in str(e).lower():
-                raise RateLimitExceeded(f"OpenAI rate limit exceeded: {e}")
-            raise ServiceUnavailable(f"OpenAI API error: {e}")
+            response_time = time.time() - start_time
+            
+            # Log failed request
+            AIServiceLog.log_request(
+                service_type='openai_chat',
+                operation='generate_summary',
+                success=False,
+                error_message=str(e),
+                response_time=response_time
+            )
+            
+            raise e
     
     def answer_question(
         self, 
