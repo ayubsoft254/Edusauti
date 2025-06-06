@@ -187,7 +187,7 @@
                                 </span>
                                 <span>
                                     <i class="fas fa-file-audio mr-1"></i>
-                                    {{ audio_summary.audio_size_mb }} MB
+                                    {{ audio_summary.audio_size_mb|default:'0' }} MB
                                 </span>
                             </div>
                         </div>
@@ -249,9 +249,11 @@
                     
                     <!-- Ask Question Form -->
                     <form id="question-form" class="mb-8">
+                        {% csrf_token %}
                         <div class="relative">
                             <textarea 
                                 id="question-input" 
+                                name="question_text"
                                 placeholder="Ask a question about this document..."
                                 class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:border-transparent resize-none"
                                 rows="3"
@@ -431,25 +433,26 @@
         </div>
         
         <form id="share-form">
+            {% csrf_token %}
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Share with email (optional)</label>
-                    <input type="email" id="share-email" class="w-full form-input rounded-lg" placeholder="colleague@example.com">
+                    <input type="email" id="share-email" name="email" class="w-full form-input rounded-lg" placeholder="colleague@example.com">
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
                     <div class="space-y-2">
                         <label class="flex items-center">
-                            <input type="checkbox" id="can-view" checked class="rounded border-gray-300 text-edu-beige focus:ring-edu-beige">
+                            <input type="checkbox" id="can-view" name="can_view" checked class="rounded border-gray-300 text-edu-beige focus:ring-edu-beige">
                             <span class="ml-2 text-sm">Can view document</span>
                         </label>
                         <label class="flex items-center">
-                            <input type="checkbox" id="can-ask-questions" class="rounded border-gray-300 text-edu-beige focus:ring-edu-beige">
+                            <input type="checkbox" id="can-ask-questions" name="can_ask_questions" class="rounded border-gray-300 text-edu-beige focus:ring-edu-beige">
                             <span class="ml-2 text-sm">Can ask questions</span>
                         </label>
                         <label class="flex items-center">
-                            <input type="checkbox" id="can-download" class="rounded border-gray-300 text-edu-beige focus:ring-edu-beige">
+                            <input type="checkbox" id="can-download" name="can_download" class="rounded border-gray-300 text-edu-beige focus:ring-edu-beige">
                             <span class="ml-2 text-sm">Can download</span>
                         </label>
                     </div>
@@ -457,7 +460,7 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
-                    <select id="share-expiry" class="w-full form-input rounded-lg">
+                    <select id="share-expiry" name="expires_in_days" class="w-full form-input rounded-lg">
                         <option value="7">7 days</option>
                         <option value="30">30 days</option>
                         <option value="90">90 days</option>
@@ -491,31 +494,70 @@
 
 {% block extra_js %}
 <script>
-// Get CSRF token
-function getCSRFToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-           document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || '';
-}
-
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Document detail page loaded');
+    
+    // Get CSRF token from multiple possible sources
+    function getCSRFToken() {
+        // Try from form first
+        const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (csrfInput) return csrfInput.value;
+        
+        // Try from meta tag
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        if (csrfMeta) return csrfMeta.getAttribute('content');
+        
+        // Try from cookie
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'csrftoken') return decodeURIComponent(value);
+        }
+        
+        // Try from global variable set in base template
+        if (window.CSRF_TOKEN) return window.CSRF_TOKEN;
+        
+        console.warn('CSRF token not found');
+        return '';
+    }
+
     // Audio Player Controls
     const audioPlayer = document.getElementById('audio-player');
     const playPauseBtn = document.getElementById('play-pause-btn');
     const speedBtn = document.getElementById('speed-btn');
     
     if (audioPlayer && playPauseBtn) {
+        console.log('Audio player found, setting up controls');
+        
         playPauseBtn.addEventListener('click', function() {
             if (audioPlayer.paused) {
-                audioPlayer.play();
-                this.innerHTML = '<i class="fas fa-pause"></i>';
+                audioPlayer.play().then(() => {
+                    this.innerHTML = '<i class="fas fa-pause"></i>';
+                }).catch(error => {
+                    console.error('Audio play failed:', error);
+                    showToast('Unable to play audio', 'error');
+                });
             } else {
                 audioPlayer.pause();
                 this.innerHTML = '<i class="fas fa-play"></i>';
             }
         });
         
+        audioPlayer.addEventListener('play', function() {
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        });
+        
+        audioPlayer.addEventListener('pause', function() {
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        });
+        
         audioPlayer.addEventListener('ended', function() {
             playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        });
+        
+        audioPlayer.addEventListener('error', function(e) {
+            console.error('Audio error:', e);
+            showToast('Audio playback error', 'error');
         });
     }
     
@@ -530,56 +572,126 @@ document.addEventListener('DOMContentLoaded', function() {
             audioPlayer.playbackRate = newSpeed;
             this.dataset.speed = newSpeed;
             this.textContent = newSpeed + 'x Speed';
+            
+            console.log('Playback speed changed to:', newSpeed);
         });
     }
 
-    // Question Form
+    // Question Form Submission
     const questionForm = document.getElementById('question-form');
     const questionInput = document.getElementById('question-input');
     
-    if (questionForm) {
+    if (questionForm && questionInput) {
+        console.log('Question form found, setting up event listener');
+        
         questionForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            console.log('Question form submitted');
             
             const question = questionInput.value.trim();
-            if (!question) return;
+            if (!question) {
+                showToast('Please enter a question', 'warning');
+                return;
+            }
             
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
+            
+            // Set loading state
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
             submitBtn.disabled = true;
             
             try {
+                const csrfToken = getCSRFToken();
+                console.log('Submitting question with CSRF token:', csrfToken ? 'Found' : 'Not found');
+                
                 const response = await fetch(`/api/documents/{{ document.id }}/questions/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': getCSRFToken()
+                        'X-CSRFToken': csrfToken,
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({
                         question_text: question
                     })
                 });
                 
+                console.log('API Response status:', response.status);
+                
                 if (response.ok) {
+                    const result = await response.json();
+                    console.log('Question submitted successfully:', result);
+                    
                     questionInput.value = '';
                     showToast('Question submitted successfully!', 'success');
-                    setTimeout(() => window.location.reload(), 1000);
+                    
+                    // Reload page after a short delay to show the new question
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
                 } else {
-                    const error = await response.json();
-                    showToast(error.error || 'Failed to submit question', 'error');
+                    const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
+                    console.error('API Error:', response.status, errorData);
+                    showToast(errorData.error || `Server error: ${response.status}`, 'error');
                 }
             } catch (error) {
-                console.error('Error submitting question:', error);
-                showToast('Network error. Please try again.', 'error');
+                console.error('Network error submitting question:', error);
+                showToast('Network error. Please check your connection and try again.', 'error');
             } finally {
+                // Reset button state
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             }
         });
     }
     
-    // Share Modal
+    // Rating stars functionality
+    const ratingStars = document.querySelectorAll('.rating-star');
+    ratingStars.forEach(star => {
+        star.addEventListener('click', async function() {
+            const questionId = this.dataset.question;
+            const rating = parseInt(this.dataset.rating);
+            
+            console.log('Rating star clicked:', questionId, rating);
+            
+            try {
+                const csrfToken = getCSRFToken();
+                const response = await fetch(`/api/questions/${questionId}/rate/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ rating: rating })
+                });
+                
+                if (response.ok) {
+                    // Update star display
+                    const questionStars = document.querySelectorAll(`[data-question="${questionId}"]`);
+                    questionStars.forEach((s, index) => {
+                        const starIcon = s.querySelector('i');
+                        if (index < rating) {
+                            starIcon.classList.add('text-yellow-400');
+                            starIcon.classList.remove('text-gray-300');
+                        } else {
+                            starIcon.classList.remove('text-yellow-400');
+                            starIcon.classList.add('text-gray-300');
+                        }
+                    });
+                    showToast('Thank you for your feedback!', 'success');
+                } else {
+                    console.error('Rating failed:', response.status);
+                    showToast('Failed to save rating', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving rating:', error);
+                showToast('Network error', 'error');
+            }
+        });
+    });
+    
+    // Share Modal Functionality
     const shareBtn = document.getElementById('share-btn');
     const shareModal = document.getElementById('share-modal');
     const closeShareModal = document.getElementById('close-share-modal');
@@ -587,90 +699,271 @@ document.addEventListener('DOMContentLoaded', function() {
     const shareForm = document.getElementById('share-form');
     const copyLinkBtn = document.getElementById('copy-link');
     
-    if (shareBtn) {
-        shareBtn.addEventListener('click', () => {
+    if (shareBtn && shareModal) {
+        shareBtn.addEventListener('click', function() {
+            console.log('Share button clicked');
             shareModal.classList.remove('hidden');
         });
     }
     
-    if (closeShareModal) {
-        closeShareModal.addEventListener('click', () => {
+    function closeModal() {
+        if (shareModal) {
             shareModal.classList.add('hidden');
-        });
+            // Reset form
+            const shareResult = document.getElementById('share-result');
+            if (shareResult) shareResult.classList.add('hidden');
+        }
+    }
+    
+    if (closeShareModal) {
+        closeShareModal.addEventListener('click', closeModal);
     }
     
     if (closeShareModalBtn) {
-        closeShareModalBtn.addEventListener('click', () => {
-            shareModal.classList.add('hidden');
+        closeShareModalBtn.addEventListener('click', closeModal);
+    }
+    
+    // Close modal when clicking outside
+    if (shareModal) {
+        shareModal.addEventListener('click', function(e) {
+            if (e.target === shareModal) {
+                closeModal();
+            }
         });
     }
     
     if (shareForm) {
         shareForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            console.log('Share form submitted');
             
-            const formData = new FormData();
-            formData.append('email', document.getElementById('share-email').value);
-            formData.append('can_view', document.getElementById('can-view').checked);
-            formData.append('can_ask_questions', document.getElementById('can-ask-questions').checked);
-            formData.append('can_download', document.getElementById('can-download').checked);
-            formData.append('expires_in_days', document.getElementById('share-expiry').value);
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            
+            // Set loading state
+            submitBtn.textContent = 'Generating...';
+            submitBtn.disabled = true;
             
             try {
-                const response = await fetch(`/documents/{{ document.id }}/share/`, {
+                const csrfToken = getCSRFToken();
+                
+                const response = await fetch(`/api/documents/{{ document.id }}/share/`, {
                     method: 'POST',
-                    body: formData,
                     headers: {
-                        'X-CSRFToken': getCSRFToken()
-                    }
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: formData
                 });
                 
                 if (response.ok) {
                     const data = await response.json();
-                    document.getElementById('share-link').value = data.share_url;
-                    document.getElementById('share-result').classList.remove('hidden');
-                    showToast('Share link generated!', 'success');
+                    console.log('Share link generated:', data);
+                    
+                    const shareLinkInput = document.getElementById('share-link');
+                    const shareResult = document.getElementById('share-result');
+                    
+                    if (shareLinkInput && shareResult) {
+                        shareLinkInput.value = data.share_url || data.link || 'Link generated successfully';
+                        shareResult.classList.remove('hidden');
+                    }
+                    
+                    showToast('Share link generated successfully!', 'success');
                 } else {
-                    const error = await response.json();
-                    showToast(error.error || 'Failed to generate share link', 'error');
+                    const errorData = await response.json().catch(() => ({ error: 'Failed to generate share link' }));
+                    console.error('Share error:', response.status, errorData);
+                    showToast(errorData.error || 'Failed to generate share link', 'error');
                 }
             } catch (error) {
-                console.error('Error generating share link:', error);
+                console.error('Network error generating share link:', error);
                 showToast('Network error. Please try again.', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             }
         });
     }
     
     if (copyLinkBtn) {
-        copyLinkBtn.addEventListener('click', function() {
+        copyLinkBtn.addEventListener('click', async function() {
             const linkInput = document.getElementById('share-link');
-            linkInput.select();
-            document.execCommand('copy');
-            showToast('Link copied to clipboard!', 'success');
+            if (linkInput) {
+                try {
+                    if (navigator.clipboard) {
+                        await navigator.clipboard.writeText(linkInput.value);
+                    } else {
+                        // Fallback for older browsers
+                        linkInput.select();
+                        document.execCommand('copy');
+                    }
+                    showToast('Link copied to clipboard!', 'success');
+                } catch (error) {
+                    console.error('Copy failed:', error);
+                    showToast('Failed to copy link', 'error');
+                }
+            }
         });
     }
     
-    // Simple toast notification function
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${
-            type === 'success' ? 'bg-green-500' : 
-            type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-        }`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
+    // Action buttons
+    const downloadBtn = document.getElementById('download-btn');
+    const regenerateBtn = document.getElementById('regenerate-btn');
+    const regenerateAudioBtn = document.getElementById('regenerate-audio-btn');
+    const retryProcessingBtn = document.getElementById('retry-processing-btn');
+    
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', function() {
+            console.log('Download button clicked');
+            // Implement download functionality
+            window.location.href = `/documents/{{ document.id }}/download/`;
+        });
+    }
+    
+    if (regenerateBtn) {
+        regenerateBtn.addEventListener('click', async function() {
+            console.log('Regenerate button clicked');
+            
+            if (!confirm('Are you sure you want to regenerate this document? This will create new AI summaries.')) {
+                return;
+            }
+            
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Regenerating...';
+            this.disabled = true;
+            
+            try {
+                const csrfToken = getCSRFToken();
+                const response = await fetch(`/api/documents/{{ document.id }}/regenerate/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    showToast('Document regeneration started!', 'success');
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    const errorData = await response.json().catch(() => ({ error: 'Regeneration failed' }));
+                    showToast(errorData.error || 'Failed to start regeneration', 'error');
+                }
+            } catch (error) {
+                console.error('Regeneration error:', error);
+                showToast('Network error. Please try again.', 'error');
+            } finally {
+                this.innerHTML = originalText;
+                this.disabled = false;
+            }
+        });
+    }
+    
+    if (regenerateAudioBtn) {
+        regenerateAudioBtn.addEventListener('click', function() {
+            console.log('Regenerate audio button clicked');
+            // Implement audio regeneration with voice selection
+            showToast('Audio regeneration feature coming soon!', 'info');
+        });
+    }
+    
+    if (retryProcessingBtn) {
+        retryProcessingBtn.addEventListener('click', async function() {
+            console.log('Retry processing button clicked');
+            
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Retrying...';
+            this.disabled = true;
+            
+            try {
+                const csrfToken = getCSRFToken();
+                const response = await fetch(`/api/documents/{{ document.id }}/retry/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    showToast('Processing restarted!', 'success');
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    const errorData = await response.json().catch(() => ({ error: 'Retry failed' }));
+                    showToast(errorData.error || 'Failed to retry processing', 'error');
+                }
+            } catch (error) {
+                console.error('Retry error:', error);
+                showToast('Network error. Please try again.', 'error');
+            } finally {
+                this.innerHTML = originalText;
+                this.disabled = false;
+            }
+        });
     }
     
     // Auto-refresh for processing documents
     {% if document.status == 'processing' %}
-    setTimeout(() => {
+    console.log('Document is processing, setting up auto-refresh');
+    const refreshInterval = setInterval(() => {
+        console.log('Auto-refreshing page for processing document');
         window.location.reload();
     }, 30000); // Refresh every 30 seconds
+    
+    // Clear interval when leaving page
+    window.addEventListener('beforeunload', () => {
+        clearInterval(refreshInterval);
+    });
     {% endif %}
+    
+    // Utility function for toast notifications (uses global function if available)
+    function showToast(message, type = 'info') {
+        console.log('Toast:', message, type);
+        
+        // Use global toast function if available
+        if (window.EduSauti && window.EduSauti.showToast) {
+            window.EduSauti.showToast(message, type);
+            return;
+        }
+        
+        // Fallback simple toast implementation
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 transition-transform transform translate-x-full ${
+            type === 'success' ? 'bg-green-500' : 
+            type === 'error' ? 'bg-red-500' : 
+            type === 'warning' ? 'bg-yellow-500' :
+            'bg-blue-500'
+        }`;
+        
+        toast.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas ${
+                    type === 'success' ? 'fa-check-circle' : 
+                    type === 'error' ? 'fa-exclamation-circle' : 
+                    type === 'warning' ? 'fa-exclamation-triangle' :
+                    'fa-info-circle'
+                } mr-2"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => {
+            toast.classList.remove('translate-x-full');
+        }, 100);
+        
+        // Auto remove
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+    }
+    
+    console.log('Document detail JavaScript initialization complete');
 });
 </script>
 {% endblock %}
