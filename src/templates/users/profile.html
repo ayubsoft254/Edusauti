@@ -176,13 +176,13 @@
                     <!-- Action Buttons -->
                     {% if profile_user == user %}
                         <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
-                            <a href="{% url 'users:profile_edit' %}" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift">
+                            <a href="{% url 'profile_edit' %}" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift">
                                 <i class="fas fa-edit mr-2"></i>Edit Profile
                             </a>
-                            <a href="{% url 'users:settings' %}" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-all hover-lift">
+                            <a href="{% url 'settings' %}" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-all hover-lift">
                                 <i class="fas fa-cog mr-2"></i>Settings
                             </a>
-                            <a href="{% url 'users:billing' %}" class="bg-edu-accent text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift">
+                            <a href="{% url 'billing' %}" class="bg-edu-accent text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift">
                                 <i class="fas fa-credit-card mr-2"></i>Billing
                             </a>
                         </div>
@@ -261,7 +261,7 @@
                                     <h3 class="font-semibold text-edu-deep">Want more?</h3>
                                     <p class="text-sm text-gray-600">Upgrade to Pro or Premium for unlimited access</p>
                                 </div>
-                                <a href="{% url 'users:subscription' %}" class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-all text-sm">
+                                <a href="{% url 'subscription' %}" class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-all text-sm">
                                     Upgrade Now
                                 </a>
                             </div>
@@ -444,15 +444,15 @@
                     <div class="profile-card rounded-2xl p-6 scroll-reveal shadow-lg">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Actions</h3>
                         <div class="space-y-3">
-                            <a href="{% url 'users:settings' %}" class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
+                            <a href="{% url 'settings' %}" class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
                                 <i class="fas fa-cog mr-3"></i>Account Settings
                             </a>
                             
-                            <a href="{% url 'users:usage_stats' %}" class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
+                            <a href="{% url 'usage_stats' %}" class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
                                 <i class="fas fa-chart-bar mr-3"></i>Usage Statistics
                             </a>
                             
-                            <a href="{% url 'users:billing' %}" class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
+                            <a href="{% url 'billing' %}" class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
                                 <i class="fas fa-credit-card mr-3"></i>Billing & Plans
                             </a>
                             
@@ -573,7 +573,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.EduSauti.setLoadingState(this, true);
             
             try {
-                const response = await fetch('{% url "users:profile_edit" %}', {
+                const response = await fetch('{% url "profile_edit" %}', {
                     method: 'POST',
                     body: formData,
                     headers: {
