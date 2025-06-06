@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load document_tags %}
 
 {% block title %}{{ document.title }} - EduSauti{% endblock %}
 
@@ -188,7 +187,7 @@
                                 </span>
                                 <span>
                                     <i class="fas fa-file-audio mr-1"></i>
-                                    {{ audio_summary.audio_size|audio_size_mb }} MB
+                                    {{ audio_summary.audio_size_mb }} MB
                                 </span>
                             </div>
                         </div>
@@ -319,8 +318,8 @@
                                                         {% for i in "12345" %}
                                                             <button class="rating-star text-gray-300 hover:text-yellow-400 transition-colors" 
                                                                     data-question="{{ question.id }}" 
-                                                                    data-rating="{{ i }}">
-                                                                <i class="fas fa-star {% if question.user_rating and i|add:0 <= question.user_rating %}text-yellow-400{% endif %}"></i>
+                                                                    data-rating="{{ forloop.counter }}">
+                                                                <i class="fas fa-star {% if question.user_rating and forloop.counter <= question.user_rating %}text-yellow-400{% endif %}"></i>
                                                             </button>
                                                         {% endfor %}
                                                     </div>
@@ -492,6 +491,12 @@
 
 {% block extra_js %}
 <script>
+// Get CSRF token
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+           document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || '';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Audio Player Controls
     const audioPlayer = document.getElementById('audio-player');
@@ -549,7 +554,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': window.CSRF_TOKEN
+                        'X-CSRFToken': getCSRFToken()
                     },
                     body: JSON.stringify({
                         question_text: question
@@ -558,15 +563,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (response.ok) {
                     questionInput.value = '';
-                    window.EduSauti.showToast('Question submitted successfully!', 'success');
-                    // Optionally reload the page or update the questions list
+                    showToast('Question submitted successfully!', 'success');
                     setTimeout(() => window.location.reload(), 1000);
                 } else {
                     const error = await response.json();
-                    window.EduSauti.showToast(error.error || 'Failed to submit question', 'error');
+                    showToast(error.error || 'Failed to submit question', 'error');
                 }
             } catch (error) {
-                window.EduSauti.showToast('Network error. Please try again.', 'error');
+                console.error('Error submitting question:', error);
+                showToast('Network error. Please try again.', 'error');
             } finally {
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
@@ -616,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     method: 'POST',
                     body: formData,
                     headers: {
-                        'X-CSRFToken': EduSauti.csrfToken
+                        'X-CSRFToken': getCSRFToken()
                     }
                 });
                 
@@ -624,13 +629,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     const data = await response.json();
                     document.getElementById('share-link').value = data.share_url;
                     document.getElementById('share-result').classList.remove('hidden');
-                    EduSauti.showToast('Share link generated!', 'success');
+                    showToast('Share link generated!', 'success');
                 } else {
                     const error = await response.json();
-                    EduSauti.showToast(error.error || 'Failed to generate share link', 'error');
+                    showToast(error.error || 'Failed to generate share link', 'error');
                 }
             } catch (error) {
-                EduSauti.showToast('Network error. Please try again.', 'error');
+                console.error('Error generating share link:', error);
+                showToast('Network error. Please try again.', 'error');
             }
         });
     }
@@ -640,8 +646,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const linkInput = document.getElementById('share-link');
             linkInput.select();
             document.execCommand('copy');
-            EduSauti.showToast('Link copied to clipboard!', 'success');
+            showToast('Link copied to clipboard!', 'success');
         });
+    }
+    
+    // Simple toast notification function
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${
+            type === 'success' ? 'bg-green-500' : 
+            type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+        }`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
     }
     
     // Auto-refresh for processing documents
