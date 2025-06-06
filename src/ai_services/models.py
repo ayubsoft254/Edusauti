@@ -75,10 +75,10 @@ class AIServiceLog(models.Model):
         if error_message:
             self.error_message = error_message
         
-        # Calculate response time
+        # Calculate response time in milliseconds
         if self.created_at:
-            self.response_time = int((self.completed_at - self.created_at).total_seconds() * 1000)
-        
+            self.response_time = (self.completed_at - self.created_at).total_seconds() * 1000
+    
         self.save()
     
     @classmethod

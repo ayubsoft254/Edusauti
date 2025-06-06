@@ -79,6 +79,7 @@ class OpenAIService(BaseAIService):
         )
         
         try:
+            start_time = time.time()
             # Create the prompt based on parameters
             system_prompt = self._create_summary_prompt(style, length, subject_area, difficulty_level)
             
