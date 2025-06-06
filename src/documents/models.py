@@ -144,6 +144,21 @@ class Document(models.Model):
         """Increment question count"""
         self.total_questions_asked += 1
         self.save(update_fields=['total_questions_asked'])
+    
+    def save(self, *args, **kwargs):
+        """Override save to set file metadata"""
+        # Set file metadata when creating new documents
+        if not self.pk and self.file:
+            self.original_filename = self.file.name
+            self.file_size = self.file.size
+            
+            # Determine file type from extension
+            if '.' in self.file.name:
+                extension = self.file.name.split('.')[-1].lower()
+                self.file_type = extension
+        
+        # Call parent save method explicitly
+        super(Document, self).save(*args, **kwargs)
 
 
 class AudioSummary(models.Model):
