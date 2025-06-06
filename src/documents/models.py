@@ -107,10 +107,17 @@ class Document(models.Model):
     def __str__(self):
         return f"{self.title} - {self.user.get_full_name()}"
     
-    @property
+    def get_tags_list(self):
+        """Return tags as a list"""
+        if not self.tags:
+            return []
+        return [tag.strip() for tag in self.tags.split(',') if tag.strip()]
+    
     def file_size_mb(self):
-        """Get file size in MB"""
-        return round(self.file_size / (1024 * 1024), 2)
+        """Return file size in MB"""
+        if not self.file_size:
+            return 0
+        return round(self.file_size / (1024 * 1024), 1)
     
     @property
     def processing_duration(self):
