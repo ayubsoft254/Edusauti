@@ -42,16 +42,6 @@ class SpeechService(BaseAIService):
     ) -> Dict[str, Any]:
         """
         Convert text to speech using Azure Speech Service
-        
-        Args:
-            text: Text to convert to speech
-            voice_name: Azure voice name to use
-            speech_rate: Speed of speech (slow, medium, fast)
-            speech_pitch: Pitch of speech (low, medium, high)
-            user: User making the request
-            
-        Returns:
-            Dict containing audio data and metadata
         """
         
         # Validate input
@@ -81,16 +71,16 @@ class SpeechService(BaseAIService):
             # Create SSML with rate and pitch adjustments
             ssml_text = self._create_ssml(text, voice_name, speech_rate, speech_pitch)
 
-            # Create synthesizer with default audio output (this will work)
+            # Create synthesizer with default audio output
             synthesizer = speechsdk.SpeechSynthesizer(
                 speech_config=self.speech_config,
-                audio_config=None  # Use default audio output
+                audio_config=None
             )
             
             # Synthesize speech
             result = synthesizer.speak_ssml_async(ssml_text).get()
             
-            response_time = time.time() - start_time
+            response_time = (time.time() - start_time) * 1000  # Convert to milliseconds
             
             # Check result
             if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
@@ -111,6 +101,7 @@ class SpeechService(BaseAIService):
                 )
                 log_entry.characters_processed = character_count
                 log_entry.estimated_cost = estimated_cost
+                log_entry.response_time = response_time
                 log_entry.save()
                 
                 # Update usage stats
@@ -140,20 +131,37 @@ class SpeechService(BaseAIService):
                 if cancellation_details.error_details:
                     error_msg += f" - {cancellation_details.error_details}"
                 
-                self.handle_error(log_entry, Exception(error_msg))
+                log_entry.mark_completed(
+                    status='failed',
+                    error_message=error_msg
+                )
+                log_entry.response_time = response_time
+                log_entry.save()
+                
                 raise ServiceUnavailable(error_msg)
-            
+        
             else:
                 error_msg = f"Speech synthesis failed with reason: {result.reason}"
-                self.handle_error(log_entry, Exception(error_msg))
-                raise ServiceUnavailable(error_msg)
+                log_entry.mark_completed(
+                    status='failed',
+                    error_message=error_msg
+                )
+                log_entry.response_time = response_time
+                log_entry.save()
                 
+                raise ServiceUnavailable(error_msg)
+            
         except Exception as e:
-            response_time = time.time() - start_time
+            response_time = (time.time() - start_time) * 1000
             
             if log_entry.status == 'pending':
-                self.handle_error(log_entry, e)
-            
+                log_entry.mark_completed(
+                    status='failed',
+                    error_message=str(e)
+                )
+                log_entry.response_time = response_time
+                log_entry.save()
+        
             if "rate limit" in str(e).lower() or "quota" in str(e).lower():
                 raise RateLimitExceeded(f"Speech Service rate limit exceeded: {e}")
             raise ServiceUnavailable(f"Speech Service error: {e}")
