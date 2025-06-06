@@ -2,6 +2,7 @@ from typing import Dict, Any, BinaryIO, List
 import azure.cognitiveservices.speech as speechsdk
 from django.conf import settings
 from .base import BaseAIService, RateLimitExceeded, ServiceUnavailable, InvalidInput
+from .models import AIServiceLog
 import time
 
 
@@ -394,3 +395,9 @@ class SpeechService(BaseAIService):
             return (duration_minutes / 60) * cost_per_hour
         
         return 0.0
+    
+    def _calculate_cost(self, text_length):
+        """Calculate estimated cost for speech synthesis"""
+        # Azure Speech pricing: ~$4 per 1M characters
+        cost_per_million_chars = 4.0
+        return (text_length / 1_000_000) * cost_per_million_chars
