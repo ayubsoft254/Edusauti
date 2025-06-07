@@ -366,8 +366,8 @@
                             <span class="text-gray-900">{{ document.get_language_display|default:'English' }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Difficulty:</span>
-                            <span class="text-gray-900">{{ document.get_difficulty_level_display|default:'Intermediate' }}</span>
+                            <span class="text-gray-600">Type:</span>
+                            <span class="text-gray-900">{{ document.file_type|upper|default:'FILE' }}</span>
                         </div>
                         {% if document.subject_area %}
                             <div class="flex justify-between">
@@ -378,18 +378,18 @@
                     </div>
                 </div>
 
-                <!-- Related Actions -->
+                <!-- Quick Actions -->
                 <div class="glass-effect rounded-xl p-6 scroll-reveal">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
                     <div class="space-y-3">
+                        <a href="{% url 'upload' %}" class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
+                            <i class="fas fa-plus mr-3"></i>Upload New Document
+                        </a>
                         <button class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
                             <i class="fas fa-edit mr-3"></i>Edit Details
                         </button>
-                        <button class="w-full bg-edu-cream text-edu-deep px-4 py-3 rounded-lg hover:bg-edu-light transition-all flex items-center">
-                            <i class="fas fa-copy mr-3"></i>Duplicate
-                        </button>
-                        <button class="w-full bg-red-50 text-red-600 px-4 py-3 rounded-lg hover:bg-red-100 transition-all flex items-center">
-                            <i class="fas fa-trash mr-3"></i>Delete
+                        <button id="delete-btn" class="w-full bg-red-50 text-red-600 px-4 py-3 rounded-lg hover:bg-red-100 transition-all flex items-center">
+                            <i class="fas fa-trash mr-3"></i>Delete Document
                         </button>
                     </div>
                 </div>
@@ -400,17 +400,23 @@
                     <div class="space-y-3">
                         <div class="flex items-center space-x-3 text-sm">
                             <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-                            <span class="text-gray-600">Document processed successfully</span>
+                            <span class="text-gray-600">Document uploaded</span>
                         </div>
-                        {% if audio_summary %}
+                        {% if document.status == 'completed' %}
                             <div class="flex items-center space-x-3 text-sm">
                                 <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                <span class="text-gray-600">Processing completed</span>
+                            </div>
+                        {% endif %}
+                        {% if audio_summary %}
+                            <div class="flex items-center space-x-3 text-sm">
+                                <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
                                 <span class="text-gray-600">Audio summary generated</span>
                             </div>
                         {% endif %}
                         {% if document.total_questions_asked > 0 %}
                             <div class="flex items-center space-x-3 text-sm">
-                                <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                                <div class="w-2 h-2 bg-orange-400 rounded-full"></div>
                                 <span class="text-gray-600">{{ document.total_questions_asked }} question{{ document.total_questions_asked|pluralize }} asked</span>
                             </div>
                         {% endif %}
@@ -508,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.innerHTML = '<i class="fas fa-pause"></i>';
                 }).catch(error => {
                     console.error('Audio play failed:', error);
-                    showToast('Unable to play audio', 'error');
+                    window.EduSauti.showToast('Unable to play audio', 'error');
                 });
             } else {
                 audioPlayer.pause();
@@ -553,7 +559,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const question = questionInput.value.trim();
             if (!question) {
-                showToast('Please enter a question', 'warning');
+                window.EduSauti.showToast('Please enter a question', 'warning');
                 return;
             }
             
@@ -565,7 +571,7 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = true;
             
             try {
-                const response = await fetch(`/api/documents/{{ document.id }}/questions/`, {
+                const response = await fetch(`/documents/api/{{ document.id }}/questions/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -578,7 +584,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (response.ok) {
                     questionInput.value = '';
-                    showToast('Question submitted successfully!', 'success');
+                    window.EduSauti.showToast('Question submitted successfully!', 'success');
                     
                     // Reload page after a short delay
                     setTimeout(() => {
@@ -586,11 +592,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 1500);
                 } else {
                     const errorData = await response.json();
-                    showToast(errorData.error || 'Failed to submit question', 'error');
+                    window.EduSauti.showToast(errorData.error || 'Failed to submit question', 'error');
                 }
             } catch (error) {
                 console.error('Error submitting question:', error);
-                showToast('Network error. Please try again.', 'error');
+                window.EduSauti.showToast('Network error. Please try again.', 'error');
             } finally {
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
@@ -624,6 +630,17 @@ document.addEventListener('DOMContentLoaded', function() {
         shareModal.addEventListener('click', function(e) {
             if (e.target === shareModal) {
                 closeModal();
+            }
+        });
+    }
+
+    // Delete confirmation
+    const deleteBtn = document.getElementById('delete-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+                // TODO: Implement delete functionality
+                window.EduSauti.showToast('Delete functionality will be implemented', 'info');
             }
         });
     }

@@ -140,7 +140,7 @@ def upload_document(request):
                     })
                 else:
                     messages.success(request, 'Document uploaded successfully!')
-                    return redirect('documents:document_detail', document_id=document.id)
+                    return redirect('document_detail', document_id=document.id)
                     
             except Exception as e:
                 error_msg = f'Error uploading document: {str(e)}'

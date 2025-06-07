@@ -67,7 +67,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = User
     form_class = UserProfileForm
     template_name = 'users/profile_edit.html'
-    success_url = reverse_lazy('users:profile')
+    success_url = reverse_lazy('profile')
     
     def get_object(self):
         return self.request.user
@@ -92,7 +92,7 @@ def settings_view(request):
             if profile_form:
                 profile_form.save()
             messages.success(request, 'Settings updated successfully!')
-            return redirect('users:settings')
+            return redirect('settings')
     else:
         user_form = UserProfileForm(instance=user)
         profile_form = ExtendedProfileForm(instance=profile) if profile else None
@@ -146,9 +146,9 @@ def upgrade_subscription(request):
             )
             
             messages.success(request, f'Successfully upgraded to {tier.title()} plan!')
-            return redirect('users:subscription')
+            return redirect('subscription')
     
-    return redirect('users:subscription')
+    return redirect('subscription')
 
 
 @login_required
@@ -310,7 +310,7 @@ def update_billing_info(request):
             billing_profile.save()
             
             messages.success(request, 'Billing information updated successfully!')
-            return redirect('users:billing')
+            return redirect('billing')
     else:
         form = BillingProfileForm(instance=billing_profile)
     
@@ -332,7 +332,7 @@ def download_invoice(request, invoice_id):
         )
     except SubscriptionHistory.DoesNotExist:
         messages.error(request, 'Invoice not found.')
-        return redirect('users:billing_history')
+        return redirect('billing_history')
     
     # Generate PDF invoice
     from django.http import HttpResponse
@@ -433,7 +433,7 @@ def cancel_subscription(request):
         else:
             messages.info(request, 'No active subscription found.')
         
-        return redirect('users:billing')
+        return redirect('billing')
     
     # Show confirmation page
     current_subscription = SubscriptionHistory.objects.filter(
