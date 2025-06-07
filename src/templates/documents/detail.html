@@ -66,17 +66,26 @@
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
     }
+    
+    @media (max-width: 768px) {
+        .mobile-stack {
+            display: block;
+        }
+        .mobile-stack > * {
+            margin-bottom: 1rem;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-bg">
+<div class="min-h-screen gradient-bg">
     <!-- Document Header -->
     <div class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
                 <div class="flex-1">
-                    <div class="flex items-center space-x-4 mb-4">
+                    <div class="flex items-center space-x-4 mb-4 flex-wrap">
                         <!-- Status Badge -->
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
                             {% if document.status == 'completed' %}
@@ -94,17 +103,19 @@
                                 {% elif document.status == 'failed' %}fa-exclamation-circle
                                 {% else %}fa-file
                                 {% endif %} mr-2"></i>
-                            {{ document.get_status_display }}
+                            {{ document.get_status_display|default:document.status|title }}
                         </span>
                         
                         <!-- File Type Badge -->
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-edu-cream text-edu-deep">
-                            <i class="fas fa-file-{{ document.file_type|default:'alt' }} mr-2"></i>
-                            {{ document.file_type|upper|default:'FILE' }}
-                        </span>
+                        {% if document.file_type %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-edu-cream text-edu-deep">
+                                <i class="fas fa-file-{{ document.file_type|default:'alt' }} mr-2"></i>
+                                {{ document.file_type|upper }}
+                            </span>
+                        {% endif %}
                     </div>
                     
-                    <h1 class="text-3xl font-bold text-gray-900 mb-4 scroll-reveal">{{ document.title }}</h1>
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 scroll-reveal">{{ document.title }}</h1>
                     
                     {% if document.description %}
                         <p class="text-lg text-gray-600 mb-6 scroll-reveal">{{ document.description }}</p>
@@ -131,9 +142,9 @@
                     </div>
                     
                     <!-- Tags -->
-                    {% if document.get_tags_list %}
+                    {% if document_tags %}
                         <div class="flex flex-wrap gap-2 mb-6 scroll-reveal">
-                            {% for tag in document.get_tags_list %}
+                            {% for tag in document_tags %}
                                 <span class="tag px-3 py-1 rounded-full text-sm">{{ tag|title }}</span>
                             {% endfor %}
                         </div>
@@ -141,17 +152,20 @@
                 </div>
                 
                 <!-- Action Buttons -->
-                <div class="flex flex-col sm:flex-row lg:flex-col space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-0 lg:space-y-2 lg:ml-8">
+                <div class="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 lg:ml-8 mt-4 lg:mt-0 mobile-stack">
                     {% if document.status == 'completed' %}
-                        <button id="share-btn" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift flex items-center justify-center">
-                            <i class="fas fa-share-alt mr-2"></i>Share
+                        <button id="share-btn" class="bg-edu-beige text-white px-4 lg:px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift flex items-center justify-center flex-1 lg:flex-none">
+                            <i class="fas fa-share-alt mr-2"></i>
+                            <span class="hidden sm:inline">Share</span>
                         </button>
-                        <button id="download-btn" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-all hover-lift flex items-center justify-center">
-                            <i class="fas fa-download mr-2"></i>Download
+                        <button id="download-btn" class="bg-gray-600 text-white px-4 lg:px-6 py-3 rounded-lg hover:bg-gray-700 transition-all hover-lift flex items-center justify-center flex-1 lg:flex-none">
+                            <i class="fas fa-download mr-2"></i>
+                            <span class="hidden sm:inline">Download</span>
                         </button>
                     {% endif %}
-                    <button id="regenerate-btn" class="bg-edu-accent text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift flex items-center justify-center">
-                        <i class="fas fa-refresh mr-2"></i>Regenerate
+                    <button id="regenerate-btn" class="bg-edu-accent text-white px-4 lg:px-6 py-3 rounded-lg hover:bg-edu-dark transition-all hover-lift flex items-center justify-center flex-1 lg:flex-none">
+                        <i class="fas fa-refresh mr-2"></i>
+                        <span class="hidden sm:inline">Regenerate</span>
                     </button>
                 </div>
             </div>
@@ -176,7 +190,7 @@
                                 Your browser does not support the audio element.
                             </audio>
                             
-                            <div class="flex items-center justify-between text-sm text-gray-600">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-600 space-y-2 sm:space-y-0">
                                 <span>
                                     <i class="fas fa-microphone mr-1"></i>
                                     {{ audio_summary.voice_name|default:'Jenny Neural' }}
@@ -193,7 +207,7 @@
                         </div>
                         
                         <!-- Audio Controls -->
-                        <div class="flex items-center justify-center space-x-4 mt-4">
+                        <div class="flex items-center justify-center space-x-4 mt-4 flex-wrap gap-2">
                             <button id="play-pause-btn" class="bg-edu-beige text-white p-3 rounded-full hover:bg-edu-dark transition-all">
                                 <i class="fas fa-play"></i>
                             </button>
@@ -201,7 +215,8 @@
                                 1x Speed
                             </button>
                             <button id="regenerate-audio-btn" class="bg-edu-accent text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-all">
-                                <i class="fas fa-refresh mr-2"></i>New Voice
+                                <i class="fas fa-refresh mr-2"></i>
+                                <span class="hidden sm:inline">New Voice</span>
                             </button>
                         </div>
                     </div>
@@ -234,7 +249,7 @@
                             <i class="fas fa-file-text mr-3 text-edu-beige"></i>
                             AI Summary
                         </h2>
-                        <div class="document-content prose prose-lg max-w-none">
+                        <div class="document-content prose prose-lg max-w-none text-gray-700">
                             {{ document.summary_text|linebreaks }}
                         </div>
                     </div>
@@ -255,15 +270,16 @@
                                 id="question-input" 
                                 name="question_text"
                                 placeholder="Ask a question about this document..."
-                                class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-edu-beige focus:border-transparent resize-none form-input"
                                 rows="3"
                                 required
                             ></textarea>
                             <button 
                                 type="submit" 
-                                class="absolute bottom-3 right-3 bg-edu-beige text-white px-6 py-2 rounded-lg hover:bg-edu-dark transition-all"
+                                class="absolute bottom-3 right-3 bg-edu-beige text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-edu-dark transition-all text-sm sm:text-base"
                             >
-                                <i class="fas fa-paper-plane mr-2"></i>Ask
+                                <i class="fas fa-paper-plane mr-2"></i>
+                                <span class="hidden sm:inline">Ask</span>
                             </button>
                         </div>
                     </form>
@@ -278,8 +294,8 @@
                                         <div class="w-8 h-8 bg-edu-beige rounded-full flex items-center justify-center flex-shrink-0">
                                             <i class="fas fa-user text-white text-sm"></i>
                                         </div>
-                                        <div class="flex-1">
-                                            <p class="text-gray-900">{{ question.question_text }}</p>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-gray-900 break-words">{{ question.question_text }}</p>
                                             <p class="text-sm text-gray-500 mt-2">
                                                 <i class="fas fa-clock mr-1"></i>
                                                 {{ question.asked_at|timesince }} ago
@@ -296,41 +312,22 @@
                                 
                                 <!-- Answer -->
                                 {% if question.is_answered %}
-                                    <div class="answer-bubble p-4 rounded-lg ml-8">
+                                    <div class="answer-bubble p-4 rounded-lg ml-4 sm:ml-8">
                                         <div class="flex items-start space-x-3">
                                             <div class="w-8 h-8 bg-edu-accent rounded-full flex items-center justify-center flex-shrink-0">
                                                 <i class="fas fa-robot text-white text-sm"></i>
                                             </div>
-                                            <div class="flex-1">
-                                                <p class="text-gray-900">{{ question.answer_text }}</p>
-                                                <div class="flex items-center justify-between mt-3">
-                                                    <p class="text-sm text-gray-500">
-                                                        <i class="fas fa-clock mr-1"></i>
-                                                        Answered {{ question.answered_at|timesince }} ago
-                                                        {% if question.answer_confidence %}
-                                                            <span class="ml-3">
-                                                                <i class="fas fa-chart-line mr-1"></i>
-                                                                {{ question.answer_confidence|floatformat:0 }}% confidence
-                                                            </span>
-                                                        {% endif %}
-                                                    </p>
-                                                    
-                                                    <!-- Rating -->
-                                                    <div class="flex items-center space-x-1">
-                                                        {% for i in "12345" %}
-                                                            <button class="rating-star text-gray-300 hover:text-yellow-400 transition-colors" 
-                                                                    data-question="{{ question.id }}" 
-                                                                    data-rating="{{ forloop.counter }}">
-                                                                <i class="fas fa-star {% if question.user_rating and forloop.counter <= question.user_rating %}text-yellow-400{% endif %}"></i>
-                                                            </button>
-                                                        {% endfor %}
-                                                    </div>
-                                                </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-gray-900 break-words">{{ question.answer_text }}</p>
+                                                <p class="text-sm text-gray-500 mt-2">
+                                                    <i class="fas fa-clock mr-1"></i>
+                                                    {{ question.answered_at|timesince }} ago
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
                                 {% else %}
-                                    <div class="answer-bubble p-4 rounded-lg ml-8">
+                                    <div class="answer-bubble p-4 rounded-lg ml-4 sm:ml-8">
                                         <div class="flex items-center space-x-3">
                                             <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center flex-shrink-0">
                                                 <i class="fas fa-spinner fa-spin text-white text-sm"></i>
@@ -362,7 +359,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Size:</span>
-                            <span class="text-gray-900">{{ document.file_size_mb }} MB</span>
+                            <span class="text-gray-900">{{ document.file_size_mb|default:'N/A' }} MB</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Language:</span>
@@ -405,10 +402,12 @@
                             <div class="w-2 h-2 bg-green-400 rounded-full"></div>
                             <span class="text-gray-600">Document processed successfully</span>
                         </div>
-                        <div class="flex items-center space-x-3 text-sm">
-                            <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
-                            <span class="text-gray-600">Audio summary generated</span>
-                        </div>
+                        {% if audio_summary %}
+                            <div class="flex items-center space-x-3 text-sm">
+                                <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                <span class="text-gray-600">Audio summary generated</span>
+                            </div>
+                        {% endif %}
                         {% if document.total_questions_asked > 0 %}
                             <div class="flex items-center space-x-3 text-sm">
                                 <div class="w-2 h-2 bg-purple-400 rounded-full"></div>
@@ -424,7 +423,7 @@
 
 <!-- Share Modal -->
 <div id="share-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl max-w-md w-full p-6">
+    <div class="bg-white rounded-xl max-w-md w-full p-6 max-h-screen overflow-y-auto">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold">Share Document</h3>
             <button id="close-share-modal" class="text-gray-400 hover:text-gray-600">
@@ -497,38 +496,12 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Document detail page loaded');
     
-    // Get CSRF token from multiple possible sources
-    function getCSRFToken() {
-        // Try from form first
-        const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
-        if (csrfInput) return csrfInput.value;
-        
-        // Try from meta tag
-        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-        if (csrfMeta) return csrfMeta.getAttribute('content');
-        
-        // Try from cookie
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            const [name, value] = cookie.trim().split('=');
-            if (name === 'csrftoken') return decodeURIComponent(value);
-        }
-        
-        // Try from global variable set in base template
-        if (window.CSRF_TOKEN) return window.CSRF_TOKEN;
-        
-        console.warn('CSRF token not found');
-        return '';
-    }
-
     // Audio Player Controls
     const audioPlayer = document.getElementById('audio-player');
     const playPauseBtn = document.getElementById('play-pause-btn');
     const speedBtn = document.getElementById('speed-btn');
     
     if (audioPlayer && playPauseBtn) {
-        console.log('Audio player found, setting up controls');
-        
         playPauseBtn.addEventListener('click', function() {
             if (audioPlayer.paused) {
                 audioPlayer.play().then(() => {
@@ -554,11 +527,6 @@ document.addEventListener('DOMContentLoaded', function() {
         audioPlayer.addEventListener('ended', function() {
             playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
         });
-        
-        audioPlayer.addEventListener('error', function(e) {
-            console.error('Audio error:', e);
-            showToast('Audio playback error', 'error');
-        });
     }
     
     if (speedBtn && audioPlayer) {
@@ -572,8 +540,6 @@ document.addEventListener('DOMContentLoaded', function() {
             audioPlayer.playbackRate = newSpeed;
             this.dataset.speed = newSpeed;
             this.textContent = newSpeed + 'x Speed';
-            
-            console.log('Playback speed changed to:', newSpeed);
         });
     }
 
@@ -582,11 +548,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const questionInput = document.getElementById('question-input');
     
     if (questionForm && questionInput) {
-        console.log('Question form found, setting up event listener');
-        
         questionForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            console.log('Question form submitted');
             
             const question = questionInput.value.trim();
             if (!question) {
@@ -602,365 +565,67 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = true;
             
             try {
-                const csrfToken = getCSRFToken();
-                console.log('Submitting question with CSRF token:', csrfToken ? 'Found' : 'Not found');
-                
                 const response = await fetch(`/api/documents/{{ document.id }}/questions/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken,
-                        'Accept': 'application/json'
+                        'X-CSRFToken': window.CSRF_TOKEN,
                     },
                     body: JSON.stringify({
                         question_text: question
                     })
                 });
                 
-                console.log('API Response status:', response.status);
-                
                 if (response.ok) {
-                    const result = await response.json();
-                    console.log('Question submitted successfully:', result);
-                    
                     questionInput.value = '';
                     showToast('Question submitted successfully!', 'success');
                     
-                    // Reload page after a short delay to show the new question
+                    // Reload page after a short delay
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);
                 } else {
-                    const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
-                    console.error('API Error:', response.status, errorData);
-                    showToast(errorData.error || `Server error: ${response.status}`, 'error');
+                    const errorData = await response.json();
+                    showToast(errorData.error || 'Failed to submit question', 'error');
                 }
             } catch (error) {
-                console.error('Network error submitting question:', error);
-                showToast('Network error. Please check your connection and try again.', 'error');
+                console.error('Error submitting question:', error);
+                showToast('Network error. Please try again.', 'error');
             } finally {
-                // Reset button state
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             }
         });
     }
-    
-    // Rating stars functionality
-    const ratingStars = document.querySelectorAll('.rating-star');
-    ratingStars.forEach(star => {
-        star.addEventListener('click', async function() {
-            const questionId = this.dataset.question;
-            const rating = parseInt(this.dataset.rating);
-            
-            console.log('Rating star clicked:', questionId, rating);
-            
-            try {
-                const csrfToken = getCSRFToken();
-                const response = await fetch(`/api/questions/${questionId}/rate/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify({ rating: rating })
-                });
-                
-                if (response.ok) {
-                    // Update star display
-                    const questionStars = document.querySelectorAll(`[data-question="${questionId}"]`);
-                    questionStars.forEach((s, index) => {
-                        const starIcon = s.querySelector('i');
-                        if (index < rating) {
-                            starIcon.classList.add('text-yellow-400');
-                            starIcon.classList.remove('text-gray-300');
-                        } else {
-                            starIcon.classList.remove('text-yellow-400');
-                            starIcon.classList.add('text-gray-300');
-                        }
-                    });
-                    showToast('Thank you for your feedback!', 'success');
-                } else {
-                    console.error('Rating failed:', response.status);
-                    showToast('Failed to save rating', 'error');
-                }
-            } catch (error) {
-                console.error('Error saving rating:', error);
-                showToast('Network error', 'error');
-            }
-        });
-    });
-    
-    // Share Modal Functionality
+
+    // Share Modal
     const shareBtn = document.getElementById('share-btn');
     const shareModal = document.getElementById('share-modal');
     const closeShareModal = document.getElementById('close-share-modal');
     const closeShareModalBtn = document.getElementById('close-share-modal-btn');
-    const shareForm = document.getElementById('share-form');
-    const copyLinkBtn = document.getElementById('copy-link');
     
     if (shareBtn && shareModal) {
         shareBtn.addEventListener('click', function() {
-            console.log('Share button clicked');
             shareModal.classList.remove('hidden');
         });
-    }
-    
-    function closeModal() {
-        if (shareModal) {
+        
+        function closeModal() {
             shareModal.classList.add('hidden');
-            // Reset form
-            const shareResult = document.getElementById('share-result');
-            if (shareResult) shareResult.classList.add('hidden');
         }
-    }
-    
-    if (closeShareModal) {
-        closeShareModal.addEventListener('click', closeModal);
-    }
-    
-    if (closeShareModalBtn) {
-        closeShareModalBtn.addEventListener('click', closeModal);
-    }
-    
-    // Close modal when clicking outside
-    if (shareModal) {
+        
+        if (closeShareModal) {
+            closeShareModal.addEventListener('click', closeModal);
+        }
+        
+        if (closeShareModalBtn) {
+            closeShareModalBtn.addEventListener('click', closeModal);
+        }
+        
         shareModal.addEventListener('click', function(e) {
             if (e.target === shareModal) {
                 closeModal();
             }
         });
-    }
-    
-    if (shareForm) {
-        shareForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            console.log('Share form submitted');
-            
-            const formData = new FormData(this);
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            
-            // Set loading state
-            submitBtn.textContent = 'Generating...';
-            submitBtn.disabled = true;
-            
-            try {
-                const csrfToken = getCSRFToken();
-                
-                const response = await fetch(`/api/documents/{{ document.id }}/share/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Share link generated:', data);
-                    
-                    const shareLinkInput = document.getElementById('share-link');
-                    const shareResult = document.getElementById('share-result');
-                    
-                    if (shareLinkInput && shareResult) {
-                        shareLinkInput.value = data.share_url || data.link || 'Link generated successfully';
-                        shareResult.classList.remove('hidden');
-                    }
-                    
-                    showToast('Share link generated successfully!', 'success');
-                } else {
-                    const errorData = await response.json().catch(() => ({ error: 'Failed to generate share link' }));
-                    console.error('Share error:', response.status, errorData);
-                    showToast(errorData.error || 'Failed to generate share link', 'error');
-                }
-            } catch (error) {
-                console.error('Network error generating share link:', error);
-                showToast('Network error. Please try again.', 'error');
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-        });
-    }
-    
-    if (copyLinkBtn) {
-        copyLinkBtn.addEventListener('click', async function() {
-            const linkInput = document.getElementById('share-link');
-            if (linkInput) {
-                try {
-                    if (navigator.clipboard) {
-                        await navigator.clipboard.writeText(linkInput.value);
-                    } else {
-                        // Fallback for older browsers
-                        linkInput.select();
-                        document.execCommand('copy');
-                    }
-                    showToast('Link copied to clipboard!', 'success');
-                } catch (error) {
-                    console.error('Copy failed:', error);
-                    showToast('Failed to copy link', 'error');
-                }
-            }
-        });
-    }
-    
-    // Action buttons
-    const downloadBtn = document.getElementById('download-btn');
-    const regenerateBtn = document.getElementById('regenerate-btn');
-    const regenerateAudioBtn = document.getElementById('regenerate-audio-btn');
-    const retryProcessingBtn = document.getElementById('retry-processing-btn');
-    
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', function() {
-            console.log('Download button clicked');
-            // Implement download functionality
-            window.location.href = `/documents/{{ document.id }}/download/`;
-        });
-    }
-    
-    if (regenerateBtn) {
-        regenerateBtn.addEventListener('click', async function() {
-            console.log('Regenerate button clicked');
-            
-            if (!confirm('Are you sure you want to regenerate this document? This will create new AI summaries.')) {
-                return;
-            }
-            
-            const originalText = this.innerHTML;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Regenerating...';
-            this.disabled = true;
-            
-            try {
-                const csrfToken = getCSRFToken();
-                const response = await fetch(`/api/documents/{{ document.id }}/regenerate/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    showToast('Document regeneration started!', 'success');
-                    setTimeout(() => window.location.reload(), 2000);
-                } else {
-                    const errorData = await response.json().catch(() => ({ error: 'Regeneration failed' }));
-                    showToast(errorData.error || 'Failed to start regeneration', 'error');
-                }
-            } catch (error) {
-                console.error('Regeneration error:', error);
-                showToast('Network error. Please try again.', 'error');
-            } finally {
-                this.innerHTML = originalText;
-                this.disabled = false;
-            }
-        });
-    }
-    
-    if (regenerateAudioBtn) {
-        regenerateAudioBtn.addEventListener('click', function() {
-            console.log('Regenerate audio button clicked');
-            // Implement audio regeneration with voice selection
-            showToast('Audio regeneration feature coming soon!', 'info');
-        });
-    }
-    
-    if (retryProcessingBtn) {
-        retryProcessingBtn.addEventListener('click', async function() {
-            console.log('Retry processing button clicked');
-            
-            const originalText = this.innerHTML;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Retrying...';
-            this.disabled = true;
-            
-            try {
-                const csrfToken = getCSRFToken();
-                const response = await fetch(`/api/documents/{{ document.id }}/retry/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    showToast('Processing restarted!', 'success');
-                    setTimeout(() => window.location.reload(), 2000);
-                } else {
-                    const errorData = await response.json().catch(() => ({ error: 'Retry failed' }));
-                    showToast(errorData.error || 'Failed to retry processing', 'error');
-                }
-            } catch (error) {
-                console.error('Retry error:', error);
-                showToast('Network error. Please try again.', 'error');
-            } finally {
-                this.innerHTML = originalText;
-                this.disabled = false;
-            }
-        });
-    }
-    
-    // Auto-refresh for processing documents
-    {% if document.status == 'processing' %}
-    console.log('Document is processing, setting up auto-refresh');
-    const refreshInterval = setInterval(() => {
-        console.log('Auto-refreshing page for processing document');
-        window.location.reload();
-    }, 30000); // Refresh every 30 seconds
-    
-    // Clear interval when leaving page
-    window.addEventListener('beforeunload', () => {
-        clearInterval(refreshInterval);
-    });
-    {% endif %}
-    
-    // Utility function for toast notifications (uses global function if available)
-    function showToast(message, type = 'info') {
-        console.log('Toast:', message, type);
-        
-        // Use global toast function if available
-        if (window.EduSauti && window.EduSauti.showToast) {
-            window.EduSauti.showToast(message, type);
-            return;
-        }
-        
-        // Fallback simple toast implementation
-        const toast = document.createElement('div');
-        toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 transition-transform transform translate-x-full ${
-            type === 'success' ? 'bg-green-500' : 
-            type === 'error' ? 'bg-red-500' : 
-            type === 'warning' ? 'bg-yellow-500' :
-            'bg-blue-500'
-        }`;
-        
-        toast.innerHTML = `
-            <div class="flex items-center">
-                <i class="fas ${
-                    type === 'success' ? 'fa-check-circle' : 
-                    type === 'error' ? 'fa-exclamation-circle' : 
-                    type === 'warning' ? 'fa-exclamation-triangle' :
-                    'fa-info-circle'
-                } mr-2"></i>
-                <span>${message}</span>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `;
-        
-        document.body.appendChild(toast);
-        
-        // Trigger animation
-        setTimeout(() => {
-            toast.classList.remove('translate-x-full');
-        }, 100);
-        
-        // Auto remove
-        setTimeout(() => {
-            toast.classList.add('translate-x-full');
-            setTimeout(() => toast.remove(), 300);
-        }, 5000);
     }
     
     console.log('Document detail JavaScript initialization complete');
