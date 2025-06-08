@@ -1,712 +1,405 @@
-{% extends 'base.html' %}
-
-{% block title %}Upload Document - EduSauti{% endblock %}
-
-{% block meta_description %}Upload your documents to EduSauti for AI-powered voice summaries and interactive Q&A{% endblock %}
-
-{% block breadcrumbs %}
-    <li>
-        <span class="mx-2 text-gray-400">/</span>
-        <a href="{% url 'dashboard' %}" class="text-edu-dark hover:text-edu-beige transition-colors">Documents</a>
-    </li>
-    <li>
-        <span class="mx-2 text-gray-400">/</span>
-        <span class="text-gray-600">Upload</span>
-    </li>
-{% endblock %}
-
-{% block extra_css %}
-.upload-container {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(153, 135, 111, 0.1);
-    transition: all 0.3s ease;
-}
-
-.upload-area {
-    border: 3px dashed rgba(153, 135, 111, 0.3);
-    background: linear-gradient(135deg, rgba(245, 243, 240, 0.8) 0%, rgba(232, 224, 215, 0.5) 100%);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.upload-area.dragover {
-    border-color: #99876f;
-    background: linear-gradient(135deg, rgba(153, 135, 111, 0.1) 0%, rgba(245, 243, 240, 0.9) 100%);
-    transform: scale(1.02);
-}
-
-.upload-area.uploading {
-    border-color: #3b82f6;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(245, 243, 240, 0.9) 100%);
-}
-
-.file-preview {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(153, 135, 111, 0.2);
-    transition: all 0.3s ease;
-}
-
-.file-preview:hover {
-    border-color: rgba(153, 135, 111, 0.4);
-    transform: translateY(-2px);
-}
-
-.progress-bar {
-    background: linear-gradient(90deg, #10b981, #059669);
-    transition: width 0.3s ease;
-}
-
-.progress-bg {
-    background: rgba(153, 135, 111, 0.1);
-}
-
-.file-type-icon {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #99876f, #7d6b57);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.5rem;
-}
-
-.limitation-card {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(252, 165, 165, 0.1) 100%);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.usage-card {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 197, 253, 0.1) 100%);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-}
-
-.success-card {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(110, 231, 183, 0.1) 100%);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.upload-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(153, 135, 111, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.upload-area:hover .upload-overlay {
-    opacity: 1;
-}
-
-.floating-upload {
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes pulse-upload {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
-.pulse-upload {
-    animation: pulse-upload 2s ease-in-out infinite;
-}
-
-.file-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1rem;
-}
-
-@media (max-width: 640px) {
-    .file-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.upload-tips {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(251, 191, 36, 0.1) 100%);
-    border: 1px solid rgba(245, 158, 11, 0.2);
-}
-{% endblock %}
-
-{% block content %}
-<div class="min-h-screen bg-gradient-bg py-8">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8 scroll-reveal">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold text-edu-deep mb-2">
-                        Upload Document
-                    </h1>
-                    <p class="text-edu-dark">
-                        Transform your documents into interactive learning experiences
-                    </p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Document - EduSauti</title>
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- CSRF Token for AJAX requests -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'edu-beige': '#99876f',
+                        'edu-light': '#b5a28a',
+                        'edu-dark': '#7d6b57',
+                        'edu-cream': '#f5f3f0',
+                        'edu-accent': '#d4a574',
+                        'edu-deep': '#5c5246',
+                    },
+                    fontFamily: {
+                        'display': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'fadeInUp': 'fadeInUp 0.8s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #f5f3f0 0%, #e8e0d7 50%, #d4c7b8 100%);
+        }
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .form-input {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: rgba(245, 243, 240, 0.8);
+        }
+        .form-input:focus {
+            border-color: #99876f;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(153, 135, 111, 0.1);
+            transform: translateY(-2px);
+        }
+        .drag-area {
+            border: 2px dashed #99876f;
+            transition: all 0.3s ease;
+        }
+        .drag-area.dragover {
+            border-color: #7d6b57;
+            background: rgba(153, 135, 111, 0.1);
+            transform: scale(1.02);
+        }
+        .upload-progress {
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="font-display antialiased gradient-bg min-h-screen">
+    <!-- Navigation -->
+    <nav class="glass-effect sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <a href="{% url 'dashboard' %}" class="flex items-center space-x-2">
+                        <div class="text-2xl">🎓</div>
+                        <span class="text-xl font-bold text-edu-deep">EduSauti</span>
+                    </a>
                 </div>
-                <div class="mt-4 md:mt-0">
-                    <a href="{% url 'dashboard' %}" class="bg-white text-edu-beige border border-edu-beige px-4 py-2 rounded-lg hover:bg-edu-beige hover:text-white transition-all">
-                        <i class="fas fa-arrow-left mr-2"></i>
-                        Back to Documents
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'dashboard' %}" class="text-edu-deep hover:text-edu-beige transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
                     </a>
                 </div>
             </div>
         </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-edu-deep mb-4">Upload Your Document</h1>
+            <p class="text-lg text-edu-dark">Transform your learning materials into interactive AI-powered summaries</p>
+        </div>
 
         {% if limit_reached %}
-            <!-- Limit Reached Warning -->
-            <div class="limitation-card rounded-xl p-6 mb-8 scroll-reveal">
-                <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-red-800 mb-2">Upload Limit Reached</h3>
-                        <p class="text-red-700 mb-4">
-                            You have reached your monthly limit of {{ user.monthly_document_limit }} documents. 
-                            Upgrade your plan to upload more documents.
-                        </p>
-                        <div class="flex space-x-4">
-                            <a href="{% url 'subscription' %}" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                                Upgrade Plan
-                            </a>
-                            <a href="{% url 'usage-stats-api' %}" class="text-red-600 hover:text-red-800 transition-colors">
-                                View Usage Stats
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-8 text-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
+            <h3 class="text-xl font-semibold text-red-800 mb-2">Upload Limit Reached</h3>
+            <p class="text-red-700 mb-4">You have reached your monthly limit of {{ user.monthly_document_limit }} documents.</p>
+            <a href="{% url 'billing' %}" class="bg-edu-beige text-white px-6 py-2 rounded-full hover:bg-edu-dark transition-colors">
+                Upgrade Your Plan
+            </a>
+        </div>
         {% else %}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Upload Area -->
-                <div class="lg:col-span-2">
-                    <div class="upload-container rounded-xl p-6 scroll-reveal">
-                        <!-- Upload Zone -->
-                        <div id="upload-area" class="upload-area rounded-xl p-12 text-center mb-6 cursor-pointer">
-                            <input type="file" id="file-input" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx" multiple class="hidden">
-                            
-                            <div class="upload-overlay">
-                                <div class="text-white text-center">
-                                    <i class="fas fa-upload text-4xl mb-2"></i>
-                                    <p class="font-semibold">Drop files here</p>
-                                </div>
-                            </div>
-
-                            <div id="upload-content">
-                                <div class="floating-upload mb-6">
-                                    <div class="w-20 h-20 bg-edu-beige rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="fas fa-cloud-upload-alt text-white text-3xl"></i>
-                                    </div>
-                                </div>
-                                
-                                <h3 class="text-xl font-semibold text-edu-deep mb-4">
-                                    Drag & Drop your documents here
-                                </h3>
-                                <p class="text-gray-600 mb-6">
-                                    or <button type="button" onclick="document.getElementById('file-input').click()" class="text-edu-beige hover:text-edu-dark font-medium underline">browse files</button>
-                                </p>
-                                
-                                <div class="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
-                                    <span class="flex items-center">
-                                        <i class="fas fa-file-pdf text-red-500 mr-1"></i>PDF
-                                    </span>
-                                    <span class="flex items-center">
-                                        <i class="fas fa-file-word text-blue-500 mr-1"></i>Word
-                                    </span>
-                                    <span class="flex items-center">
-                                        <i class="fas fa-file-powerpoint text-orange-500 mr-1"></i>PowerPoint
-                                    </span>
-                                    <span class="flex items-center">
-                                        <i class="fas fa-file-alt text-gray-500 mr-1"></i>Text
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Upload Progress (Hidden by default) -->
-                            <div id="upload-progress" class="hidden">
-                                <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 pulse-upload">
-                                    <i class="fas fa-upload text-white text-xl"></i>
-                                </div>
-                                <h3 class="text-xl font-semibold text-blue-600 mb-4">Uploading...</h3>
-                                <div class="progress-bg rounded-full h-2 mb-2">
-                                    <div id="progress-bar" class="progress-bar h-2 rounded-full" style="width: 0%"></div>
-                                </div>
-                                <p id="upload-status" class="text-sm text-gray-600">Preparing upload...</p>
-                            </div>
+        
+        <!-- Upload Form -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8 mb-8">
+            <form id="upload-form" method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- File Upload Area -->
+                <div class="drag-area rounded-xl p-12 text-center cursor-pointer" id="drag-area">
+                    <div id="upload-content">
+                        <i class="fas fa-cloud-upload-alt text-6xl text-edu-beige mb-6"></i>
+                        <h3 class="text-2xl font-semibold text-edu-deep mb-4">Drop your document here</h3>
+                        <p class="text-edu-dark mb-6">or click to browse files</p>
+                        <div class="flex flex-wrap justify-center gap-2 text-sm text-edu-light">
+                            <span class="bg-edu-cream px-3 py-1 rounded-full">PDF</span>
+                            <span class="bg-edu-cream px-3 py-1 rounded-full">DOCX</span>
+                            <span class="bg-edu-cream px-3 py-1 rounded-full">TXT</span>
+                            <span class="bg-edu-cream px-3 py-1 rounded-full">PPTX</span>
                         </div>
-
-                        <!-- File Previews -->
-                        <div id="file-previews" class="file-grid hidden">
-                            <!-- File previews will be inserted here -->
+                        <p class="text-xs text-edu-light mt-4">Maximum file size: 10MB</p>
+                    </div>
+                    
+                    <!-- Progress Bar (Hidden by default) -->
+                    <div id="upload-progress" class="hidden">
+                        <div class="mb-4">
+                            <i class="fas fa-file-alt text-4xl text-edu-beige mb-2"></i>
+                            <p class="text-lg font-medium text-edu-deep" id="file-name"></p>
                         </div>
-
-                        <!-- Upload Button -->
-                        <div id="upload-actions" class="hidden mt-6">
-                            <div class="flex justify-between items-center">
-                                <button type="button" onclick="clearFiles()" class="text-gray-600 hover:text-gray-800 transition-colors">
-                                    <i class="fas fa-times mr-2"></i>Clear All
-                                </button>
-                                <button type="button" onclick="startUpload()" id="upload-btn" class="bg-edu-beige text-white px-8 py-3 rounded-xl font-semibold hover:bg-edu-dark transition-all hover-lift">
-                                    <i class="fas fa-upload mr-2"></i>
-                                    Upload Documents
-                                </button>
-                            </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
+                            <div class="bg-edu-beige h-3 rounded-full upload-progress" id="progress-bar"></div>
+                        </div>
+                        <p class="text-sm text-edu-dark" id="progress-text">Uploading... 0%</p>
+                    </div>
+                </div>
+                
+                <input type="file" id="file-input" name="file" accept=".pdf,.docx,.doc,.txt,.pptx,.ppt" class="hidden">
+                
+                <!-- Document Details -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="relative">
+                        <input type="text" id="title" name="title" placeholder=" " class="form-input w-full px-4 py-3 rounded-lg focus:outline-none peer">
+                        <label for="title" class="absolute left-4 top-3 text-edu-dark transition-all peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:text-edu-beige peer-[:not(:placeholder-shown)]:-translate-y-6 peer-[:not(:placeholder-shown)]:scale-90">
+                            Document Title (Optional)
+                        </label>
+                    </div>
+                    
+                    <div class="relative">
+                        <select id="category" name="category" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none appearance-none bg-white">
+                            <option value="">Select Category</option>
+                            <option value="academic">Academic</option>
+                            <option value="research">Research</option>
+                            <option value="business">Business</option>
+                            <option value="personal">Personal</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-4 top-4 text-edu-light pointer-events-none"></i>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <textarea id="description" name="description" rows="3" placeholder=" " class="form-input w-full px-4 py-3 rounded-lg focus:outline-none peer resize-none"></textarea>
+                    <label for="description" class="absolute left-4 top-3 text-edu-dark transition-all peer-focus:-translate-y-6 peer-focus:scale-90 peer-focus:text-edu-beige peer-[:not(:placeholder-shown)]:-translate-y-6 peer-[:not(:placeholder-shown)]:scale-90">
+                        Description (Optional)
+                    </label>
+                </div>
+                
+                <!-- Voice Settings -->
+                <div class="bg-edu-cream rounded-lg p-6">
+                    <h4 class="text-lg font-semibold text-edu-deep mb-4">
+                        <i class="fas fa-microphone mr-2"></i>Voice Summary Settings
+                    </h4>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-edu-dark mb-2">Voice</label>
+                            <select name="voice_preference" class="form-input w-full px-3 py-2 rounded-lg text-sm">
+                                <option value="female">Female Voice</option>
+                                <option value="male">Male Voice</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-edu-dark mb-2">Speed</label>
+                            <select name="speech_rate" class="form-input w-full px-3 py-2 rounded-lg text-sm">
+                                <option value="slow">Slow</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="fast">Fast</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-edu-dark mb-2">Tone</label>
+                            <select name="speech_tone" class="form-input w-full px-3 py-2 rounded-lg text-sm">
+                                <option value="neutral" selected>Neutral</option>
+                                <option value="friendly">Friendly</option>
+                                <option value="professional">Professional</option>
+                            </select>
                         </div>
                     </div>
                 </div>
-
-                <!-- Sidebar -->
-                <div class="space-y-6">
-                    <!-- Usage Stats -->
-                    <div class="usage-card rounded-xl p-6 scroll-reveal">
-                        <h3 class="text-lg font-semibold text-blue-800 mb-4">Current Usage</h3>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="text-gray-600">Documents this month</span>
-                                    <span class="font-medium">{{ user.documents_uploaded_this_month }}/{{ user.monthly_document_limit }}</span>
-                                </div>
-                                <div class="progress-bg rounded-full h-2">
-                                    <div class="progress-bar h-2 rounded-full" 
-                                         style="width: {% widthratio user.documents_uploaded_this_month user.monthly_document_limit 100 %}%"></div>
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <div class="flex justify-between text-sm mb-1">
-                                    <span class="text-gray-600">Questions this month</span>
-                                    <span class="font-medium">{{ user.questions_asked_this_month }}/{{ user.monthly_question_limit }}</span>
-                                </div>
-                                <div class="progress-bg rounded-full h-2">
-                                    <div class="progress-bar h-2 rounded-full" 
-                                         style="width: {% widthratio user.questions_asked_this_month user.monthly_question_limit 100 %}%"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-4 pt-4 border-t border-blue-200">
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="text-blue-700 font-medium">Current Plan</span>
-                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-                                    {{ user.get_subscription_tier_display }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Upload Tips -->
-                    <div class="upload-tips rounded-xl p-6 scroll-reveal">
-                        <h3 class="text-lg font-semibold text-amber-800 mb-4">
-                            <i class="fas fa-lightbulb mr-2"></i>Upload Tips
-                        </h3>
-                        
-                        <ul class="space-y-3 text-sm text-amber-700">
-                            <li class="flex items-start space-x-2">
-                                <i class="fas fa-check text-amber-600 mt-1"></i>
-                                <span>Use clear, well-structured documents for better AI analysis</span>
-                            </li>
-                            <li class="flex items-start space-x-2">
-                                <i class="fas fa-check text-amber-600 mt-1"></i>
-                                <span>Smaller files (under 10MB) process faster</span>
-                            </li>
-                            <li class="flex items-start space-x-2">
-                                <i class="fas fa-check text-amber-600 mt-1"></i>
-                                <span>Include descriptive titles for better organization</span>
-                            </li>
-                            <li class="flex items-start space-x-2">
-                                <i class="fas fa-check text-amber-600 mt-1"></i>
-                                <span>Documents with images may take longer to process</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Supported Formats -->
-                    <div class="upload-container rounded-xl p-6 scroll-reveal">
-                        <h3 class="text-lg font-semibold text-edu-deep mb-4">Supported Formats</h3>
-                        
-                        <div class="space-y-3">
-                            <div class="flex items-center space-x-3">
-                                <i class="fas fa-file-pdf text-red-500 text-lg"></i>
-                                <div>
-                                    <span class="font-medium text-edu-deep">PDF</span>
-                                    <p class="text-xs text-gray-600">Portable Document Format</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center space-x-3">
-                                <i class="fas fa-file-word text-blue-500 text-lg"></i>
-                                <div>
-                                    <span class="font-medium text-edu-deep">Word</span>
-                                    <p class="text-xs text-gray-600">DOC, DOCX</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center space-x-3">
-                                <i class="fas fa-file-powerpoint text-orange-500 text-lg"></i>
-                                <div>
-                                    <span class="font-medium text-edu-deep">PowerPoint</span>
-                                    <p class="text-xs text-gray-600">PPT, PPTX</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center space-x-3">
-                                <i class="fas fa-file-alt text-gray-500 text-lg"></i>
-                                <div>
-                                    <span class="font-medium text-edu-deep">Text</span>
-                                    <p class="text-xs text-gray-600">TXT</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-4 pt-4 border-t border-gray-200">
-                            <p class="text-xs text-gray-600">
-                                Maximum file size: <span class="font-medium">50MB</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="upload-container rounded-xl p-6 scroll-reveal">
-                        <h3 class="text-lg font-semibold text-edu-deep mb-4">Quick Actions</h3>
-                        
-                        <div class="space-y-3">
-                            <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
-                                <i class="fas fa-folder text-edu-beige group-hover:text-white"></i>
-                                <span class="font-medium">View All Documents</span>
-                            </a>
-                            
-                            <a href="{% url 'usage-stats-api' %}" class="flex items-center space-x-3 p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
-                                <i class="fas fa-chart-bar text-edu-beige group-hover:text-white"></i>
-                                <span class="font-medium">Usage Statistics</span>
-                            </a>
-                            
-                            <a href="{% url 'subscription' %}" class="flex items-center space-x-3 p-3 bg-edu-cream rounded-lg hover:bg-edu-beige hover:text-white transition-all group">
-                                <i class="fas fa-crown text-edu-beige group-hover:text-white"></i>
-                                <span class="font-medium">Upgrade Plan</span>
-                            </a>
-                        </div>
-                    </div>
+                
+                <!-- Upload Button -->
+                <div class="text-center">
+                    <button type="submit" id="upload-btn" class="bg-edu-beige text-white px-8 py-3 rounded-full font-semibold hover:bg-edu-dark transition-colors transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-upload mr-2"></i>
+                        <span id="btn-text">Upload Document</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Usage Stats -->
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-edu-deep mb-4">Your Usage This Month</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-edu-beige">{{ user.documents_uploaded_this_month }}</div>
+                    <div class="text-sm text-edu-dark">Documents Uploaded</div>
+                    <div class="text-xs text-edu-light">of {{ user.monthly_document_limit }} limit</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-edu-accent">{{ user.questions_asked_this_month }}</div>
+                    <div class="text-sm text-edu-dark">Questions Asked</div>
+                    <div class="text-xs text-edu-light">of {{ user.monthly_question_limit }} limit</div>
                 </div>
             </div>
+        </div>
+        
         {% endif %}
     </div>
-</div>
 
-<!-- Success Modal -->
-<div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-        <div class="success-card rounded-lg p-6 text-center">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-check text-green-600 text-2xl"></i>
-            </div>
-            <h3 class="text-lg font-semibold text-green-800 mb-2">Upload Successful!</h3>
-            <p class="text-green-700 mb-6" id="success-message">
-                Your documents have been uploaded and are being processed.
-            </p>
-            <div class="flex space-x-3">
-                <button onclick="closeSuccessModal()" class="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300 transition-colors">
-                    Upload More
-                </button>
-                <a href="{% url 'dashboard' %}" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors text-center">
-                    View Documents
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-let selectedFiles = [];
-let uploadInProgress = false;
-
-// File input change event
-document.getElementById('file-input').addEventListener('change', function(e) {
-    handleFiles(e.target.files);
-});
-
-// Drag and drop events
-const uploadArea = document.getElementById('upload-area');
-
-uploadArea.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    uploadArea.classList.add('dragover');
-});
-
-uploadArea.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    uploadArea.classList.remove('dragover');
-});
-
-uploadArea.addEventListener('drop', function(e) {
-    e.preventDefault();
-    uploadArea.classList.remove('dragover');
-    handleFiles(e.dataTransfer.files);
-});
-
-uploadArea.addEventListener('click', function() {
-    if (!uploadInProgress) {
-        document.getElementById('file-input').click();
-    }
-});
-
-function handleFiles(files) {
-    if (uploadInProgress) return;
-    
-    const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
-    const maxSize = 50 * 1024 * 1024; // 50MB
-    
-    Array.from(files).forEach(file => {
-        if (validTypes.includes(file.type)) {
-            if (file.size <= maxSize) {
-                selectedFiles.push(file);
-            } else {
-                EduSauti.showToast(`File "${file.name}" is too large. Maximum size is 50MB.`, 'warning');
+    <!-- JavaScript -->
+    <script>
+        const dragArea = document.getElementById('drag-area');
+        const fileInput = document.getElementById('file-input');
+        const uploadForm = document.getElementById('upload-form');
+        const uploadBtn = document.getElementById('upload-btn');
+        const btnText = document.getElementById('btn-text');
+        const uploadContent = document.getElementById('upload-content');
+        const uploadProgress = document.getElementById('upload-progress');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const fileNameElement = document.getElementById('file-name');
+        
+        // Drag and drop functionality
+        dragArea.addEventListener('click', () => fileInput.click());
+        
+        dragArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dragArea.classList.add('dragover');
+        });
+        
+        dragArea.addEventListener('dragleave', () => {
+            dragArea.classList.remove('dragover');
+        });
+        
+        dragArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(files[0]);
             }
-        } else {
-            EduSauti.showToast(`File "${file.name}" is not a supported format.`, 'warning');
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+        
+        function handleFileSelect(file) {
+            // Validate file type
+            const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'text/plain', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.ms-powerpoint'];
+            if (!allowedTypes.includes(file.type)) {
+                showToast('Invalid file type. Please upload PDF, DOCX, TXT, or PPTX files.', 'error');
+                return;
+            }
+            
+            // Validate file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('File size exceeds 10MB limit.', 'error');
+                return;
+            }
+            
+            // Auto-fill title if empty
+            const titleInput = document.getElementById('title');
+            if (!titleInput.value) {
+                titleInput.value = file.name.replace(/\.[^/.]+$/, "");
+            }
+            
+            fileNameElement.textContent = file.name;
         }
-    });
-    
-    if (selectedFiles.length > 0) {
-        displayFilePreviews();
-        showUploadActions();
-    }
-}
-
-function displayFilePreviews() {
-    const previewContainer = document.getElementById('file-previews');
-    previewContainer.innerHTML = '';
-    previewContainer.classList.remove('hidden');
-    
-    selectedFiles.forEach((file, index) => {
-        const preview = createFilePreview(file, index);
-        previewContainer.appendChild(preview);
-    });
-}
-
-function createFilePreview(file, index) {
-    const div = document.createElement('div');
-    div.className = 'file-preview rounded-lg p-4';
-    
-    const fileType = getFileType(file.type);
-    const fileSize = formatFileSize(file.size);
-    
-    div.innerHTML = `
-        <div class="flex items-start space-x-4">
-            <div class="file-type-icon">
-                <i class="fas ${getFileIcon(file.type)}"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <h4 class="font-medium text-edu-deep truncate">${file.name}</h4>
-                <p class="text-sm text-gray-600">${fileType} • ${fileSize}</p>
-                <div class="mt-2">
-                    <input type="text" placeholder="Add description (optional)" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-edu-beige focus:outline-none"
-                           onchange="updateFileDescription(${index}, this.value)">
+        
+        // Form submission
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!fileInput.files.length) {
+                showToast('Please select a file to upload.', 'warning');
+                return;
+            }
+            
+            const formData = new FormData(uploadForm);
+            
+            // Update UI for upload
+            uploadBtn.disabled = true;
+            btnText.textContent = 'Uploading...';
+            uploadContent.classList.add('hidden');
+            uploadProgress.classList.remove('hidden');
+            
+            try {
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = Math.round((e.loaded / e.total) * 100);
+                        progressBar.style.width = percentComplete + '%';
+                        progressText.textContent = `Uploading... ${percentComplete}%`;
+                    }
+                });
+                
+                xhr.addEventListener('load', () => {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            showToast('Document uploaded successfully!', 'success');
+                            setTimeout(() => {
+                                window.location.href = response.redirect_url;
+                            }, 1500);
+                        } else {
+                            showToast(response.error || 'Upload failed.', 'error');
+                            resetUploadUI();
+                        }
+                    } else {
+                        showToast('Upload failed. Please try again.', 'error');
+                        resetUploadUI();
+                    }
+                });
+                
+                xhr.addEventListener('error', () => {
+                    showToast('Upload failed. Please try again.', 'error');
+                    resetUploadUI();
+                });
+                
+                xhr.open('POST', uploadForm.action || window.location.href);
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                xhr.send(formData);
+                
+            } catch (error) {
+                showToast('Upload failed. Please try again.', 'error');
+                resetUploadUI();
+            }
+        });
+        
+        function resetUploadUI() {
+            uploadBtn.disabled = false;
+            btnText.textContent = 'Upload Document';
+            uploadContent.classList.remove('hidden');
+            uploadProgress.classList.add('hidden');
+            progressBar.style.width = '0%';
+        }
+        
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 p-4 rounded-lg text-white transform translate-x-full transition-transform duration-300 ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+            }`;
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${
+                        type === 'success' ? 'fa-check-circle' :
+                        type === 'error' ? 'fa-exclamation-circle' :
+                        type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'
+                    } mr-3"></i>
+                    <span>${message}</span>
                 </div>
-            </div>
-            <button onclick="removeFile(${index})" class="text-red-500 hover:text-red-700 transition-colors">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    `;
-    
-    return div;
-}
-
-function getFileType(mimeType) {
-    const types = {
-        'application/pdf': 'PDF',
-        'application/msword': 'Word Document',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word Document',
-        'text/plain': 'Text File',
-        'application/vnd.ms-powerpoint': 'PowerPoint',
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'PowerPoint'
-    };
-    return types[mimeType] || 'Unknown';
-}
-
-function getFileIcon(mimeType) {
-    const icons = {
-        'application/pdf': 'fa-file-pdf',
-        'application/msword': 'fa-file-word',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'fa-file-word',
-        'text/plain': 'fa-file-alt',
-        'application/vnd.ms-powerpoint': 'fa-file-powerpoint',
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'fa-file-powerpoint'
-    };
-    return icons[mimeType] || 'fa-file';
-}
-
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-function updateFileDescription(index, description) {
-    if (selectedFiles[index]) {
-        selectedFiles[index].description = description;
-    }
-}
-
-function removeFile(index) {
-    selectedFiles.splice(index, 1);
-    
-    if (selectedFiles.length === 0) {
-        hideUploadActions();
-        document.getElementById('file-previews').classList.add('hidden');
-    } else {
-        displayFilePreviews();
-    }
-}
-
-function clearFiles() {
-    selectedFiles = [];
-    hideUploadActions();
-    document.getElementById('file-previews').classList.add('hidden');
-    document.getElementById('file-input').value = '';
-}
-
-function showUploadActions() {
-    document.getElementById('upload-actions').classList.remove('hidden');
-}
-
-function hideUploadActions() {
-    document.getElementById('upload-actions').classList.add('hidden');
-}
-
-async function startUpload() {
-    if (selectedFiles.length === 0 || uploadInProgress) return;
-    
-    uploadInProgress = true;
-    showUploadProgress();
-    
-    const uploadBtn = document.getElementById('upload-btn');
-    EduSauti.setLoadingState(uploadBtn, true);
-    
-    let uploadedCount = 0;
-    let failedCount = 0;
-    
-    for (let i = 0; i < selectedFiles.length; i++) {
-        const file = selectedFiles[i];
-        
-        try {
-            updateUploadStatus(`Uploading ${file.name}...`);
-            updateProgress((i / selectedFiles.length) * 100);
+            `;
             
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('title', file.name.split('.')[0]);
-            if (file.description) {
-                formData.append('description', file.description);
-            }
+            document.body.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-x-full'), 100);
             
-            const response = await fetch('/api/documents/', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': EduSauti.csrfToken
-                }
-            });
-            
-            if (response.ok) {
-                uploadedCount++;
-            } else {
-                failedCount++;
-                const errorData = await response.json();
-                console.error(`Upload failed for ${file.name}:`, errorData);
-            }
-            
-        } catch (error) {
-            failedCount++;
-            console.error(`Upload error for ${file.name}:`, error);
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
         }
-    }
-    
-    updateProgress(100);
-    updateUploadStatus('Upload complete!');
-    
-    setTimeout(() => {
-        uploadInProgress = false;
-        hideUploadProgress();
-        EduSauti.setLoadingState(uploadBtn, false);
-        
-        if (uploadedCount > 0) {
-            showSuccessModal(uploadedCount, failedCount);
-            clearFiles();
-        }
-        
-        if (failedCount > 0) {
-            EduSauti.showToast(`${failedCount} file(s) failed to upload`, 'error');
-        }
-    }, 1000);
-}
-
-function showUploadProgress() {
-    document.getElementById('upload-content').classList.add('hidden');
-    document.getElementById('upload-progress').classList.remove('hidden');
-    document.getElementById('upload-area').classList.add('uploading');
-}
-
-function hideUploadProgress() {
-    document.getElementById('upload-content').classList.remove('hidden');
-    document.getElementById('upload-progress').classList.add('hidden');
-    document.getElementById('upload-area').classList.remove('uploading');
-}
-
-function updateProgress(percentage) {
-    document.getElementById('progress-bar').style.width = percentage + '%';
-}
-
-function updateUploadStatus(status) {
-    document.getElementById('upload-status').textContent = status;
-}
-
-function showSuccessModal(successCount, failedCount) {
-    const message = failedCount > 0 
-        ? `${successCount} file(s) uploaded successfully. ${failedCount} file(s) failed.`
-        : `${successCount} file(s) uploaded successfully and are being processed.`;
-    
-    document.getElementById('success-message').textContent = message;
-    document.getElementById('success-modal').classList.remove('hidden');
-}
-
-function closeSuccessModal() {
-    document.getElementById('success-modal').classList.add('hidden');
-}
-
-// Close modal when clicking outside
-document.getElementById('success-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeSuccessModal();
-    }
-});
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeSuccessModal();
-    }
-});
-
-// Show welcome message
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        EduSauti.showToast('Ready to upload your documents!', 'info', 3000);
-    }, 1000);
-});
-{% endblock %}
+    </script>
+</body>
+</html>
