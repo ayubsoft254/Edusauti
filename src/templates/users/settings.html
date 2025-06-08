@@ -1,395 +1,1112 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Account Settings - EduSauti">
+    <meta name="keywords" content="account settings, profile management, AI education, educational technology">
+    <meta name="author" content="EduSauti">
 
-{% block title %}Settings - EduSauti{% endblock %}
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="Settings - EduSauti">
+    <meta property="og:description" content="Manage your EduSauti account settings and preferences">
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}/static/images/og-image.jpg">
 
-{% block meta_description %}Manage your EduSauti account settings and preferences{% endblock %}
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
+    <meta property="twitter:title" content="Settings - EduSauti">
+    <meta property="twitter:description" content="Manage your EduSauti account settings and preferences">
+    <meta property="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}/static/images/twitter-image.jpg">
 
-{% block breadcrumbs %}
-    <li>
-        <span class="mx-2 text-gray-400">/</span>
-        <span class="text-gray-600">Settings</span>
-    </li>
-{% endblock %}
+    <title>Settings - EduSauti</title>
 
-{% block extra_css %}
-.settings-section {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(153, 135, 111, 0.1);
-}
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
-.form-floating {
-    position: relative;
-    margin-bottom: 1.5rem;
-}
+    <!-- CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-.form-floating input,
-.form-floating select,
-.form-floating textarea {
-    width: 100%;
-    padding: 1.25rem 1rem 0.75rem 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 0.75rem;
-    background-color: #f9fafb;
-    transition: all 0.3s ease;
-    font-size: 1rem;
-    line-height: 1.5;
-}
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
 
-.form-floating input:focus,
-.form-floating select:focus,
-.form-floating textarea:focus {
-    outline: none;
-    border-color: #99876f;
-    background-color: white;
-    box-shadow: 0 0 0 3px rgba(153, 135, 111, 0.1);
-}
+    <!-- CSRF Token for AJAX requests -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
 
-.form-floating label {
-    position: absolute;
-    top: 1.25rem;
-    left: 1rem;
-    color: #6b7280;
-    pointer-events: none;
-    transition: all 0.2s ease-in-out;
-    transform-origin: 0 0;
-    font-size: 1rem;
-    line-height: 1.5;
-    z-index: 1;
-}
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'edu-beige': '#99876f',
+                        'edu-light': '#b5a28a',
+                        'edu-dark': '#7d6b57',
+                        'edu-cream': '#f5f3f0',
+                        'edu-accent': '#d4a574',
+                        'edu-deep': '#5c5246',
+                    },
+                    ringColor: {
+                        'edu-beige': '#99876f',
+                    },
+                    fontFamily: {
+                        'display': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'fadeInUp': 'fadeInUp 0.8s ease-out',
+                        'slideInLeft': 'slideInLeft 0.8s ease-out',
+                        'slideInRight': 'slideInRight 0.8s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
+                        'gradient-x': 'gradient-x 3s ease infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideInLeft: {
+                            '0%': { opacity: '0', transform: 'translateX(-30px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' }
+                        },
+                        slideInRight: {
+                            '0%': { opacity: '0', transform: 'translateX(30px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' }
+                        },
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' }
+                        },
+                        'gradient-x': {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            }
+                        },
+                        glow: {
+                            '0%': { 'box-shadow': '0 0 5px rgba(153, 135, 111, 0.5)' },
+                            '100%': { 'box-shadow': '0 0 20px rgba(153, 135, 111, 0.8)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
-.form-floating input:focus + label,
-.form-floating input:not(:placeholder-shown) + label,
-.form-floating input[value]:not([value=""]) + label,
-.form-floating select:focus + label,
-.form-floating textarea:focus + label,
-.form-floating textarea:not(:placeholder-shown) + label {
-    top: 0.25rem;
-    left: 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #99876f;
-    transform: scale(1);
-}
-
-.avatar-upload {
-    position: relative;
-    display: inline-block;
-}
-
-.avatar-upload input[type="file"] {
-    position: absolute;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-}
-
-.avatar-preview {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid #99876f;
-}
-
-.upload-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.avatar-upload:hover .upload-overlay {
-    opacity: 1;
-}
-{% endblock %}
-
-{% block content %}
-<div class="min-h-screen bg-gradient-bg py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8 scroll-reveal">
-            <h1 class="text-3xl font-bold text-edu-deep mb-2">Account Settings</h1>
-            <p class="text-edu-dark">Manage your profile and account preferences</p>
-        </div>
-
-        <form method="post" enctype="multipart/form-data" id="settings-form">
-            {% csrf_token %}
-            
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Profile Section -->
-                <div class="lg:col-span-2 space-y-8">
-                    <!-- Basic Information -->
-                    <div class="settings-section rounded-xl p-6 scroll-reveal">
-                        <h2 class="text-xl font-semibold text-edu-deep mb-6">Basic Information</h2>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #f5f3f0 0%, #e8e0d7 50%, #d4c7b8 100%);
+        }
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(153, 135, 111, 0.2);
+        }
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background: linear-gradient(135deg, #99876f, #7d6b57);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(153, 135, 111, 0.3);
+        }
+        .tab-content {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #99876f;
+            box-shadow: 0 0 0 3px rgba(153, 135, 111, 0.1);
+        }
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .form-error {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .form-help {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .avatar-upload {
+            position: relative;
+            display: inline-block;
+        }
+        .avatar-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            object-fit: cover;
+        }
+        .avatar-placeholder {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #99876f, #b5a28a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .avatar-overlay {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #99876f;
+            color: white;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid white;
+        }
+        .avatar-overlay:hover {
+            background: #7d6b57;
+            transform: scale(1.1);
+        }
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .danger-zone {
+            border: 2px solid #ef4444;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            background: rgba(239, 68, 68, 0.05);
+        }
+        .success-message {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .error-message {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .password-strength {
+            margin-top: 0.5rem;
+        }
+        .strength-bar {
+            height: 4px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        .strength-weak { background: #ef4444; width: 25%; }
+        .strength-fair { background: #f59e0b; width: 50%; }
+        .strength-good { background: #10b981; width: 75%; }
+        .strength-strong { background: #059669; width: 100%; }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f3f0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #99876f;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7d6b57;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="font-display antialiased">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-effect">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <a href="{% url 'home' %}" class="flex items-center space-x-2">
+                        <div class="text-2xl">🎓</div>
+                        <span class="text-xl font-bold text-edu-deep">EduSauti</span>
+                    </a>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="text-edu-deep hover:text-edu-beige transition-colors">Dashboard</a>
+                        <a href="{% url 'dashboard' %}" class="text-edu-deep hover:text-edu-beige transition-colors">Documents</a>
+                        <a href="{% url 'usage-stats' %}" class="text-edu-deep hover:text-edu-beige transition-colors">Usage</a>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- First Name -->
-                            <div class="form-floating">
-                                <input
-                                    type="text"
-                                    id="{{ user_form.first_name.id_for_label }}"
-                                    name="{{ user_form.first_name.name }}"
-                                    value="{{ user_form.first_name.value|default:'' }}"
-                                    placeholder="First Name"
-                                >
-                                <label for="{{ user_form.first_name.id_for_label }}">First Name</label>
-                                {% if user_form.first_name.errors %}
-                                    <div class="mt-2 text-sm text-red-600">
-                                        {% for error in user_form.first_name.errors %}
-                                            <p>{{ error }}</p>
-                                        {% endfor %}
+                        <!-- User Dropdown -->
+                        <div class="relative" id="user-dropdown">
+                            <button class="flex items-center space-x-2 text-edu-deep hover:text-edu-beige transition-colors" id="user-menu-btn">
+                                {% if user.profile and user.profile.avatar %}
+                                    <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
+                                {% else %}
+                                    <div class="w-8 h-8 rounded-full bg-edu-beige flex items-center justify-center">
+                                        <span class="text-white text-sm font-semibold">{{ user.first_name|first|default:user.username|first|upper }}</span>
                                     </div>
                                 {% endif %}
-                            </div>
-
-                            <!-- Last Name -->
-                            <div class="form-floating">
-                                <input
-                                    type="text"
-                                    id="{{ user_form.last_name.id_for_label }}"
-                                    name="{{ user_form.last_name.name }}"
-                                    value="{{ user_form.last_name.value|default:'' }}"
-                                    placeholder="Last Name"
-                                >
-                                <label for="{{ user_form.last_name.id_for_label }}">Last Name</label>
-                                {% if user_form.last_name.errors %}
-                                    <div class="mt-2 text-sm text-red-600">
-                                        {% for error in user_form.last_name.errors %}
-                                            <p>{{ error }}</p>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="form-floating">
-                            <input
-                                type="email"
-                                id="{{ user_form.email.id_for_label }}"
-                                name="{{ user_form.email.name }}"
-                                value="{{ user_form.email.value|default:'' }}"
-                                placeholder="Email Address"
-                            >
-                            <label for="{{ user_form.email.id_for_label }}">Email Address</label>
-                            {% if user_form.email.errors %}
-                                <div class="mt-2 text-sm text-red-600">
-                                    {% for error in user_form.email.errors %}
-                                        <p>{{ error }}</p>
-                                    {% endfor %}
+                                <span class="font-medium">{{ user.first_name|default:user.username }}</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 hidden" id="user-menu">
+                                <div class="py-2">
+                                    <a href="{% url 'profile' %}" class="block px-4 py-2 text-edu-deep hover:bg-edu-cream transition-colors">
+                                        <i class="fas fa-user mr-2"></i>Profile
+                                    </a>
+                                    <a href="{% url 'settings' %}" class="block px-4 py-2 text-edu-deep hover:bg-edu-cream transition-colors bg-edu-cream">
+                                        <i class="fas fa-cog mr-2"></i>Settings
+                                    </a>
+                                    <a href="{% url 'billing' %}" class="block px-4 py-2 text-edu-deep hover:bg-edu-cream transition-colors">
+                                        <i class="fas fa-credit-card mr-2"></i>Billing
+                                    </a>
+                                    <div class="border-t border-gray-100 my-1"></div>
+                                    <a href="{% url 'account_logout' %}" class="block px-4 py-2 text-red-600 hover:bg-red-50 transition-colors">
+                                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                    </a>
                                 </div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Extended Profile -->
-                    {% if profile_form %}
-                    <div class="settings-section rounded-xl p-6 scroll-reveal">
-                        <h2 class="text-xl font-semibold text-edu-deep mb-6">Additional Information</h2>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Phone -->
-                            {% if profile_form.phone %}
-                            <div class="form-floating">
-                                <input
-                                    type="tel"
-                                    id="{{ profile_form.phone.id_for_label }}"
-                                    name="{{ profile_form.phone.name }}"
-                                    value="{{ profile_form.phone.value|default:'' }}"
-                                    placeholder="Phone Number"
-                                >
-                                <label for="{{ profile_form.phone.id_for_label }}">Phone Number</label>
                             </div>
-                            {% endif %}
-
-                            <!-- Date of Birth -->
-                            {% if profile_form.date_of_birth %}
-                            <div class="form-floating">
-                                <input
-                                    type="date"
-                                    id="{{ profile_form.date_of_birth.id_for_label }}"
-                                    name="{{ profile_form.date_of_birth.name }}"
-                                    value="{{ profile_form.date_of_birth.value|default:'' }}"
-                                >
-                                <label for="{{ profile_form.date_of_birth.id_for_label }}">Date of Birth</label>
-                            </div>
-                            {% endif %}
                         </div>
-
-                        <!-- Bio -->
-                        {% if profile_form.bio %}
-                        <div class="form-floating">
-                            <textarea
-                                id="{{ profile_form.bio.id_for_label }}"
-                                name="{{ profile_form.bio.name }}"
-                                rows="4"
-                                placeholder="Tell us about yourself..."
-                            >{{ profile_form.bio.value|default:'' }}</textarea>
-                            <label for="{{ profile_form.bio.id_for_label }}">Bio</label>
-                        </div>
-                        {% endif %}
-                    </div>
                     {% endif %}
                 </div>
+                
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden" id="mobile-menu-btn" aria-label="Toggle mobile menu">
+                    <i class="fas fa-bars text-edu-deep text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="md:hidden hidden bg-white shadow-lg" id="mobile-menu">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Dashboard</a>
+                    <a href="{% url 'dashboard' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Documents</a>
+                    <a href="{% url 'usage-stats' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Usage</a>
+                    <a href="{% url 'profile' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Profile</a>
+                    <a href="{% url 'settings' %}" class="block py-2 text-edu-beige font-semibold mobile-menu-link">Settings</a>
+                    <a href="{% url 'billing' %}" class="block py-2 text-edu-deep hover:text-edu-beige mobile-menu-link">Billing</a>
+                    <a href="{% url 'account_logout' %}" class="block py-2 text-red-600 hover:text-red-800">Logout</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
 
-                <!-- Sidebar -->
-                <div class="space-y-8">
-                    <!-- Profile Picture -->
-                    <div class="settings-section rounded-xl p-6 scroll-reveal">
-                        <h3 class="text-lg font-semibold text-edu-deep mb-4">Profile Picture</h3>
-                        
-                        <div class="text-center">
-                            <div class="avatar-upload">
-                                {% if user.profile.avatar %}
-                                    <img src="{{ user.profile.avatar.url }}" alt="Profile Picture" class="avatar-preview mx-auto">
-                                {% else %}
-                                    <div class="avatar-preview mx-auto bg-edu-beige flex items-center justify-center text-white text-2xl font-bold">
-                                        {{ user.first_name|first|default:user.username|first|upper }}
-                                    </div>
-                                {% endif %}
-                                <div class="upload-overlay">
-                                    <i class="fas fa-camera text-white text-xl"></i>
-                                </div>
-                                {% if user_form.avatar %}
-                                    <input type="file" name="{{ user_form.avatar.name }}" accept="image/*" id="avatar-input">
-                                {% endif %}
-                            </div>
-                            <p class="text-sm text-gray-500 mt-3">Click to change your profile picture</p>
+    <!-- Main Content -->
+    <main class="pt-16">
+        <!-- Breadcrumbs -->
+        <nav class="bg-edu-cream py-4" aria-label="Breadcrumb">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <ol class="flex items-center space-x-2 text-sm">
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="text-edu-dark hover:text-edu-beige transition-colors">
+                            <i class="fas fa-home mr-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <span class="mx-2 text-gray-400">/</span>
+                        <span class="text-gray-600">Settings</span>
+                    </li>
+                </ol>
+            </div>
+        </nav>
+
+        <div class="min-h-screen gradient-bg">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Page Header -->
+                <div class="glass-effect rounded-xl p-8 mb-8 scroll-reveal">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                                <i class="fas fa-cog mr-3 text-edu-beige"></i>
+                                Account Settings
+                            </h1>
+                            <p class="text-gray-600">Manage your account information and preferences</p>
                         </div>
-                    </div>
-
-                    <!-- Account Status -->
-                    <div class="settings-section rounded-xl p-6 scroll-reveal">
-                        <h3 class="text-lg font-semibold text-edu-deep mb-4">Account Status</h3>
-                        
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Member Since</span>
-                                <span class="font-medium text-edu-deep">{{ user.date_joined|date:"M Y" }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Current Plan</span>
-                                <span class="font-medium text-edu-deep">{{ user.subscription_tier|title }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Status</span>
-                                <span class="text-green-600 font-medium">
-                                    <i class="fas fa-check-circle mr-1"></i>Active
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Links -->
-                    <div class="settings-section rounded-xl p-6 scroll-reveal">
-                        <h3 class="text-lg font-semibold text-edu-deep mb-4">Quick Links</h3>
-                        
-                        <div class="space-y-2">
-                            <a href="{% url 'subscription' %}" class="flex items-center space-x-2 text-edu-beige hover:text-edu-dark transition-colors">
-                                <i class="fas fa-crown"></i>
-                                <span>Manage Subscription</span>
-                            </a>
-                            <a href="{% url 'billing' %}" class="flex items-center space-x-2 text-edu-beige hover:text-edu-dark transition-colors">
-                                <i class="fas fa-credit-card"></i>
-                                <span>Billing Information</span>
-                            </a>
-                            <a href="{% url 'account_change_password' %}" class="flex items-center space-x-2 text-edu-beige hover:text-edu-dark transition-colors">
-                                <i class="fas fa-lock"></i>
-                                <span>Change Password</span>
-                            </a>
+                        <div class="flex items-center space-x-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-shield-alt mr-1"></i>
+                                Account Verified
+                            </span>
                         </div>
                     </div>
                 </div>
+
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-6 scroll-reveal">
+                            {% if message.tags == 'success' %}
+                                <div class="success-message">
+                                    <i class="fas fa-check-circle mr-3"></i>
+                                    {{ message }}
+                                </div>
+                            {% elif message.tags == 'error' %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle mr-3"></i>
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="grid lg:grid-cols-4 gap-8">
+                    <!-- Sidebar -->
+                    <div class="lg:col-span-1">
+                        <div class="glass-effect rounded-xl p-6 scroll-reveal sticky top-24">
+                            <h3 class="text-lg font-semibold mb-4">Settings</h3>
+                            <nav class="space-y-2">
+                                <button class="tab-button w-full text-left px-4 py-3 rounded-lg active" data-tab="profile">
+                                    <i class="fas fa-user mr-3"></i>Profile Information
+                                </button>
+                                <button class="tab-button w-full text-left px-4 py-3 rounded-lg" data-tab="account">
+                                    <i class="fas fa-cog mr-3"></i>Account Settings
+                                </button>
+                                <button class="tab-button w-full text-left px-4 py-3 rounded-lg" data-tab="security">
+                                    <i class="fas fa-shield-alt mr-3"></i>Security & Privacy
+                                </button>
+                                <button class="tab-button w-full text-left px-4 py-3 rounded-lg" data-tab="notifications">
+                                    <i class="fas fa-bell mr-3"></i>Notifications
+                                    <span class="notification-badge">3</span>
+                                </button>
+                                <button class="tab-button w-full text-left px-4 py-3 rounded-lg" data-tab="preferences">
+                                    <i class="fas fa-palette mr-3"></i>Preferences
+                                </button>
+                                <button class="tab-button w-full text-left px-4 py-3 rounded-lg" data-tab="danger">
+                                    <i class="fas fa-exclamation-triangle mr-3 text-red-500"></i>
+                                    <span class="text-red-600">Danger Zone</span>
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="lg:col-span-3">
+                        <form method="post" enctype="multipart/form-data" id="settings-form">
+                            {% csrf_token %}
+                            
+                            <!-- Profile Information Tab -->
+                            <div class="tab-content active" id="profile-tab">
+                                <div class="glass-effect rounded-xl p-8 scroll-reveal">
+                                    <h2 class="text-2xl font-bold mb-6">Profile Information</h2>
+                                    
+                                    <!-- Avatar Upload -->
+                                    <div class="form-group">
+                                        <label class="form-label">Profile Picture</label>
+                                        <div class="flex items-center space-x-6">
+                                            <div class="avatar-upload">
+                                                {% if user.profile and user.profile.avatar %}
+                                                    <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="avatar-preview" id="avatar-preview">
+                                                {% else %}
+                                                    <div class="avatar-placeholder" id="avatar-placeholder">
+                                                        {{ user.first_name|first|default:user.username|first|upper }}
+                                                    </div>
+                                                {% endif %}
+                                                <label for="id_avatar" class="avatar-overlay">
+                                                    <i class="fas fa-camera"></i>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="file" id="id_avatar" name="avatar" accept="image/*" class="hidden" onchange="previewAvatar(this)">
+                                                <p class="text-sm text-gray-600 mb-2">Upload a new profile picture</p>
+                                                <p class="text-xs text-gray-500">JPG, PNG or GIF. Max 5MB.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Basic Information -->
+                                    <div class="grid md:grid-cols-2 gap-6">
+                                        <div class="form-group">
+                                            <label for="{{ user_form.first_name.id_for_label }}" class="form-label">
+                                                First Name
+                                            </label>
+                                            {{ user_form.first_name }}
+                                            {% if user_form.first_name.errors %}
+                                                <div class="form-error">{{ user_form.first_name.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="{{ user_form.last_name.id_for_label }}" class="form-label">
+                                                Last Name
+                                            </label>
+                                            {{ user_form.last_name }}
+                                            {% if user_form.last_name.errors %}
+                                                <div class="form-error">{{ user_form.last_name.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="{{ user_form.email.id_for_label }}" class="form-label">
+                                            Email Address
+                                        </label>
+                                        {{ user_form.email }}
+                                        {% if user_form.email.errors %}
+                                            <div class="form-error">{{ user_form.email.errors.0 }}</div>
+                                        {% endif %}
+                                        <div class="form-help">We'll send important updates to this email</div>
+                                    </div>
+
+                                    {% if profile_form %}
+                                        <!-- Extended Profile Fields -->
+                                        <div class="form-group">
+                                            <label for="{{ profile_form.bio.id_for_label }}" class="form-label">
+                                                Bio
+                                            </label>
+                                            {{ profile_form.bio }}
+                                            {% if profile_form.bio.errors %}
+                                                <div class="form-error">{{ profile_form.bio.errors.0 }}</div>
+                                            {% endif %}
+                                            <div class="form-help">Tell others about yourself (optional)</div>
+                                        </div>
+
+                                        <div class="grid md:grid-cols-2 gap-6">
+                                            <div class="form-group">
+                                                <label for="{{ profile_form.location.id_for_label }}" class="form-label">
+                                                    Location
+                                                </label>
+                                                {{ profile_form.location }}
+                                                {% if profile_form.location.errors %}
+                                                    <div class="form-error">{{ profile_form.location.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="{{ profile_form.website.id_for_label }}" class="form-label">
+                                                    Website
+                                                </label>
+                                                {{ profile_form.website }}
+                                                {% if profile_form.website.errors %}
+                                                    <div class="form-error">{{ profile_form.website.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="grid md:grid-cols-2 gap-6">
+                                            <div class="form-group">
+                                                <label for="{{ profile_form.phone.id_for_label }}" class="form-label">
+                                                    Phone Number
+                                                </label>
+                                                {{ profile_form.phone }}
+                                                {% if profile_form.phone.errors %}
+                                                    <div class="form-error">{{ profile_form.phone.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="{{ profile_form.date_of_birth.id_for_label }}" class="form-label">
+                                                    Date of Birth
+                                                </label>
+                                                {{ profile_form.date_of_birth }}
+                                                {% if profile_form.date_of_birth.errors %}
+                                                    <div class="form-error">{{ profile_form.date_of_birth.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Account Settings Tab -->
+                            <div class="tab-content" id="account-tab">
+                                <div class="glass-effect rounded-xl p-8 scroll-reveal">
+                                    <h2 class="text-2xl font-bold mb-6">Account Settings</h2>
+                                    
+                                    <div class="space-y-6">
+                                        <!-- Username -->
+                                        <div class="form-group">
+                                            <label for="{{ user_form.username.id_for_label }}" class="form-label">
+                                                Username
+                                            </label>
+                                            {{ user_form.username }}
+                                            {% if user_form.username.errors %}
+                                                <div class="form-error">{{ user_form.username.errors.0 }}</div>
+                                            {% endif %}
+                                            <div class="form-help">This is how others will see you on EduSauti</div>
+                                        </div>
+
+                                        <!-- Account Status -->
+                                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                            <div class="flex items-center">
+                                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                                <div>
+                                                    <h3 class="font-semibold text-green-800">Account Status</h3>
+                                                    <p class="text-green-700">Your account is active and verified</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Subscription Info -->
+                                        <div class="bg-edu-cream border border-edu-light rounded-lg p-4">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-crown text-edu-beige mr-3"></i>
+                                                    <div>
+                                                        <h3 class="font-semibold text-edu-deep">Current Plan</h3>
+                                                        <p class="text-edu-dark">{{ user.get_subscription_tier_display|default:"Free Plan" }}</p>
+                                                    </div>
+                                                </div>
+                                                <a href="{% url 'subscription' %}" class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-colors">
+                                                    Manage Plan
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Security & Privacy Tab -->
+                            <div class="tab-content" id="security-tab">
+                                <div class="glass-effect rounded-xl p-8 scroll-reveal">
+                                    <h2 class="text-2xl font-bold mb-6">Security & Privacy</h2>
+                                    
+                                    <div class="space-y-6">
+                                        <!-- Password Change -->
+                                        <div class="border border-gray-200 rounded-lg p-6">
+                                            <h3 class="text-lg font-semibold mb-4">Change Password</h3>
+                                            <div class="grid md:grid-cols-2 gap-6">
+                                                <div class="form-group">
+                                                    <label for="current_password" class="form-label">
+                                                        Current Password
+                                                    </label>
+                                                    <input type="password" id="current_password" name="current_password" class="form-input">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="new_password" class="form-label">
+                                                        New Password
+                                                    </label>
+                                                    <input type="password" id="new_password" name="new_password" class="form-input" onkeyup="checkPasswordStrength(this.value)">
+                                                    <div class="password-strength">
+                                                        <div class="strength-bar" id="strength-bar"></div>
+                                                        <p class="text-sm text-gray-600 mt-1" id="strength-text">Password strength: <span id="strength-level">-</span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="bg-edu-beige text-white px-6 py-2 rounded-lg hover:bg-edu-dark transition-colors" onclick="changePassword()">
+                                                Update Password
+                                            </button>
+                                        </div>
+
+                                        <!-- Two-Factor Authentication -->
+                                        <div class="border border-gray-200 rounded-lg p-6">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <h3 class="text-lg font-semibold">Two-Factor Authentication</h3>
+                                                    <p class="text-gray-600">Add an extra layer of security to your account</p>
+                                                </div>
+                                                <button type="button" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                                    Enable 2FA
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Login Sessions -->
+                                        <div class="border border-gray-200 rounded-lg p-6">
+                                            <div class="flex items-center justify-between mb-4">
+                                                <h3 class="text-lg font-semibold">Active Sessions</h3>
+                                                <button type="button" class="text-red-600 hover:text-red-800 transition-colors">
+                                                    Sign out all devices
+                                                </button>
+                                            </div>
+                                            <div class="space-y-3">
+                                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                    <div class="flex items-center">
+                                                        <i class="fas fa-desktop text-gray-500 mr-3"></i>
+                                                        <div>
+                                                            <p class="font-medium">Current Session</p>
+                                                            <p class="text-sm text-gray-600">{{ request.META.HTTP_USER_AGENT|truncatechars:50 }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <span class="text-green-600 text-sm font-medium">Active now</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Notifications Tab -->
+                            <div class="tab-content" id="notifications-tab">
+                                <div class="glass-effect rounded-xl p-8 scroll-reveal">
+                                    <h2 class="text-2xl font-bold mb-6">Notification Preferences</h2>
+                                    
+                                    <div class="space-y-6">
+                                        <!-- Email Notifications -->
+                                        <div class="border border-gray-200 rounded-lg p-6">
+                                            <h3 class="text-lg font-semibold mb-4">Email Notifications</h3>
+                                            <div class="space-y-4">
+                                                <div class="flex items-center justify-between">
+                                                    <div>
+                                                        <p class="font-medium">Document Processing Updates</p>
+                                                        <p class="text-sm text-gray-600">Get notified when your documents are processed</p>
+                                                    </div>
+                                                    <label class="relative inline-flex items-center cursor-pointer">
+                                                        <input type="checkbox" checked class="sr-only peer">
+                                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-edu-beige/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-edu-beige"></div>
+                                                    </label>
+                                                </div>
+                                                <div class="flex items-center justify-between">
+                                                    <div>
+                                                        <p class="font-medium">Weekly Usage Summary</p>
+                                                        <p class="text-sm text-gray-600">Weekly digest of your EduSauti activity</p>
+                                                    </div>
+                                                    <label class="relative inline-flex items-center cursor-pointer">
+                                                        <input type="checkbox" checked class="sr-only peer">
+                                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-edu-beige/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-edu-beige"></div>
+                                                    </label>
+                                                </div>
+                                                <div class="flex items-center justify-between">
+                                                    <div>
+                                                        <p class="font-medium">Product Updates</p>
+                                                        <p class="text-sm text-gray-600">New features and improvements</p>
+                                                    </div>
+                                                    <label class="relative inline-flex items-center cursor-pointer">
+                                                        <input type="checkbox" class="sr-only peer">
+                                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-edu-beige/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-edu-beige"></div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Browser Notifications -->
+                                        <div class="border border-gray-200 rounded-lg p-6">
+                                            <h3 class="text-lg font-semibold mb-4">Browser Notifications</h3>
+                                            <div class="space-y-4">
+                                                <div class="flex items-center justify-between">
+                                                    <div>
+                                                        <p class="font-medium">Real-time Updates</p>
+                                                        <p class="text-sm text-gray-600">Get instant notifications in your browser</p>
+                                                    </div>
+                                                    <button type="button" class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-colors" onclick="requestNotificationPermission()">
+                                                        Enable
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Preferences Tab -->
+                            <div class="tab-content" id="preferences-tab">
+                                <div class="glass-effect rounded-xl p-8 scroll-reveal">
+                                    <h2 class="text-2xl font-bold mb-6">Preferences</h2>
+                                    
+                                    <div class="space-y-6">
+                                        <!-- Language & Region -->
+                                        <div class="border border-gray-200 rounded-lg p-6">
+                                            <h3 class="text-lg font-semibold mb-4">Language & Region</h3>
+                                            <div class="grid md:grid-cols-2 gap-6">
+                                                <div class="form-group">
+                                                    <label for="language" class="form-label">Language</label>
+                                                    <select id="language" class="form-input">
+                                                        <option>English (US)</option>
+                                                        <option>English (UK)</option>
+                                                        <option>Spanish</option>
+                                                        <option>French</option>
+                                                        <option>German</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="timezone" class="form-label">Timezone</label>
+                                                    <select id="timezone" class="form-input">
+                                                        <option>UTC-05:00 (Eastern Time)</option>
+                                                        <option>UTC-06:00 (Central Time)</option>
+                                                        <option>UTC-07:00 (Mountain Time)</option>
+                                                        <option>UTC-08:00 (Pacific Time)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Display Preferences -->
+                                        <div class="border border-gray-200 rounded-lg p-6">
+                                            <h3 class="text-lg font-semibold mb-4">Display</h3>
+                                            <div class="space-y-4">
+                                                <div class="flex items-center justify-between">
+                                                    <div>
+                                                        <p class="font-medium">Dark Mode</p>
+                                                        <p class="text-sm text-gray-600">Use dark theme across the application</p>
+                                                    </div>
+                                                    <label class="relative inline-flex items-center cursor-pointer">
+                                                        <input type="checkbox" class="sr-only peer">
+                                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-edu-beige/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-edu-beige"></div>
+                                                    </label>
+                                                </div>
+                                                <div class="flex items-center justify-between">
+                                                    <div>
+                                                        <p class="font-medium">Reduced Motion</p>
+                                                        <p class="text-sm text-gray-600">Minimize animations and transitions</p>
+                                                    </div>
+                                                    <label class="relative inline-flex items-center cursor-pointer">
+                                                        <input type="checkbox" class="sr-only peer">
+                                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-edu-beige/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-edu-beige"></div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Danger Zone Tab -->
+                            <div class="tab-content" id="danger-tab">
+                                <div class="glass-effect rounded-xl p-8 scroll-reveal">
+                                    <h2 class="text-2xl font-bold mb-6 text-red-600">
+                                        <i class="fas fa-exclamation-triangle mr-3"></i>
+                                        Danger Zone
+                                    </h2>
+                                    
+                                    <div class="space-y-6">
+                                        <!-- Export Data -->
+                                        <div class="border border-gray-200 rounded-lg p-6">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <h3 class="text-lg font-semibold">Export Your Data</h3>
+                                                    <p class="text-gray-600">Download a copy of all your data</p>
+                                                </div>
+                                                <button type="button" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                                                    Request Export
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Deactivate Account -->
+                                        <div class="danger-zone">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <h3 class="text-lg font-semibold text-red-600">Deactivate Account</h3>
+                                                    <p class="text-gray-600">Temporarily disable your account. You can reactivate it later.</p>
+                                                </div>
+                                                <button type="button" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">
+                                                    Deactivate
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Delete Account -->
+                                        <div class="danger-zone">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <h3 class="text-lg font-semibold text-red-600">Delete Account</h3>
+                                                    <p class="text-gray-600">Permanently delete your account and all associated data. This action cannot be undone.</p>
+                                                </div>
+                                                <button type="button" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors" onclick="confirmAccountDeletion()">
+                                                    Delete Account
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Save Button -->
+                            <div class="flex justify-end space-x-4 mt-8">
+                                <button type="button" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-colors">
+                                    <i class="fas fa-save mr-2"></i>
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
+        </div>
+    </main>
 
-            <!-- Save Button -->
-            <div class="mt-8 flex justify-end scroll-reveal">
-                <button
-                    type="submit"
-                    class="bg-edu-beige text-white px-8 py-3 rounded-xl font-semibold hover:bg-edu-dark transition-all hover-lift focus:outline-none focus:ring-4 focus:ring-edu-beige focus:ring-opacity-30"
-                    id="save-btn"
-                >
-                    <i class="fas fa-save mr-2"></i>
-                    Save Changes
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-{% endblock %}
+    <!-- JavaScript -->
+    <script>
+        // Global variables
+        window.CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-{% block extra_js %}
-// Initialize floating labels
-function initFloatingLabels() {
-    const inputs = document.querySelectorAll('.form-floating input, .form-floating textarea, .form-floating select');
-    
-    inputs.forEach(input => {
-        // Check initial state
-        checkFloatingLabel(input);
-        
-        // Add event listeners
-        input.addEventListener('focus', () => checkFloatingLabel(input));
-        input.addEventListener('blur', () => checkFloatingLabel(input));
-        input.addEventListener('input', () => checkFloatingLabel(input));
-    });
-}
+        // Tab functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
 
-function checkFloatingLabel(input) {
-    const label = input.nextElementSibling;
-    if (!label || !label.matches('label')) return;
-    
-    if (input.value !== '' || input === document.activeElement) {
-        label.classList.add('active');
-    } else {
-        label.classList.remove('active');
-    }
-}
-
-// Avatar preview
-document.getElementById('avatar-input')?.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const preview = document.querySelector('.avatar-preview');
-            if (preview.tagName === 'IMG') {
-                preview.src = e.target.result;
-            } else {
-                // Replace div with img
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.className = preview.className;
-                img.alt = 'Profile Picture';
-                preview.parentNode.replaceChild(img, preview);
+                // Close mobile menu when clicking on links
+                document.querySelectorAll('.mobile-menu-link').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenu.classList.add('hidden');
+                    });
+                });
             }
-        };
-        reader.readAsDataURL(file);
-    }
-});
 
-// Form submission
-document.getElementById('settings-form').addEventListener('submit', function(e) {
-    const saveBtn = document.getElementById('save-btn');
-    EduSauti.setLoadingState(saveBtn, true);
-    
-    // Re-enable after timeout in case of issues
-    setTimeout(() => {
-        EduSauti.setLoadingState(saveBtn, false);
-    }, 10000);
-});
+            // User dropdown menu
+            const userMenuBtn = document.getElementById('user-menu-btn');
+            const userMenu = document.getElementById('user-menu');
+            
+            if (userMenuBtn && userMenu) {
+                userMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('hidden');
+                });
 
-// Initialize on load
-document.addEventListener('DOMContentLoaded', function() {
-    initFloatingLabels();
-});
-{% endblock %}
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function() {
+                    userMenu.classList.add('hidden');
+                });
+            }
+
+            // Tab functionality
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked button and corresponding content
+                    this.classList.add('active');
+                    document.getElementById(tabId + '-tab').classList.add('active');
+                });
+            });
+
+            // Scroll reveal animation
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.scroll-reveal').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Add form-input class to form fields
+            document.querySelectorAll('input[type="text"], input[type="email"], input[type="url"], input[type="tel"], input[type="date"], textarea, select').forEach(input => {
+                if (!input.classList.contains('hidden')) {
+                    input.classList.add('form-input');
+                }
+            });
+
+            // Auto-resize textareas
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.classList.add('form-textarea');
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                });
+            });
+        });
+
+        // Avatar preview function
+        function previewAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatarPreview = document.getElementById('avatar-preview');
+                    const avatarPlaceholder = document.getElementById('avatar-placeholder');
+                    
+                    if (avatarPreview) {
+                        avatarPreview.src = e.target.result;
+                    } else if (avatarPlaceholder) {
+                        // Replace placeholder with image
+                        avatarPlaceholder.outerHTML = `<img src="${e.target.result}" alt="Avatar" class="avatar-preview" id="avatar-preview">`;
+                    }
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Password strength checker
+        function checkPasswordStrength(password) {
+            const strengthBar = document.getElementById('strength-bar');
+            const strengthLevel = document.getElementById('strength-level');
+            
+            if (!password) {
+                strengthBar.className = 'strength-bar';
+                strengthLevel.textContent = '-';
+                return;
+            }
+            
+            let strength = 0;
+            
+            // Length check
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            
+            // Character variety checks
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            // Update UI
+            strengthBar.className = 'strength-bar';
+            if (strength <= 2) {
+                strengthBar.classList.add('strength-weak');
+                strengthLevel.textContent = 'Weak';
+                strengthLevel.className = 'text-red-600';
+            } else if (strength <= 4) {
+                strengthBar.classList.add('strength-fair');
+                strengthLevel.textContent = 'Fair';
+                strengthLevel.className = 'text-orange-600';
+            } else if (strength <= 5) {
+                strengthBar.classList.add('strength-good');
+                strengthLevel.textContent = 'Good';
+                strengthLevel.className = 'text-green-600';
+            } else {
+                strengthBar.classList.add('strength-strong');
+                strengthLevel.textContent = 'Strong';
+                strengthLevel.className = 'text-green-700';
+            }
+        }
+
+        // Password change function
+        function changePassword() {
+            const currentPassword = document.getElementById('current_password').value;
+            const newPassword = document.getElementById('new_password').value;
+            
+            if (!currentPassword || !newPassword) {
+                alert('Please fill in both password fields');
+                return;
+            }
+            
+            // Here you would make an AJAX request to change the password
+            console.log('Changing password...');
+            alert('Password change functionality would be implemented here');
+        }
+
+        // Notification permission function
+        function requestNotificationPermission() {
+            if ('Notification' in window) {
+                Notification.requestPermission().then(function(permission) {
+                    if (permission === 'granted') {
+                        new Notification('EduSauti', {
+                            body: 'Notifications enabled successfully!',
+                            icon: '/static/favicon.ico'
+                        });
+                    }
+                });
+            }
+        }
+
+        // Account deletion confirmation
+        function confirmAccountDeletion() {
+            const confirmed = confirm('Are you absolutely sure you want to delete your account? This action cannot be undone and will permanently delete all your data.');
+            if (confirmed) {
+                const doubleConfirm = prompt('Type "DELETE" to confirm account deletion:');
+                if (doubleConfirm === 'DELETE') {
+                    console.log('Account deletion confirmed');
+                    alert('Account deletion functionality would be implemented here');
+                }
+            }
+        }
+
+        // Form submission handling
+        document.getElementById('settings-form').addEventListener('submit', function(e) {
+            // You can add additional validation here if needed
+            console.log('Saving settings...');
+        });
+
+        console.log('Settings page loaded successfully');
+    </script>
+</body>
+</html>

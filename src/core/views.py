@@ -17,4 +17,8 @@ def landing_page(request):
 @login_required
 def dashboard_redirect(request):
     """Redirect to appropriate dashboard based on user type"""
-    return redirect('dashboard')
+    user = request.user
+    context = {
+        'user': user,
+    }
+    return redirect('dashboard', context)

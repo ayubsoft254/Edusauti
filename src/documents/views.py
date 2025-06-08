@@ -19,6 +19,7 @@ from .serializers import (
 def dashboard(request):
     """Main dashboard showing user's documents"""
     documents = Document.objects.filter(user=request.user).order_by('-created_at')
+    user = request.user
     
     # Filter by status if provided
     status_filter = request.GET.get('status')
@@ -48,6 +49,7 @@ def dashboard(request):
         'stats': stats,
         'status_filter': status_filter,
         'search_query': search_query,
+        'user': user,
     }
     return render(request, 'documents/dashboard.html', context)
 
