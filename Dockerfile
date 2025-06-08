@@ -1,5 +1,5 @@
 # Use Python 3.11 slim image
-FROM python:3.11-slim-bullseye
+FROM python:3.11-slim-bookworm
 
 # Upgrade system packages to reduce vulnerabilities
 RUN apt-get update && apt-get upgrade -y && apt-get clean

@@ -126,7 +126,9 @@ certs/
 
 # Local settings
 update-app.ps1
+push-to-server.ps1
 
 
 UPDATE.md
 DEPLOYMENT.md
+update.ps1
