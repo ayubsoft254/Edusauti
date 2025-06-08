@@ -125,10 +125,18 @@ def settings_view(request):
         profile_form = ExtendedProfileForm(request.POST, request.FILES, instance=profile)
         
         if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
+            # Save user form
+            user_instance = user_form.save(commit=False)
+            # Handle avatar upload if it's in the user form
+            if 'avatar' in request.FILES:
+                user_instance.avatar = request.FILES['avatar']
+            user_instance.save()
+            
+            # Save profile form
             profile_instance = profile_form.save(commit=False)
             profile_instance.user = user
             profile_instance.save()
+            
             messages.success(request, 'Settings updated successfully!')
             return redirect('settings')
         else:
@@ -142,6 +150,7 @@ def settings_view(request):
         'profile_form': profile_form,
         'user': user,
         'profile': profile,
+        'subscription_tiers': User.SUBSCRIPTION_CHOICES,
     }
     
     return render(request, 'users/settings.html', context)
