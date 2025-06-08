@@ -571,12 +571,83 @@
                                                 <label for="{{ profile_form.timezone.id_for_label }}" class="form-label">
                                                     Timezone
                                                 </label>
-                                                {{ profile_form.timezone }}
+                                                <select name="timezone" id="id_timezone" class="form-input">
+                                                    <option value="">Select your timezone</option>
+                                                    
+                                                    <!-- Africa -->
+                                                    <optgroup label="Africa">
+                                                        <option value="Africa/Cairo" {% if profile.timezone == 'Africa/Cairo' %}selected{% endif %}>Cairo (GMT+2)</option>
+                                                        <option value="Africa/Casablanca" {% if profile.timezone == 'Africa/Casablanca' %}selected{% endif %}>Casablanca (GMT+1)</option>
+                                                        <option value="Africa/Johannesburg" {% if profile.timezone == 'Africa/Johannesburg' %}selected{% endif %}>Johannesburg (GMT+2)</option>
+                                                        <option value="Africa/Lagos" {% if profile.timezone == 'Africa/Lagos' %}selected{% endif %}>Lagos (GMT+1)</option>
+                                                        <option value="Africa/Nairobi" {% if profile.timezone == 'Africa/Nairobi' %}selected{% endif %}>Nairobi (GMT+3)</option>
+                                                    </optgroup>
+                                                    
+                                                    <!-- Asia -->
+                                                    <optgroup label="Asia">
+                                                        <option value="Asia/Dubai" {% if profile.timezone == 'Asia/Dubai' %}selected{% endif %}>Dubai (GMT+4)</option>
+                                                        <option value="Asia/Hong_Kong" {% if profile.timezone == 'Asia/Hong_Kong' %}selected{% endif %}>Hong Kong (GMT+8)</option>
+                                                        <option value="Asia/Kolkata" {% if profile.timezone == 'Asia/Kolkata' %}selected{% endif %}>Kolkata (GMT+5:30)</option>
+                                                        <option value="Asia/Shanghai" {% if profile.timezone == 'Asia/Shanghai' %}selected{% endif %}>Shanghai (GMT+8)</option>
+                                                        <option value="Asia/Singapore" {% if profile.timezone == 'Asia/Singapore' %}selected{% endif %}>Singapore (GMT+8)</option>
+                                                        <option value="Asia/Tokyo" {% if profile.timezone == 'Asia/Tokyo' %}selected{% endif %}>Tokyo (GMT+9)</option>
+                                                    </optgroup>
+                                                    
+                                                    <!-- Australia -->
+                                                    <optgroup label="Australia">
+                                                        <option value="Australia/Melbourne" {% if profile.timezone == 'Australia/Melbourne' %}selected{% endif %}>Melbourne (GMT+10/+11)</option>
+                                                        <option value="Australia/Perth" {% if profile.timezone == 'Australia/Perth' %}selected{% endif %}>Perth (GMT+8)</option>
+                                                        <option value="Australia/Sydney" {% if profile.timezone == 'Australia/Sydney' %}selected{% endif %}>Sydney (GMT+10/+11)</option>
+                                                    </optgroup>
+                                                    
+                                                    <!-- Europe -->
+                                                    <optgroup label="Europe">
+                                                        <option value="Europe/Amsterdam" {% if profile.timezone == 'Europe/Amsterdam' %}selected{% endif %}>Amsterdam (GMT+1/+2)</option>
+                                                        <option value="Europe/Berlin" {% if profile.timezone == 'Europe/Berlin' %}selected{% endif %}>Berlin (GMT+1/+2)</option>
+                                                        <option value="Europe/London" {% if profile.timezone == 'Europe/London' %}selected{% endif %}>London (GMT+0/+1)</option>
+                                                        <option value="Europe/Madrid" {% if profile.timezone == 'Europe/Madrid' %}selected{% endif %}>Madrid (GMT+1/+2)</option>
+                                                        <option value="Europe/Paris" {% if profile.timezone == 'Europe/Paris' %}selected{% endif %}>Paris (GMT+1/+2)</option>
+                                                        <option value="Europe/Rome" {% if profile.timezone == 'Europe/Rome' %}selected{% endif %}>Rome (GMT+1/+2)</option>
+                                                        <option value="Europe/Stockholm" {% if profile.timezone == 'Europe/Stockholm' %}selected{% endif %}>Stockholm (GMT+1/+2)</option>
+                                                        <option value="Europe/Zurich" {% if profile.timezone == 'Europe/Zurich' %}selected{% endif %}>Zurich (GMT+1/+2)</option>
+                                                    </optgroup>
+                                                    
+                                                    <!-- North America -->
+                                                    <optgroup label="North America">
+                                                        <option value="America/New_York" {% if profile.timezone == 'America/New_York' %}selected{% endif %}>New York (GMT-5/-4)</option>
+                                                        <option value="America/Chicago" {% if profile.timezone == 'America/Chicago' %}selected{% endif %}>Chicago (GMT-6/-5)</option>
+                                                        <option value="America/Denver" {% if profile.timezone == 'America/Denver' %}selected{% endif %}>Denver (GMT-7/-6)</option>
+                                                        <option value="America/Los_Angeles" {% if profile.timezone == 'America/Los_Angeles' %}selected{% endif %}>Los Angeles (GMT-8/-7)</option>
+                                                        <option value="America/Toronto" {% if profile.timezone == 'America/Toronto' %}selected{% endif %}>Toronto (GMT-5/-4)</option>
+                                                        <option value="America/Vancouver" {% if profile.timezone == 'America/Vancouver' %}selected{% endif %}>Vancouver (GMT-8/-7)</option>
+                                                        <option value="America/Mexico_City" {% if profile.timezone == 'America/Mexico_City' %}selected{% endif %}>Mexico City (GMT-6/-5)</option>
+                                                    </optgroup>
+                                                    
+                                                    <!-- South America -->
+                                                    <optgroup label="South America">
+                                                        <option value="America/Buenos_Aires" {% if profile.timezone == 'America/Buenos_Aires' %}selected{% endif %}>Buenos Aires (GMT-3)</option>
+                                                        <option value="America/Lima" {% if profile.timezone == 'America/Lima' %}selected{% endif %}>Lima (GMT-5)</option>
+                                                        <option value="America/Sao_Paulo" {% if profile.timezone == 'America/Sao_Paulo' %}selected{% endif %}>São Paulo (GMT-3/-2)</option>
+                                                    </optgroup>
+                                                    
+                                                    <!-- Pacific -->
+                                                    <optgroup label="Pacific">
+                                                        <option value="Pacific/Auckland" {% if profile.timezone == 'Pacific/Auckland' %}selected{% endif %}>Auckland (GMT+12/+13)</option>
+                                                        <option value="Pacific/Fiji" {% if profile.timezone == 'Pacific/Fiji' %}selected{% endif %}>Fiji (GMT+12/+13)</option>
+                                                        <option value="Pacific/Honolulu" {% if profile.timezone == 'Pacific/Honolulu' %}selected{% endif %}>Honolulu (GMT-10)</option>
+                                                    </optgroup>
+                                                    
+                                                    <!-- UTC Options -->
+                                                    <optgroup label="UTC">
+                                                        <option value="UTC" {% if profile.timezone == 'UTC' %}selected{% endif %}>UTC (GMT+0)</option>
+                                                        <option value="GMT" {% if profile.timezone == 'GMT' %}selected{% endif %}>GMT (GMT+0)</option>
+                                                    </optgroup>
+                                                </select>
                                                 {% if profile_form.timezone.errors %}
                                                     <div class="form-error">{{ profile_form.timezone.errors.0 }}</div>
                                                 {% endif %}
+                                                <div class="form-help">Select your local timezone for accurate time displays</div>
                                             </div>
-                                        </div>
                                     {% endif %}
                                 </div>
                             </div>
@@ -844,7 +915,117 @@
                     this.style.height = this.scrollHeight + 'px';
                 });
             });
+
+            // Auto-detect timezone
+            detectUserTimezone();
+
+            // Enhanced timezone selector
+            enhanceTimezoneSelector();
         });
+
+        // Auto-detect user's timezone
+        function detectUserTimezone() {
+            const timezoneSelect = document.getElementById('id_timezone');
+            if (timezoneSelect && !timezoneSelect.value) {
+                try {
+                    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    
+                    // Check if the detected timezone exists in our options
+                    const option = timezoneSelect.querySelector(`option[value="${userTimezone}"]`);
+                    if (option) {
+                        timezoneSelect.value = userTimezone;
+                        // Add a subtle indication that this was auto-detected
+                        const helpText = timezoneSelect.parentNode.querySelector('.form-help');
+                        if (helpText) {
+                            helpText.innerHTML = `<i class="fas fa-magic text-edu-beige mr-1"></i>Auto-detected: ${userTimezone}. You can change this if needed.`;
+                        }
+                    }
+                } catch (error) {
+                    console.log('Could not auto-detect timezone:', error);
+                }
+            }
+        }
+
+        // Enhance timezone selector with search functionality
+        function enhanceTimezoneSelector() {
+            const timezoneSelect = document.getElementById('id_timezone');
+            if (!timezoneSelect) return;
+
+            // Add search functionality
+            timezoneSelect.addEventListener('keydown', function(e) {
+                if (e.key.length === 1) {
+                    const searchTerm = e.key.toLowerCase();
+                    const options = Array.from(this.options);
+                    
+                    // Find first option that starts with the typed character
+                    const match = options.find(option => 
+                        option.text.toLowerCase().startsWith(searchTerm) && 
+                        option.value !== ''
+                    );
+                    
+                    if (match) {
+                        this.value = match.value;
+                        e.preventDefault();
+                    }
+                }
+            });
+
+            // Add current time display for selected timezone
+            timezoneSelect.addEventListener('change', function() {
+                updateTimezonePreview(this.value);
+            });
+
+            // Initial preview if timezone is already selected
+            if (timezoneSelect.value) {
+                updateTimezonePreview(timezoneSelect.value);
+            }
+        }
+
+        // Update timezone preview
+        function updateTimezonePreview(timezone) {
+            if (!timezone) return;
+
+            try {
+                const now = new Date();
+                const timeInTimezone = new Intl.DateTimeFormat('en-US', {
+                    timeZone: timezone,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                }).format(now);
+
+                const dateInTimezone = new Intl.DateTimeFormat('en-US', {
+                    timeZone: timezone,
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }).format(now);
+
+                // Find or create preview element
+                const timezoneSelect = document.getElementById('id_timezone');
+                let preview = timezoneSelect.parentNode.querySelector('.timezone-preview');
+                
+                if (!preview) {
+                    preview = document.createElement('div');
+                    preview.className = 'timezone-preview mt-2 p-3 bg-edu-cream rounded-lg border border-edu-light';
+                    timezoneSelect.parentNode.appendChild(preview);
+                }
+
+                preview.innerHTML = `
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-clock text-edu-beige mr-2"></i>
+                        <div>
+                            <div class="font-medium text-edu-deep">Current time in ${timezone.split('/').pop().replace('_', ' ')}</div>
+                            <div class="text-gray-600">${timeInTimezone} - ${dateInTimezone}</div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.log('Error displaying timezone preview:', error);
+            }
+        }
 
         // Avatar preview function
         function previewAvatar(input) {
