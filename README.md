@@ -143,16 +143,11 @@ For deployment issues:
 Your EduSauti application is now configured for production deployment on Ubuntu server with Docker containers.
 
 **Next Steps:**
-1. Transfer these files to your Ubuntu server (41.89.130.21)
+1. Transfer these files to your Ubuntu server
 2. Run the deployment scripts
 3. Configure your domain DNS
 4. Set up SSL certificates
 5. Test the application
 
-**Server Details:**
-- IP: 41.89.130.21
-- Domain: edusauti.ayubsoft-inc.systems
-- Platform: Ubuntu + Docker + Nginx
-- Database: PostgreSQL
-- Cache: Redis
-- Task Queue: Celery
+**Live link:**
+[EduSauti](https://edusauti.ayubsoft-inc.systems)
