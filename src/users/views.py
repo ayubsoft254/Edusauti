@@ -60,6 +60,43 @@ class ProfileView(LoginRequiredMixin, DetailView):
     
     def get_object(self):
         return self.request.user
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Import Document model
+        from documents.models import Document
+        
+        # Get user's documents
+        context['documents'] = Document.objects.filter(user=self.request.user).order_by('-created_at')
+        
+        # Get recent documents (first 5)
+        context['recent_documents'] = context['documents'][:5]
+        
+        # Calculate usage statistics
+        profile_user = self.get_object()
+        documents_uploaded = getattr(profile_user, 'documents_uploaded_this_month', 0) or 0
+        documents_limit = getattr(profile_user, 'monthly_document_limit', 10) or 10
+        questions_asked = getattr(profile_user, 'questions_asked_this_month', 0) or 0
+        questions_limit = getattr(profile_user, 'monthly_question_limit', 100) or 100
+        
+        # Calculate percentages
+        documents_usage_percentage = min((documents_uploaded / documents_limit) * 100, 100) if documents_limit > 0 else 0
+        questions_usage_percentage = min((questions_asked / questions_limit) * 100, 100) if questions_limit > 0 else 0
+        
+        # Calculate remaining
+        documents_remaining = max(documents_limit - documents_uploaded, 0)
+        questions_remaining = max(questions_limit - questions_asked, 0)
+        
+        # Add usage statistics to context
+        context.update({
+            'documents_usage_percentage': round(documents_usage_percentage, 1),
+            'questions_usage_percentage': round(questions_usage_percentage, 1),
+            'documents_remaining': documents_remaining,
+            'questions_remaining': questions_remaining,
+        })
+        
+        return context
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
