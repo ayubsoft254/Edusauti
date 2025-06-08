@@ -6,13 +6,13 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 5
-    networks:
+      retries: 5    
+      networks:
       - app-network
 
   web:
     build: .
-    command: web
+    command: ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--worker-class", "uvicorn.workers.UvicornWorker", "core.asgi:application"]
     ports:
       - "8000:8000"
     volumes:
@@ -23,7 +23,8 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.production
       - REDIS_URL=redis://redis:6379
-    depends_on:
+    env_file:
+      - .env.production    depends_on:
       - redis
     restart: unless-stopped
     networks:
@@ -31,7 +32,7 @@ services:
 
   celery:
     build: .
-    command: celery
+    command: ["celery", "-A", "core", "worker", "--loglevel=info"]
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
@@ -40,6 +41,8 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.production
       - REDIS_URL=redis://redis:6379
+    env_file:
+      - .env.production
     depends_on:
       - redis
     restart: unless-stopped

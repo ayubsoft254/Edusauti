@@ -30,6 +30,9 @@ if not User.objects.filter(email='$DJANGO_SUPERUSER_EMAIL').exists():
 else:
     print('Superuser already exists')
 "
+else
+    echo "No superuser environment variables provided, skipping superuser creation"
+    echo "You can create one later with: python manage.py createsuperuser"
 fi
 
 # Execute the main command
