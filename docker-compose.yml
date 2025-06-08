@@ -1,4 +1,4 @@
-﻿services:
+services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -9,12 +9,11 @@
       retries: 5
     networks:
       - app-network
-
   web:
     build: .
     command: ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--worker-class", "uvicorn.workers.UvicornWorker", "core.asgi:application"]
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
