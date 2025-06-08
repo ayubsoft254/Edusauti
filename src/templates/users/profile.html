@@ -197,14 +197,120 @@
         html {
             scroll-behavior: smooth;
         }
+        
+        /* Enhanced Subscription Badge Styles */
         .subscription-badge {
-            background: linear-gradient(135deg, #d4a574, #99876f);
+            position: relative;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            min-width: fit-content;
+            white-space: nowrap;
+            animation: glow 2s ease-in-out infinite alternate;
         }
-        .subscription-badge.premium {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
+        
+        .subscription-badge.free {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            box-shadow: 0 4px 15px rgba(107, 114, 128, 0.4);
         }
+        
         .subscription-badge.pro {
             background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.5);
+        }
+        
+        .subscription-badge.edu {
+            background: linear-gradient(135deg, #059669, #047857);
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.5);
+        }
+        
+        .subscription-badge.enterprise {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.5);
+        }
+        
+        .subscription-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subscription-badge::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .subscription-badge:hover::before {
+            opacity: 1;
+        }
+        
+        /* Profile specific enhancements */
+        .profile-header-enhanced {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-header-enhanced::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(153, 135, 111, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes glow {
+            0% { 
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+            100% { 
+                box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);
+            }
+        }
+        
+        /* Avatar enhancement */
+        .avatar-container {
+            position: relative;
+        }
+        
+        .avatar-container::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            right: -8px;
+            bottom: -8px;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #99876f, #b5a28a, #d4a574, #99876f);
+            background-size: 400% 400%;
+            animation: gradient-rotate 3s ease infinite;
+            z-index: -1;
+            opacity: 0.6;
+        }
+        
+        @keyframes gradient-rotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
     </style>
 </head>
