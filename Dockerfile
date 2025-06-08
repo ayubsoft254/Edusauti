@@ -20,8 +20,8 @@ RUN apt-get update \
         git \
     && rm -rf /var/lib/apt/lists/*
 
-# Create directories
-RUN mkdir -p /app/logs /app/staticfiles /app/media /app/data
+# Create a non-root user early
+RUN groupadd -r django && useradd -r -g django django
 
 # Install Python dependencies
 COPY requirements.txt /app/
@@ -30,11 +30,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY src/ /app/
 
-# Create a non-root user
-RUN groupadd -r django && useradd -r -g django django
-
-# Set proper ownership and permissions
-RUN chown -R django:django /app && \
+# Create directories with proper ownership
+RUN mkdir -p /app/logs /app/staticfiles /app/media /app/data && \
+    chown -R django:django /app && \
     chmod -R 755 /app
 
 # Copy entrypoint script

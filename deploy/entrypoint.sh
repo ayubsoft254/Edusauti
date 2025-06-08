@@ -10,6 +10,11 @@ run_django_cmd() {
 # Wait for any dependencies (if needed)
 echo "Starting Django application..."
 
+# Ensure proper permissions for writable directories
+echo "Setting up directory permissions..."
+mkdir -p /app/logs /app/staticfiles /app/media /app/data
+chmod 755 /app/logs /app/staticfiles /app/media /app/data
+
 # Run migrations
 echo "Running database migrations..."
 run_django_cmd migrate --noinput
