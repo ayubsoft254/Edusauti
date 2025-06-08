@@ -269,18 +269,6 @@
             display: flex;
             align-items: center;
         }
-        .password-strength {
-            margin-top: 0.5rem;
-        }
-        .strength-bar {
-            height: 4px;
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-        .strength-weak { background: #ef4444; width: 25%; }
-        .strength-fair { background: #f59e0b; width: 50%; }
-        .strength-good { background: #10b981; width: 75%; }
-        .strength-strong { background: #059669; width: 100%; }
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -321,8 +309,8 @@
                         <!-- User Dropdown -->
                         <div class="relative" id="user-dropdown">
                             <button class="flex items-center space-x-2 text-edu-deep hover:text-edu-beige transition-colors" id="user-menu-btn">
-                                {% if user.profile and user.profile.avatar %}
-                                    <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
+                                {% if user.avatar %}
+                                    <img src="{{ user.avatar.url }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
                                 {% else %}
                                     <div class="w-8 h-8 rounded-full bg-edu-beige flex items-center justify-center">
                                         <span class="text-white text-sm font-semibold">{{ user.first_name|first|default:user.username|first|upper }}</span>
@@ -447,19 +435,11 @@
                                 <button class="tab-button w-full text-left px-4 py-3 rounded-lg" data-tab="account">
                                     <i class="fas fa-cog mr-3"></i>Account Settings
                                 </button>
-                                <button class="tab-button w-full text-left px-4 py-3 rounded-lg" data-tab="security">
-                                    <i class="fas fa-shield-alt mr-3"></i>Security & Privacy
-                                </button>
-                                <button class="tab-button w-full text-left px-4 py-3 rounded-lg" data-tab="notifications">
-                                    <i class="fas fa-bell mr-3"></i>Notifications
-                                    <span class="notification-badge">3</span>
-                                </button>
                                 <button class="tab-button w-full text-left px-4 py-3 rounded-lg" data-tab="preferences">
                                     <i class="fas fa-palette mr-3"></i>Preferences
                                 </button>
-                                <button class="tab-button w-full text-left px-4 py-3 rounded-lg" data-tab="danger">
-                                    <i class="fas fa-exclamation-triangle mr-3 text-red-500"></i>
-                                    <span class="text-red-600">Danger Zone</span>
+                                <button class="tab-button w-full text-left px-4 py-3 rounded-lg" data-tab="notifications">
+                                    <i class="fas fa-bell mr-3"></i>Notifications
                                 </button>
                             </nav>
                         </div>
@@ -480,8 +460,8 @@
                                         <label class="form-label">Profile Picture</label>
                                         <div class="flex items-center space-x-6">
                                             <div class="avatar-upload">
-                                                {% if user.profile and user.profile.avatar %}
-                                                    <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="avatar-preview" id="avatar-preview">
+                                                {% if user.avatar %}
+                                                    <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar-preview" id="avatar-preview">
                                                 {% else %}
                                                     <div class="avatar-placeholder" id="avatar-placeholder">
                                                         {{ user.first_name|first|default:user.username|first|upper }}
@@ -533,49 +513,35 @@
                                         <div class="form-help">We'll send important updates to this email</div>
                                     </div>
 
+                                    <!-- Bio and Organization -->
+                                    <div class="form-group">
+                                        <label class="form-label">Bio</label>
+                                        <textarea name="bio" class="form-input form-textarea" placeholder="Tell others about yourself...">{{ user.bio }}</textarea>
+                                        <div class="form-help">Tell others about yourself (optional)</div>
+                                    </div>
+
+                                    <div class="grid md:grid-cols-2 gap-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Organization</label>
+                                            <input type="text" name="organization" value="{{ user.organization }}" class="form-input" placeholder="Your organization">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">Role</label>
+                                            <input type="text" name="role" value="{{ user.role }}" class="form-input" placeholder="Your role/position">
+                                        </div>
+                                    </div>
+
                                     {% if profile_form %}
                                         <!-- Extended Profile Fields -->
-                                        <div class="form-group">
-                                            <label for="{{ profile_form.bio.id_for_label }}" class="form-label">
-                                                Bio
-                                            </label>
-                                            {{ profile_form.bio }}
-                                            {% if profile_form.bio.errors %}
-                                                <div class="form-error">{{ profile_form.bio.errors.0 }}</div>
-                                            {% endif %}
-                                            <div class="form-help">Tell others about yourself (optional)</div>
-                                        </div>
-
                                         <div class="grid md:grid-cols-2 gap-6">
                                             <div class="form-group">
-                                                <label for="{{ profile_form.location.id_for_label }}" class="form-label">
-                                                    Location
-                                                </label>
-                                                {{ profile_form.location }}
-                                                {% if profile_form.location.errors %}
-                                                    <div class="form-error">{{ profile_form.location.errors.0 }}</div>
-                                                {% endif %}
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="{{ profile_form.website.id_for_label }}" class="form-label">
-                                                    Website
-                                                </label>
-                                                {{ profile_form.website }}
-                                                {% if profile_form.website.errors %}
-                                                    <div class="form-error">{{ profile_form.website.errors.0 }}</div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-
-                                        <div class="grid md:grid-cols-2 gap-6">
-                                            <div class="form-group">
-                                                <label for="{{ profile_form.phone.id_for_label }}" class="form-label">
+                                                <label for="{{ profile_form.phone_number.id_for_label }}" class="form-label">
                                                     Phone Number
                                                 </label>
-                                                {{ profile_form.phone }}
-                                                {% if profile_form.phone.errors %}
-                                                    <div class="form-error">{{ profile_form.phone.errors.0 }}</div>
+                                                {{ profile_form.phone_number }}
+                                                {% if profile_form.phone_number.errors %}
+                                                    <div class="form-error">{{ profile_form.phone_number.errors.0 }}</div>
                                                 {% endif %}
                                             </div>
 
@@ -586,6 +552,28 @@
                                                 {{ profile_form.date_of_birth }}
                                                 {% if profile_form.date_of_birth.errors %}
                                                     <div class="form-error">{{ profile_form.date_of_birth.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="grid md:grid-cols-2 gap-6">
+                                            <div class="form-group">
+                                                <label for="{{ profile_form.country.id_for_label }}" class="form-label">
+                                                    Country
+                                                </label>
+                                                {{ profile_form.country }}
+                                                {% if profile_form.country.errors %}
+                                                    <div class="form-error">{{ profile_form.country.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="{{ profile_form.timezone.id_for_label }}" class="form-label">
+                                                    Timezone
+                                                </label>
+                                                {{ profile_form.timezone }}
+                                                {% if profile_form.timezone.errors %}
+                                                    <div class="form-error">{{ profile_form.timezone.errors.0 }}</div>
                                                 {% endif %}
                                             </div>
                                         </div>
@@ -641,69 +629,80 @@
                                 </div>
                             </div>
 
-                            <!-- Security & Privacy Tab -->
-                            <div class="tab-content" id="security-tab">
+                            <!-- Preferences Tab -->
+                            <div class="tab-content" id="preferences-tab">
                                 <div class="glass-effect rounded-xl p-8 scroll-reveal">
-                                    <h2 class="text-2xl font-bold mb-6">Security & Privacy</h2>
+                                    <h2 class="text-2xl font-bold mb-6">Preferences</h2>
                                     
                                     <div class="space-y-6">
-                                        <!-- Password Change -->
+                                        <!-- Voice & Language Preferences -->
                                         <div class="border border-gray-200 rounded-lg p-6">
-                                            <h3 class="text-lg font-semibold mb-4">Change Password</h3>
+                                            <h3 class="text-lg font-semibold mb-4">Voice & Language</h3>
                                             <div class="grid md:grid-cols-2 gap-6">
                                                 <div class="form-group">
-                                                    <label for="current_password" class="form-label">
-                                                        Current Password
-                                                    </label>
-                                                    <input type="password" id="current_password" name="current_password" class="form-input">
+                                                    <label class="form-label">Preferred Voice</label>
+                                                    <select name="preferred_voice" class="form-input">
+                                                        {% for voice in user.available_voices %}
+                                                            <option value="{{ voice }}" {% if user.preferred_voice == voice %}selected{% endif %}>
+                                                                {{ voice }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
                                                 </div>
+                                                
                                                 <div class="form-group">
-                                                    <label for="new_password" class="form-label">
-                                                        New Password
+                                                    <label class="form-label">Preferred Language</label>
+                                                    <select name="preferred_language" class="form-input">
+                                                        <option value="en-US" {% if user.preferred_language == 'en-US' %}selected{% endif %}>English (US)</option>
+                                                        <option value="en-GB" {% if user.preferred_language == 'en-GB' %}selected{% endif %}>English (UK)</option>
+                                                        <option value="es-ES" {% if user.preferred_language == 'es-ES' %}selected{% endif %}>Spanish</option>
+                                                        <option value="fr-FR" {% if user.preferred_language == 'fr-FR' %}selected{% endif %}>French</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Learning Preferences -->
+                                        {% if profile_form %}
+                                            <div class="border border-gray-200 rounded-lg p-6">
+                                                <h3 class="text-lg font-semibold mb-4">Learning Preferences</h3>
+                                                <div class="grid md:grid-cols-2 gap-6">
+                                                    <div class="form-group">
+                                                        <label for="{{ profile_form.default_summary_length.id_for_label }}" class="form-label">
+                                                            Default Summary Length
+                                                        </label>
+                                                        {{ profile_form.default_summary_length }}
+                                                        {% if profile_form.default_summary_length.errors %}
+                                                            <div class="form-error">{{ profile_form.default_summary_length.errors.0 }}</div>
+                                                        {% endif %}
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="{{ profile_form.preferred_explanation_style.id_for_label }}" class="form-label">
+                                                            Explanation Style
+                                                        </label>
+                                                        {{ profile_form.preferred_explanation_style }}
+                                                        {% if profile_form.preferred_explanation_style.errors %}
+                                                            <div class="form-error">{{ profile_form.preferred_explanation_style.errors.0 }}</div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+
+                                        <!-- Audio Preferences -->
+                                        <div class="border border-gray-200 rounded-lg p-6">
+                                            <h3 class="text-lg font-semibold mb-4">Audio Settings</h3>
+                                            <div class="space-y-4">
+                                                <div class="flex items-center justify-between">
+                                                    <div>
+                                                        <p class="font-medium">Auto-play Audio Summaries</p>
+                                                        <p class="text-sm text-gray-600">Automatically play audio when document is processed</p>
+                                                    </div>
+                                                    <label class="relative inline-flex items-center cursor-pointer">
+                                                        <input type="checkbox" name="auto_play_summaries" {% if user.auto_play_summaries %}checked{% endif %} class="sr-only peer">
+                                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-edu-beige/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-edu-beige"></div>
                                                     </label>
-                                                    <input type="password" id="new_password" name="new_password" class="form-input" onkeyup="checkPasswordStrength(this.value)">
-                                                    <div class="password-strength">
-                                                        <div class="strength-bar" id="strength-bar"></div>
-                                                        <p class="text-sm text-gray-600 mt-1" id="strength-text">Password strength: <span id="strength-level">-</span></p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <button type="button" class="bg-edu-beige text-white px-6 py-2 rounded-lg hover:bg-edu-dark transition-colors" onclick="changePassword()">
-                                                Update Password
-                                            </button>
-                                        </div>
-
-                                        <!-- Two-Factor Authentication -->
-                                        <div class="border border-gray-200 rounded-lg p-6">
-                                            <div class="flex items-center justify-between">
-                                                <div>
-                                                    <h3 class="text-lg font-semibold">Two-Factor Authentication</h3>
-                                                    <p class="text-gray-600">Add an extra layer of security to your account</p>
-                                                </div>
-                                                <button type="button" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                                                    Enable 2FA
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <!-- Login Sessions -->
-                                        <div class="border border-gray-200 rounded-lg p-6">
-                                            <div class="flex items-center justify-between mb-4">
-                                                <h3 class="text-lg font-semibold">Active Sessions</h3>
-                                                <button type="button" class="text-red-600 hover:text-red-800 transition-colors">
-                                                    Sign out all devices
-                                                </button>
-                                            </div>
-                                            <div class="space-y-3">
-                                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                    <div class="flex items-center">
-                                                        <i class="fas fa-desktop text-gray-500 mr-3"></i>
-                                                        <div>
-                                                            <p class="font-medium">Current Session</p>
-                                                            <p class="text-sm text-gray-600">{{ request.META.HTTP_USER_AGENT|truncatechars:50 }}</p>
-                                                        </div>
-                                                    </div>
-                                                    <span class="text-green-600 text-sm font-medium">Active now</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -723,163 +722,14 @@
                                             <div class="space-y-4">
                                                 <div class="flex items-center justify-between">
                                                     <div>
-                                                        <p class="font-medium">Document Processing Updates</p>
-                                                        <p class="text-sm text-gray-600">Get notified when your documents are processed</p>
+                                                        <p class="font-medium">Email Notifications</p>
+                                                        <p class="text-sm text-gray-600">Receive email updates about your account</p>
                                                     </div>
                                                     <label class="relative inline-flex items-center cursor-pointer">
-                                                        <input type="checkbox" checked class="sr-only peer">
+                                                        <input type="checkbox" name="email_notifications" {% if user.email_notifications %}checked{% endif %} class="sr-only peer">
                                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-edu-beige/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-edu-beige"></div>
                                                     </label>
                                                 </div>
-                                                <div class="flex items-center justify-between">
-                                                    <div>
-                                                        <p class="font-medium">Weekly Usage Summary</p>
-                                                        <p class="text-sm text-gray-600">Weekly digest of your EduSauti activity</p>
-                                                    </div>
-                                                    <label class="relative inline-flex items-center cursor-pointer">
-                                                        <input type="checkbox" checked class="sr-only peer">
-                                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-edu-beige/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-edu-beige"></div>
-                                                    </label>
-                                                </div>
-                                                <div class="flex items-center justify-between">
-                                                    <div>
-                                                        <p class="font-medium">Product Updates</p>
-                                                        <p class="text-sm text-gray-600">New features and improvements</p>
-                                                    </div>
-                                                    <label class="relative inline-flex items-center cursor-pointer">
-                                                        <input type="checkbox" class="sr-only peer">
-                                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-edu-beige/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-edu-beige"></div>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Browser Notifications -->
-                                        <div class="border border-gray-200 rounded-lg p-6">
-                                            <h3 class="text-lg font-semibold mb-4">Browser Notifications</h3>
-                                            <div class="space-y-4">
-                                                <div class="flex items-center justify-between">
-                                                    <div>
-                                                        <p class="font-medium">Real-time Updates</p>
-                                                        <p class="text-sm text-gray-600">Get instant notifications in your browser</p>
-                                                    </div>
-                                                    <button type="button" class="bg-edu-beige text-white px-4 py-2 rounded-lg hover:bg-edu-dark transition-colors" onclick="requestNotificationPermission()">
-                                                        Enable
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Preferences Tab -->
-                            <div class="tab-content" id="preferences-tab">
-                                <div class="glass-effect rounded-xl p-8 scroll-reveal">
-                                    <h2 class="text-2xl font-bold mb-6">Preferences</h2>
-                                    
-                                    <div class="space-y-6">
-                                        <!-- Language & Region -->
-                                        <div class="border border-gray-200 rounded-lg p-6">
-                                            <h3 class="text-lg font-semibold mb-4">Language & Region</h3>
-                                            <div class="grid md:grid-cols-2 gap-6">
-                                                <div class="form-group">
-                                                    <label for="language" class="form-label">Language</label>
-                                                    <select id="language" class="form-input">
-                                                        <option>English (US)</option>
-                                                        <option>English (UK)</option>
-                                                        <option>Spanish</option>
-                                                        <option>French</option>
-                                                        <option>German</option>
-                                                    </select>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="timezone" class="form-label">Timezone</label>
-                                                    <select id="timezone" class="form-input">
-                                                        <option>UTC-05:00 (Eastern Time)</option>
-                                                        <option>UTC-06:00 (Central Time)</option>
-                                                        <option>UTC-07:00 (Mountain Time)</option>
-                                                        <option>UTC-08:00 (Pacific Time)</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Display Preferences -->
-                                        <div class="border border-gray-200 rounded-lg p-6">
-                                            <h3 class="text-lg font-semibold mb-4">Display</h3>
-                                            <div class="space-y-4">
-                                                <div class="flex items-center justify-between">
-                                                    <div>
-                                                        <p class="font-medium">Dark Mode</p>
-                                                        <p class="text-sm text-gray-600">Use dark theme across the application</p>
-                                                    </div>
-                                                    <label class="relative inline-flex items-center cursor-pointer">
-                                                        <input type="checkbox" class="sr-only peer">
-                                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-edu-beige/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-edu-beige"></div>
-                                                    </label>
-                                                </div>
-                                                <div class="flex items-center justify-between">
-                                                    <div>
-                                                        <p class="font-medium">Reduced Motion</p>
-                                                        <p class="text-sm text-gray-600">Minimize animations and transitions</p>
-                                                    </div>
-                                                    <label class="relative inline-flex items-center cursor-pointer">
-                                                        <input type="checkbox" class="sr-only peer">
-                                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-edu-beige/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-edu-beige"></div>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Danger Zone Tab -->
-                            <div class="tab-content" id="danger-tab">
-                                <div class="glass-effect rounded-xl p-8 scroll-reveal">
-                                    <h2 class="text-2xl font-bold mb-6 text-red-600">
-                                        <i class="fas fa-exclamation-triangle mr-3"></i>
-                                        Danger Zone
-                                    </h2>
-                                    
-                                    <div class="space-y-6">
-                                        <!-- Export Data -->
-                                        <div class="border border-gray-200 rounded-lg p-6">
-                                            <div class="flex items-center justify-between">
-                                                <div>
-                                                    <h3 class="text-lg font-semibold">Export Your Data</h3>
-                                                    <p class="text-gray-600">Download a copy of all your data</p>
-                                                </div>
-                                                <button type="button" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-                                                    Request Export
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <!-- Deactivate Account -->
-                                        <div class="danger-zone">
-                                            <div class="flex items-center justify-between">
-                                                <div>
-                                                    <h3 class="text-lg font-semibold text-red-600">Deactivate Account</h3>
-                                                    <p class="text-gray-600">Temporarily disable your account. You can reactivate it later.</p>
-                                                </div>
-                                                <button type="button" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">
-                                                    Deactivate
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <!-- Delete Account -->
-                                        <div class="danger-zone">
-                                            <div class="flex items-center justify-between">
-                                                <div>
-                                                    <h3 class="text-lg font-semibold text-red-600">Delete Account</h3>
-                                                    <p class="text-gray-600">Permanently delete your account and all associated data. This action cannot be undone.</p>
-                                                </div>
-                                                <button type="button" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors" onclick="confirmAccountDeletion()">
-                                                    Delete Account
-                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -888,7 +738,7 @@
 
                             <!-- Save Button -->
                             <div class="flex justify-end space-x-4 mt-8">
-                                <button type="button" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+                                <button type="button" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors" onclick="window.location.href='{% url 'profile' %}'">
                                     Cancel
                                 </button>
                                 <button type="submit" class="bg-edu-beige text-white px-6 py-3 rounded-lg hover:bg-edu-dark transition-colors">
@@ -1012,91 +862,6 @@
                     }
                 };
                 reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        // Password strength checker
-        function checkPasswordStrength(password) {
-            const strengthBar = document.getElementById('strength-bar');
-            const strengthLevel = document.getElementById('strength-level');
-            
-            if (!password) {
-                strengthBar.className = 'strength-bar';
-                strengthLevel.textContent = '-';
-                return;
-            }
-            
-            let strength = 0;
-            
-            // Length check
-            if (password.length >= 8) strength++;
-            if (password.length >= 12) strength++;
-            
-            // Character variety checks
-            if (/[a-z]/.test(password)) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
-            
-            // Update UI
-            strengthBar.className = 'strength-bar';
-            if (strength <= 2) {
-                strengthBar.classList.add('strength-weak');
-                strengthLevel.textContent = 'Weak';
-                strengthLevel.className = 'text-red-600';
-            } else if (strength <= 4) {
-                strengthBar.classList.add('strength-fair');
-                strengthLevel.textContent = 'Fair';
-                strengthLevel.className = 'text-orange-600';
-            } else if (strength <= 5) {
-                strengthBar.classList.add('strength-good');
-                strengthLevel.textContent = 'Good';
-                strengthLevel.className = 'text-green-600';
-            } else {
-                strengthBar.classList.add('strength-strong');
-                strengthLevel.textContent = 'Strong';
-                strengthLevel.className = 'text-green-700';
-            }
-        }
-
-        // Password change function
-        function changePassword() {
-            const currentPassword = document.getElementById('current_password').value;
-            const newPassword = document.getElementById('new_password').value;
-            
-            if (!currentPassword || !newPassword) {
-                alert('Please fill in both password fields');
-                return;
-            }
-            
-            // Here you would make an AJAX request to change the password
-            console.log('Changing password...');
-            alert('Password change functionality would be implemented here');
-        }
-
-        // Notification permission function
-        function requestNotificationPermission() {
-            if ('Notification' in window) {
-                Notification.requestPermission().then(function(permission) {
-                    if (permission === 'granted') {
-                        new Notification('EduSauti', {
-                            body: 'Notifications enabled successfully!',
-                            icon: '/static/favicon.ico'
-                        });
-                    }
-                });
-            }
-        }
-
-        // Account deletion confirmation
-        function confirmAccountDeletion() {
-            const confirmed = confirm('Are you absolutely sure you want to delete your account? This action cannot be undone and will permanently delete all your data.');
-            if (confirmed) {
-                const doubleConfirm = prompt('Type "DELETE" to confirm account deletion:');
-                if (doubleConfirm === 'DELETE') {
-                    console.log('Account deletion confirmed');
-                    alert('Account deletion functionality would be implemented here');
-                }
             }
         }
 
