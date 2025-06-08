@@ -24,6 +24,9 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     
+    # Health check endpoint
+    path('health/', views.health_check, name='health-check'),
+    
     # Home and landing pages
     path('', views.home, name='home'),
     path('landing/', views.landing_page, name='landing'),

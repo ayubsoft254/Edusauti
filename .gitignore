@@ -64,6 +64,8 @@ celerybeat-schedule.*
 
 # Environments
 .env
+.env.local
+.env.production
 .venv
 env/
 venv/
@@ -98,3 +100,33 @@ GitHub.sublime-settings
 .vscode/
 .history
 .dist
+
+# Deployment specific
+deploy-package/
+*.backup
+logs/
+data/
+backups/
+# IDE specific
+.vscode/
+deploy-to-server.ps1
+deploy.sh
+
+# Production artifacts
+staticfiles/
+*.pid
+*.sock
+
+# SSL certificates (if any)
+ssl/
+certs/
+
+# Docker specific
+.docker/
+
+# Local settings
+update-app.ps1
+
+
+UPDATE.md
+DEPLOYMENT.md
