@@ -118,25 +118,30 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 def settings_view(request):
     """User settings view"""
     user = request.user
-    profile = getattr(user, 'profile', None)
+    profile, created = UserProfile.objects.get_or_create(user=user)
     
     if request.method == 'POST':
         user_form = UserProfileForm(request.POST, request.FILES, instance=user)
-        profile_form = ExtendedProfileForm(request.POST, instance=profile) if profile else None
+        profile_form = ExtendedProfileForm(request.POST, request.FILES, instance=profile)
         
-        if user_form.is_valid() and (not profile_form or profile_form.is_valid()):
+        if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
-            if profile_form:
-                profile_form.save()
+            profile_instance = profile_form.save(commit=False)
+            profile_instance.user = user
+            profile_instance.save()
             messages.success(request, 'Settings updated successfully!')
             return redirect('settings')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         user_form = UserProfileForm(instance=user)
-        profile_form = ExtendedProfileForm(instance=profile) if profile else None
+        profile_form = ExtendedProfileForm(instance=profile)
     
     context = {
         'user_form': user_form,
         'profile_form': profile_form,
+        'user': user,
+        'profile': profile,
     }
     
     return render(request, 'users/settings.html', context)
