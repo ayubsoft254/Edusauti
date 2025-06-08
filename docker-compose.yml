@@ -1,14 +1,14 @@
 services:
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
   web:
     build: .
@@ -22,17 +22,12 @@ services:
       - ./logs:/app/logs
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.production
-    env_file:
-      - .env.production
+      - REDIS_URL=redis://redis:6379
     depends_on:
-      redis:
-        condition: service_healthy
+      - redis
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    networks:
+      - app-network
 
   celery:
     build: .
@@ -44,44 +39,33 @@ services:
       - ./logs:/app/logs
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings.production
-    env_file:
-      - .env.production
+      - REDIS_URL=redis://redis:6379
     depends_on:
       - redis
     restart: unless-stopped
-
-  celery-beat:
-    build: .
-    command: celery-beat
-    volumes:
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
-      - sqlite_data:/app/data
-      - ./logs:/app/logs
-    environment:
-      - DJANGO_SETTINGS_MODULE=core.settings.production
-    env_file:
-      - .env.production
-    depends_on:
-      - redis
-    restart: unless-stopped
-
+    networks:
+      - app-network
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
+      - "8443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/sites-available:/etc/nginx/sites-available:ro
-      - static_volume:/app/staticfiles:ro
-      - media_volume:/app/media:ro
-      - ./ssl:/etc/nginx/ssl:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/sites-available:/etc/nginx/sites-available
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     depends_on:
       - web
     restart: unless-stopped
+    networks:
+      - app-network
 
 volumes:
   static_volume:
   media_volume:
   sqlite_data:
+
+networks:
+  app-network:
+    driver: bridge
