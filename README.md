@@ -1,6 +1,9 @@
 # EduSauti - AI-Powered Document Processing Platform
 
 EduSauti is a Django-based web application that provides AI-powered document processing capabilities using Azure Cognitive Services.
+It allows users to upload documents, extract text, and interact with AI models for various tasks such as document analysis, chat, and speech services.
+**Live link:**
+[EduSauti](https://edusauti.ayubsoft-inc.systems)
 
 ## 🚀 Quick Start (Production Deployment)
 
