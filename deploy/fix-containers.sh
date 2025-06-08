@@ -85,7 +85,7 @@ show_recent_logs() {
 check_port_conflicts() {
     echo "=== Checking for Port Conflicts ==="
     
-    ports_to_check=(80 443 6379 8000 8080 8443)
+    ports_to_check=(80 443 6379 8001 8080 8443)
     conflicts_found=false
     
     for port in "${ports_to_check[@]}"; do

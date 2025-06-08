@@ -15,7 +15,7 @@ log_message() {
 
 # Function to check application health
 check_health() {
-    local url="http://localhost:8000/health/"
+    local url="http://localhost:8001/health/"
     local response=$(curl -s -o /dev/null -w "%{http_code}" $url 2>/dev/null || echo "000")
     
     if [ "$response" = "200" ]; then

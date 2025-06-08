@@ -1,4 +1,4 @@
-services:
+﻿services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -6,8 +6,8 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 5    
-      networks:
+      retries: 5
+    networks:
       - app-network
 
   web:
@@ -24,7 +24,8 @@ services:
       - DJANGO_SETTINGS_MODULE=core.settings.production
       - REDIS_URL=redis://redis:6379
     env_file:
-      - .env.production    depends_on:
+      - .env.production
+    depends_on:
       - redis
     restart: unless-stopped
     networks:
@@ -48,6 +49,7 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+
   nginx:
     image: nginx:alpine
     ports:

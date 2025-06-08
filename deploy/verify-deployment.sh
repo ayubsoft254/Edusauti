@@ -67,10 +67,10 @@ fi
 # Check application health
 echo ""
 print_info "Checking application health..."
-if curl -f http://localhost:8000/health/ > /dev/null 2>&1; then
+if curl -f http://localhost:8001/health/ > /dev/null 2>&1; then
     print_status "Application health check passed"
     echo "Health check response:"
-    curl -s http://localhost:8000/health/ | python3 -m json.tool
+    curl -s http://localhost:8001/health/ | python3 -m json.tool
 else
     print_error "Application health check failed"
     echo "Checking logs..."
@@ -173,7 +173,7 @@ echo "  - Shell: docker-compose exec web python manage.py shell"
 echo "  - Admin: docker-compose exec web python manage.py createsuperuser"
 echo ""
 
-if curl -f http://localhost:8000/health/ > /dev/null 2>&1; then
+if curl -f http://localhost:8001/health/ > /dev/null 2>&1; then
     print_status "🎉 Deployment verification completed successfully!"
 else
     print_error "❌ Deployment verification found issues. Check the logs above."

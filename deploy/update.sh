@@ -109,7 +109,7 @@ verify_deployment() {
     fi
     
     # Check health endpoint
-    if curl -f http://localhost:8000/health/ > /dev/null 2>&1; then
+    if curl -f http://localhost:8001/health/ > /dev/null 2>&1; then
         echo "✅ Health check passed"
     else
         echo "❌ Health check failed"

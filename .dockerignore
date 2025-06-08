@@ -53,6 +53,7 @@ docs/
 
 # Deployment
 deploy/
+!deploy/entrypoint.sh
 nginx/
 ssl/
 logs/
