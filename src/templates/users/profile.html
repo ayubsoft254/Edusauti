@@ -238,8 +238,8 @@
                         <!-- User Dropdown -->
                         <div class="relative" id="user-dropdown">
                             <button class="flex items-center space-x-2 text-edu-deep hover:text-edu-beige transition-colors" id="user-menu-btn">
-                                {% if user.profile and user.profile.avatar %}
-                                    <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
+                                {% if user.avatar %}
+                                    <img src="{{ user.avatar.url }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
                                 {% else %}
                                     <div class="w-8 h-8 rounded-full bg-edu-beige flex items-center justify-center">
                                         <span class="text-white text-sm font-semibold">{{ user.first_name|first|default:user.username|first|upper }}</span>
@@ -320,7 +320,7 @@
                         <!-- Avatar -->
                         <div class="relative">
                             {% if profile_user.profile and profile_user.profile.avatar %}
-                                <img src="{{ profile_user.profile.avatar.url }}" alt="Profile Avatar" 
+                                <img src="{{ user.avatar.url }}" alt="Profile Avatar" 
                                      class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
                             {% else %}
                                 <div class="w-32 h-32 rounded-full profile-avatar flex items-center justify-center border-4 border-white shadow-lg">

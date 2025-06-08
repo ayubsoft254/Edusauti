@@ -268,8 +268,8 @@
                         <!-- User Dropdown -->
                         <div class="relative" id="user-dropdown">
                             <button class="flex items-center space-x-2 text-edu-deep hover:text-edu-beige transition-colors" id="user-menu-btn">
-                                {% if user.profile and user.profile.avatar %}
-                                    <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
+                                {% if user.avatar %}
+                                    <img src="{{ user.avatar.url }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
                                 {% else %}
                                     <div class="w-8 h-8 rounded-full bg-edu-beige flex items-center justify-center">
                                         <span class="text-white text-sm font-semibold">{{ user.first_name|first|default:user.username|first|upper }}</span>
