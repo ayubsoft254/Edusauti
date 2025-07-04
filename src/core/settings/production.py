@@ -3,23 +3,7 @@ import os
 
 # Security settings for production
 DEBUG = False
-ALLOWED_HOSTS = [
-    'edusauti.ayubsoft-inc.systems',
-    'edusauti.ayubsoft-inc.systems:8080',
-    'edusauti.ayubsoft-inc.systems:8443',
-    '41.89.130.21',
-    '41.89.130.21:8001',
-    '41.89.130.21:8080',
-    '41.89.130.21:8443',
-    'localhost',
-    'localhost:8001',
-    'localhost:8080',
-    'localhost:8443',
-    '127.0.0.1',
-    '127.0.0.1:8001',
-    '127.0.0.1:8080',
-    '127.0.0.1:8443',
-]
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
 
 # Database configuration for production (SQLite)
 DATABASES = {
