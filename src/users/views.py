@@ -477,7 +477,7 @@ def cancel_subscription(request):
             
             # Downgrade user to free tier
             user.subscription_tier = 'free'
-            user.subscription_expires_at = None
+            user.subscription_end_date = None
             user.save()
             
             messages.success(request, 'Subscription cancelled successfully. You will retain access until the end of your billing period.')
@@ -876,7 +876,7 @@ def cancel_subscription_api(request):
     
     # Downgrade user
     user.subscription_tier = 'free'
-    user.subscription_expires_at = None
+    user.subscription_end_date = None
     user.save()
     
     return Response({
