@@ -66,10 +66,7 @@ class CustomSignupForm(SignupForm):
         user.organization = self.cleaned_data.get('organization', '')
         user.role = self.cleaned_data.get('role', '')
         user.save()
-        
-        # Create user profile
-        UserProfile.objects.create(user=user)
-        
+                
         return user
 
 

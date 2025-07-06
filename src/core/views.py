@@ -27,7 +27,7 @@ def dashboard_redirect(request):
     context = {
         'user': user,
     }
-    return redirect('dashboard', context)
+    return redirect('dashboard')
 
 
 def health_check(request):
