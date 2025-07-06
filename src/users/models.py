@@ -220,12 +220,21 @@ class UserProfile(models.Model):
 class SubscriptionHistory(models.Model):
     """Track subscription changes and billing history"""
     
+    PAYMENT_METHOD_CHOICES = [
+        ('demo', 'Demo'),
+        ('api', 'API'),
+        ('stripe', 'Stripe'),
+        ('paypal', 'PayPal'),
+        ('bank_transfer', 'Bank Transfer'),
+        ('credit_card', 'Credit Card'),
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscription_history')
     tier = models.CharField(max_length=20, choices=User.SUBSCRIPTION_TIERS)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True, blank=True)
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    payment_method = models.CharField(max_length=50, blank=True)
+    payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
