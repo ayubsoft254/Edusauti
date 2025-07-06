@@ -2,7 +2,7 @@ from .base import *
 import os
 
 # Security settings for production
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
 
 # Database configuration for production (SQLite)

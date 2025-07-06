@@ -1,7 +1,7 @@
 from .base import *
 
 # Development-specific settings
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
 
